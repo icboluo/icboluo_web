@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-3.3.1.js"></script>
+    <script>
+        function hideFn1() {
+            $("#showDiv").hide(1000, function () {/*动画完成后所执行的函数*/
+            })
+        }
+
+        function showFn1() {
+            $("#showDiv").show(1000, function () {//默认对角
+            })
+        }
+
+        function hideFn2() {
+            $("#showDiv").slideUp(1000, function () {//滑动
+            })
+        }
+
+        function showFn3() {
+            $("#showDiv").fadeIn(1000, function () {//淡入淡出
+            })
+        }
+
+        //遍历的几种方式
+        $(function () {
+            var $divArr = $("#div>li");
+
+            for (i = 0; i < $divArr.length; i++) {
+                $divArr[i].innerText;
+            }
+            $divArr.each(function (index, element) {//elelment=$divArr[i]
+                index + element.innerText;
+            });
+            $.each($divArr, function (index, element) {
+                index + element.innerText;
+            });
+            /*            for (obj of $divArr) {
+                            obj.innerText;
+                        }*/
+            /*jquery1版本可以使用*/
+
+            /*页面加载完成后给按钮绑定事件*/
+            $("#button").click(function () {
+                "点击事件"
+            }).mouseover(function () {//链式加载
+                "鼠标移入事件"
+            });
+            $("#button").on("click", function () {
+            }).on("mouseover", function () {
+            });
+            $("#button").on({
+                "click": function () {
+                }
+            }, {
+                "mouseover": function () {
+                }
+            });
+            //解绑事件
+            $("#button").off("click mouserover");//无参默认全部解绑
+            //hover设置一组mouserovr mouseout ,toggle 设置多个点击事件
+            $("#myDiv").hover(function () {
+             $("#myDiv").css("backgroundColor","red")
+            },function () {
+                $("#myDiv").css("backgroundColor","blue")
+            });
+        })
+        //jquery对象进行方法扩展：$.fn.extend{,},extend了一个封装函数
+        //对全局方法扩展：$.extend({},),方法调用$.函数名
+
+
+
+    </script>
+</head>
+<body>
+<input type="button" value="hide" onclick="hideFn1()">
+<input type="button" value="show" onclick="showFn1()">
+<input type="button" value="slideup" onclick="hideFn2()">
+<input type="button" value="fadein" onclick="showFn3()">
+<input type="button" value="点击按钮切换div显示和隐藏" onclick="toggleFn()">
+
+<div id="showDiv" style="width:300px;height:300px;background:red">
+    div显示和隐藏
+</div>
+<ul id="city">
+    <li>北京</li>
+    <li>上海</li>
+    <li>天津</li>
+    <li>重庆</li>
+</ul>
+<div id="myDiv" style="width:300px;height:300px;background:red">
+    鼠标移入变成绿色，移出恢复红色
+</div>
+
+</body>
+</html>

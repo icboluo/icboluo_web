@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--jquery：封装js-->
+    <script src="js/jquery-3.3.1.js"></script>
+    <script>
+        window.onload = function () {/*js的onload只加载一次，且后面覆盖前面*/
+            alert("js的onload");
+        };
+        $(function () {/*jquery的页面加载事件在页面上可以使用多次.且依次执行*/
+            alert("jq的onload");
+            $("#myDiv").text("<b>b</b>")
+            /*=javascript 的innertext,html同理*/
+        });
+        /*		jquery中有2个函数操作属性
+				attr(属性名)：获取该属性的值
+				attr(属性名,属性值)：设置该属性的值,如果有该属性那就是修改，如果没有该属性那就是新增
+				removeAttr(属性名)：删除属性
+				prop(属性名)：获取该属性的值
+				prop(属性名,属性值)：设置该属性的值
+				removeProp(属性名)：删除属性
+				注意：attr函数去操作非布尔型的属性，prop函数去操作布尔型的属性(选中状态)*/
+        /*		jquery操作css方式一，（行内样式）
+                    css("css属性名",css的属性值)
+                jquery操作css方式二，（内部样式、外部样式）
+                    addClass(class|fn)
+                    removeClass
+                    toggleClass(开关)切换*/
+        /*移动和新建标签位置
+    内部插入
+        append(content|fn):在指定的标签的内部，最后拼接一个标签
+        prepend(content|fn)：在指定的标签的内部，开头拼接一个标签
+    外部插入
+        after(content|fn) ：:在指定的标签的外部，最后拼接一个标签
+        before(content|fn)：:在指定的标签的外部，开头拼接一个标签
+				empty() 		清空
+				remove([expr])	移除
+*/
+    </script>
+</head>
+<body>
+<input type="text" id="myInput" value="文本框">
+<div id="myDiv">body</div>
+
+<script>
+    /*$("选择器"),jQuery("选择器")*/
+    /* JS对象->jquery对象：$(JS对象)*/
+    var inputObj = document.getElementById("myInput");
+    var $inputObj = $(inputObj);
+    alert($inputObj.val());
+    //jquery对象->js对象：jquery对象[索引]或者jquery对象.get(索引),jquery对象其实就是封装了很多JS对象的一个数组
+    var $myInput = $("#myInput");
+    var myInputObj = $myInput.get(0);
+    alert(myInputObj.value)
+
+</script>
+</body>
+</html>

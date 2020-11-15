@@ -1,0 +1,106 @@
+<!--html:(hyper text markup language),超文本标记语言-->
+<!DOCTYPE html><!--文档声明，当前为html，浏览器要用html规范去解析-->
+<html lang="en"><!--页面支持语言，默认支持英文和中文-->
+<head>
+    <meta charset="UTF-8"><!--元标签，设置编码方式-->
+    <title>第一个html</title>
+</head>
+<body>
+<!--正文-->
+<!--tab补全代码，ctrl+shift+/注释-->
+hello html!
+<!--标题标签h1-h6-->
+<h1>1级文本标签</h1>
+<h6 align="right">6级居右文本标签</h6>
+<!--一条杠,没有标签体,分割线标签hr，自关闭-->
+<!--html标签的通用属性-->
+<!--大小，单位像素-->
+<!--颜色，单词、3原色用16进制（2个代表一个颜色）混合 r(red #ff0000),g(green 00ff00),b(blue 0000ff)-->
+<!--宽度，1000像素、%-->
+<!--align排列方式,left、right、center-->
+<hr size="30px" color="#0f0" width="1000px" align="center"/>
+<!--换行-->
+普通文本<br><!--br标签：换行因为浏览器多个空格和回车会成为一个空格-->
+<font color="blue" size="6" face="楷体">字体</font><!--size取值1-7，默认3-->
+<font color="blue" size="6" face="楷体"><b><i>字体加粗倾斜</i></b></font>
+<!--page标签：段落标签,使文字与上下文之间有间隔效果,上下文之间会有一段间距-->
+<p title="我是一个自然段">很长的一句话，他是一个自然段，鼠标移上去，可以看见title</p>
+<!--&nbsp,空格-->
+<!--footer 占满一行-->
+<!--header、main、footer 语义化标签，没有实地含义，区分模块-->
+<!--herf跳转的url地址，#本页，本地静态页面，外部网络地址-->
+<!--title显示提示信息-->
+<!--target，打开方式_self本页打开，_blank新标签页打开-->
+<a href="www.baidu.com" title="链接标签" target="_blank">跳转到百度页面，在新的页面打开</a>
+&lt;a href=&quot;#"&gt;这是文本&lt;/a>
+<a href="#">这是文本</a>
+<h3>有序列表，1数字序列，a,A字母序列，i,I罗马数字序列</h3>
+<ol type="1"><!--orderde list有序列表标签,默认1234-->
+    <li>红烧肉</li><!--list item-->
+    <li>番茄炒牛肉</li>
+    <li>地沟油薯条</li>
+    <li>口水鸡</li>
+</ol>
+<h3>无序列表，disc ● 默认，circle ○，square ■</h3>
+<ul><!--unordered list无序(前面没数字)列表标签,默认实心圆disc-->
+    <li>红烧肉</li>
+    <li>番茄炒牛肉</li>
+    <li>地沟油薯条</li>
+    <li>口水鸡</li>
+</ul>
+<!--src设置图片的url，可以设置本地图片和网络图片-->
+<!--width,height,设置一个可以等比例缩放-->
+<!--alt网络问题或地址问题无法加载时的信息-->
+<!--title提示-->
+<img src="img/adv.jpg" width="300" title="图片标签" alt="如果图片丢失用这个替换">
+<span>行内标签</span><!--行内标签 内容显示在一行,这个有什么用，本来就是一行啊-->
+<div>块级标签</div><!--块级标签 自动换行-->
+<!--border 边界线宽,width 宽度，-->
+<!--cellspacing 单元格之间间距，cellpadding单元格与内部内容之间的间距-->
+<!--rowspan合并行,colspan合并列-->
+<table border="2" width="500">
+    <caption>学生信息表</caption><!--表格标题-->
+    <thead><!--头，体，尾语义化标签，-->
+    <!--tr表示一行-->
+    <tr>
+        <!--表示一列-->
+        <td>100</td>
+        <td>200</td>
+    </tr>
+    <tr><!--跨2列 -->
+        <td colspan="2"> 999</td>
+    </tr>
+</table>
+<font size="6"> 小于 &lt; &nbsp; 大于&gt; 日元&yen; &nbsp; 与符号&amp; &nbsp; 双引号&quot; &nbsp; 版权&copy; </font>&nbsp; <font
+        color="red" size="6">红心&hearts;</font>&nbsp; <font color="red" size="6">方块&diamond;</font>&nbsp; <font size="6">梅花&clubs;</font>
+
+<h3>用户注册</h3>
+<!--form表单，action提交路径，method提交方式：get不安全，数据有限制，post 长度没有限制-->
+<form action="#" method="get">
+    <!--input 组件，默认type
+    text,name键值对的key,有name才会提交,
+    value键值对中的value，用于向服务器提交数据
+    checked表示默认选中,可以不写="checked"-->
+    用户名<input type="text" name="username"/><br/>
+    密码<input type="password" name="psw"><br/>
+    性别<input type="radio" name="gender" value="1" checked="checked">男<input type="radio" name="gender" value="0">女<br/>
+    <!--单选框,name要一样-->
+    爱好<input type="checkbox" name="hobby" value="1">打篮球<input type="checkbox" name="hobby" value="2">羽毛球<br/><!--复选框-->
+    生日<input type="date"/><br/>
+    上传图片<input type="file"/><br/>
+    验证码<input type="text"/><input type="image" src="images/logo.jpg"><br/><!--../返回上一级目录，默认在当前父类文件夹中选-->
+    <input type="submit"/><!--提交按钮-->
+    <input type="reset"/><!--重置按钮-->
+    <input type="button" value="按钮"/><!--按钮-->
+    <input type="color"><!--颜色选择器-->
+    <input type="hidden" name="myhidden" value="1"/><!--隐藏域-->
+
+    <select name="country" size="1" multiple="multiple"><!--下拉框,size显示多少个,multiple多选-->
+        <option value="e">english</option><!--选项-->
+        <option value="c">chinese</option>
+    </select>
+    <textarea name="myarea" cols="30" rows="10"><!--文本域,cols多少列rows多少行-->
+</textarea>
+</form>
+</body>
+</html>

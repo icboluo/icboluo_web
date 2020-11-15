@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><!--支持中英文-->
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"><!--兼容ie-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>标题</title>
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <style>
+        div{
+            border: 1px solid red;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!--
+        	栅格系统：
+            1.将内容设置到布局容器
+            2.bootstrap先有行，再有列
+            3.bootstrap将一行设置为12个格
+            4.根据设备来设置列，语法：
+            .col-xx-n
+                xx有四个取值
+                1) lg大型设备，如：电视机        大屏幕 大桌面显示器 (≥1200px)
+                2) md 中型设备，如：电脑         中等屏幕 桌面显示器 (≥992px)
+                3) sm小型设备，如：平板          小屏幕 平板 (≥768px)
+                4) xs微型设备，如：手机          超小屏幕 手机 (<768px)
+                n 这一列占几格，一行最多12格
+                注意：
+                1.如果lg的列没有设置，参照md的列
+                2.如果md的列没有设置，参照sm的列
+                3.如果sm的列没有设置，参照xs的列
+                4.如果xs的列没有设置，参照一列占一行12个格子
+    -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">1</div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">2</div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">3</div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 visible-lg">4</div>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        /*js怎么使用呢？
+          1.内嵌式：写在head和body标签里exa这个secript
+          2.外链式：创建出一个js文件，关联js文件，<script src="../js/demo.js">,外链式的标签体不能写内容
+        js中的变量 var 包括 number string boolean undefined object
+          局部变量定义在函数内，全局变量定义在函数外，局部变量定义时深蓝掉var自动变成全局变量
+        运算符中 /有小数点 ==只运算值 ===运算值和类型
+        if中判断条件 number中非0即真,string中有内容为真,undefined==false,null=false
+        js中的函数(逐步解析) function method(){},其中提交的参数由一个内置的arguments接收
+           匿名式函数的语法：var 变量名 =  function(参数列表) {},调用 变量名()
+         window.setInterval("函数名"，毫秒值)每过多少毫秒执行一次函数,函数名加双引号不加小括号有什么不同,
+         alert创建一个对话框，onload页面加载完成后执行该函数
+         */
+        var v=10;/*全局变量*/
+        document.write("变量v的值为："+v+" 变量v的数据类型为："+typeof v +" "+v.type)
+        /*数组创建 new array()、 [],js中数组相当于java中的集合,索引越界会出现未定义*/
+        /*concat拼接,reverse反转,join拼接，和split相反,数组中每个元素用参数拼接*/
+        /*sort字符串首字母排序 arr.sort(function(a,b){return a-b;}数字排序)*/
+        /*date,data.tolocalstring,获取当前时间以本地方式*/
+        /*全局功能：parseint(左到右第一个不是数字的后面全部不要) parsefloat(左到右除小数点第一个不是数字的后面的全部不要) isnan(is not a number，不是一个数字，对吗？)*/
+        /*全局功能：浏览器地址中的url有汉字（因为url解码了decodeuri），复制过来就没有了，编码是encodeuri*/
+    </script>
+</head>
+<body>
+<!--var 变量名=初始化值 number boolean string null（object类型） undefined（不知道什么类型）->
+<!--document.write输出 typeof可以判断类型--->
+</body>
+</html>

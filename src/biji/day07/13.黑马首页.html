@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><!--支持中英文-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"><!--兼容ie-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>标题</title>
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <link href="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/css/index.css">
+    <style>
+        /*最下面一行的文字*/
+        .company {
+            font-size: 12px;
+            background-color: #ffc900;
+            text-align: center;
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .search_input {
+            width: 200px;
+            height: 36px;
+            border: 2px solid #ffc900;
+            padding-left: 10px;
+            float: left;
+            outline: 0px;
+        }
+
+        .search-button {
+            float: left;
+            width: 90px;
+            height: 36px;
+            background-color: #ffc900;
+            line-height: 36px;
+            text-align: center;
+        }
+
+        /* 下面的小标题和图标 */
+        .jx_top {
+            margin-top: 15px;
+            border-bottom: 2px solid #ffc900;  /* 下面的线*/
+            width: 100%;
+            height: 35px;
+            line-height: 35px;
+            margin-bottom: 5px;
+        }
+
+        .padd-top {
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!--头部图片 start-->
+        <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/top_banner.jpg" class="img-responsive" alt="">
+        <!--头部图片 end-->
+        <!--搜索栏 start-->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-4">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/logo.jpg" class="img-responsive" alt="">
+
+                </div>
+                <div class="col-xs-5 padd-top">
+                    <input type="text" placeholder="请输入要搜索的内容" class="search_input">
+                    <a href="#" class="search-button">搜索</a>
+                </div>
+                <div class="col-xs-3">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/hotel_tel.png" class="img-responsive" width="80%" alt="">
+                </div>
+            </div>
+        </div>
+        <!--搜索栏 end-->
+        <!--导航条 start-->
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!--
+                    第一部分 商标和汉堡按钮
+                 -->
+                <div class="navbar-header">
+                    <!--
+                        汉堡按钮
+                        data-target="#bs-example-navbar-collapse-1"：表示汉堡按钮点击之后关联的是哪个控件
+                    -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">首页</a>
+                </div>
+
+                <!-- 第二部分-->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">门票<span class="sr-only">(current)</span></a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+                        <li><a href="#">酒店</a></li>
+
+                    </ul>
+
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+        <!--导航条 end-->
+        <!--轮播图 start-->
+        <!--
+        carousel slide:轮播图的样式
+    -->
+        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+            <!-- 小圆点指针-->
+            <ol class="carousel-indicators">
+                <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+            </ol>
+
+            <!-- 轮播图图片设置 -->
+            <div class="carousel-inner" role="listbox">
+                <div class="item active">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/banner_1.jpg" alt="...">
+                    <div class="carousel-caption">
+                        这是第一个广告的标题
+                    </div>
+                </div>
+                <div class="item">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/banner_2.jpg" alt="...">
+                    <div class="carousel-caption">
+                        这是第一个广告的标题
+                    </div>
+                </div>
+                <div class="item">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/banner_3.jpg" alt="...">
+                    <div class="carousel-caption">
+                        这是第一个广告的标题
+                    </div>
+                </div>
+            </div>
+
+            <!-- 轮播图的左右控制图标 -->
+            <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+        <!--轮播图 end-->
+        <!--黑马精选 start-->
+        <div class="jx_top">
+            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/icon_5.jpg" alt="">
+            黑马精选
+            <hr/>
+        </div>
+        <!--黑马精选 end-->
+        <!--黑马精选内容 start-->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-3">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_1.jpg" class="img-responsive" alt="">
+                    <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                    <font color="red">网付价: ￥899</font>
+                </div>
+                <div class="col-xs-3">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_1.jpg" class="img-responsive" alt="">
+                    <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                    <font color="red">网付价: ￥899</font>
+                </div>
+                <div class="col-xs-3">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_1.jpg" class="img-responsive" alt="">
+                    <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                    <font color="red">网付价: ￥899</font>
+                </div>
+                <div class="col-xs-3">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_1.jpg" class="img-responsive" alt="">
+                    <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                    <font color="red">网付价: ￥899</font>
+                </div>
+            </div>
+        </div>
+        <!--黑马精选内容 end-->
+        <!--国内游 start-->
+        <div class="jx_top">
+            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/icon_6.jpg" alt="">
+            国内游
+            <hr/>
+        </div>
+        <!--国内游 end-->
+        <!--国内游内容 start-->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-4">
+                    <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/guonei_1.jpg" class="img-responsive" alt="">
+                </div>
+                <div class="col-xs-8">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+                        <div class="col-xs-4">
+                            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/jiangxuan_4.jpg" class="img-responsive" alt="">
+                            <p>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</p>
+                            <font color="red">网付价: ￥899</font>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--国内游内容 end-->
+        <!--底层内容 start-->
+        <div class="container-fluid">
+            <img src="../../../MyJava/html/bootstrap_day07/javaEE_65_day07/images/footer_service.png" class="img-responsive" alt="">
+            <div class="company">江苏传智播客教育科技股份有限公司 版权所有Copyright 2006‐2018, All Rights Reserved 苏ICP 备16007882</div>
+        </div>
+        <!--底层内容 end-->
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>全选和反选，隔行换色</title>
+    <script src="../js/jquery-3.3.1.js"></script>
+    <style>
+        .one {
+            background-color: red
+        }
+    </style>
+    <script>
+        function selectAll(obj) {
+            $(".itemSelect").prop("checked", $(obj).prop("checked"))//参数对象获得checked值
+        }
+
+        function reverse() {
+            $(".itemSelect").click();
+        }
+
+        $(function () {
+            $(".itemSelect").click(function () {
+                var result = true;
+                var $itemSelectArr = $(".itemSelect");
+                for (i = 0; i < $itemSelectArr.length; i++) {
+                    var $itemSelectObj = $itemSelectArr[i];//获得js对象
+                    var choices = $($itemSelectObj).prop("checked");//jq对象获得checked值
+                    result = result && choices;
+                }
+                $("#all").prop("checked", result);
+            });
+            $("tr:gt(1):odd").css("backgroundColor", "#999");
+            $("tr:gt(1)").mouseover(function () {
+                $(this).addClass("one")
+            })
+            $("tr:gt(1)").mouseout(function () {
+                $(this).removeClass("one")
+            })
+        })
+    </script>
+</head>
+<body>
+<table id="tab1" border="1" width="800" align="center">
+    <tr>
+        <td colspan="5"><input type="button" value="反选" onclick="reverse()"></td>
+    </tr>
+    <tr>
+        <th><input type="checkbox" onclick="selectAll(this)" id="all">全选</th>
+        <th>分类ID</th>
+        <th>分类名称</th>
+        <th>分类描述</th>
+        <th>操作</th>
+    </tr>
+    <tr>
+        <td><input type="checkbox" class="itemSelect"></td>
+        <td>1</td>
+        <td>手机数码</td>
+        <td>手机数码类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" class="itemSelect"></td>
+        <td>2</td>
+        <td>电脑办公</td>
+        <td>电脑办公类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" class="itemSelect"></td>
+        <td>3</td>
+        <td>鞋靴箱包</td>
+        <td>鞋靴箱包类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" class="itemSelect"></td>
+        <td>4</td>
+        <td>家居饰品</td>
+        <td>家居饰品类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+</table>
+</body>
+</html>

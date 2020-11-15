@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        var arr0 = ["朝阳区","海淀区","顺义区"];//北京的区信息
+        var arr1 = ["闵行区", "浦东新区", "宝山区"];
+        var arr2 = ["南京", "苏州", "无锡"];
+
+        var arr = [arr0,arr1,arr2];//二维数组
+        /*
+        onchange:当内容改变之后才会触发
+         */
+        function selectCity() {
+            var proObj = document.getElementById("provinceId");
+            // alert(proObj.value);
+            //根据省份的索引获取城市的信息
+            var cityArr = arr[proObj.value];
+            var cityObj = document.getElementById("cityId");
+            cityObj.innerHTML = "<option value=\"\">‐‐请选择市‐‐</option>";
+            //遍历城市，动态向cityId的下拉框中添加option选项
+            for (var i = 0;i<cityArr.length;i++) {
+                // cityObj.innerHTML =cityObj.innerHTML+ "<option value=\"\">"+cityArr[i]+"</option>";
+                cityObj.innerHTML += "<option value=\"\">"+cityArr[i]+"</option>";
+            }
+
+
+        }
+    </script>
+</head>
+<body>
+    <select id="provinceId" onchange="selectCity()">
+        <option>‐请选择‐</option>
+        <option value="0">北京</option>
+        <option value="1">上海</option>
+        <option value="2">江苏</option>
+    </select>
+    <select id="cityId">
+        <option value="">‐‐请选择市‐‐</option>
+    </select>
+</body>
+</html>

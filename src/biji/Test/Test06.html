@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>轮播图</title>
+</head>
+<body>
+<img id="myImg" src="img/0.jpg" width="500px" alt="">
+<script>
+    var index = 1;
+    function changeImg() {
+        var imgObj = document.getElementById("myImg");/*由id获取对象*/
+        imgObj.src = "img/" + index + ".jpg";
+        index++;
+        if (index > 4) {
+            index = 0;
+        }
+    }
+
+    window.setInterval("changeImg()", 1000);/*加双引号*/
+
+
+</script>
+</body>
+</html>

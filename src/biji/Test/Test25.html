@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .emoji {
+            margin: 50px;
+        }
+
+        ul {
+            overflow: hidden;
+        }
+
+        li {
+            float: left;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+        }
+
+        .emoji img {
+            cursor: pointer;
+        }
+    </style>
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script>
+        $(function () {
+            $(".emoji>ul img").click(function () {
+                var $clone = $(this).clone();//clone一个img
+                $clone.click(function () {
+                    $(this).remove();//clone对象移除，这里this改变是因为函数内部重新定义函数
+                });
+                $(".word").append($clone);//clone的img对象移动到.word里,this指代原img
+            })
+        })
+    </script>
+</head>
+<body>
+<div class="emoji">
+    <ul>
+        <li><img src="../images/qq-expression/01.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/02.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/03.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/04.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/05.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/06.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/07.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/08.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/09.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/10.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/11.gif" height="22" width="22" alt=""/></li>
+        <li><img src="../images/qq-expression/12.gif" height="22" width="22" alt=""/></li>
+    </ul>
+    <p class="word">
+        <strong>请发言：</strong>
+        <img src="../images/qq-expression/12.gif" height="22" width="22" alt=""/>
+    </p>
+</div>
+</body>
+</html>

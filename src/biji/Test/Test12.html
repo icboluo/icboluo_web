@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function m1() {
+            document.write(location)
+        }
+
+        function m2() {
+            window.location = "#";
+        }
+
+        function m3() {
+            location.reload()
+        }
+
+        function before() {
+            window.history.back()
+        }
+        function after() {
+            window.history.forward()
+        }
+        function to() {
+            window.history.go(1)
+        }
+
+    </script>
+</head>
+<body>
+<input type="button" value="获取地址" onclick="m1();">
+<input type="button" value="跳转页面" onclick="m2();">
+<input type="button" value="刷新页面" onclick="m3();">
+<input type="button" value="前进" onclick="after()">
+<input type="button" value="后退" onclick="before()">
+<input type="button" value="跳转至" onclick="to()">
+
+
+</body>
+</html>

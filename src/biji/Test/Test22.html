@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>抽奖</title>
+    <script src="../js/jquery-1.8.3.js"></script>
+    <script>
+        var changeImgObj;
+
+        function imgStart() {
+            changeImgObj = setInterval(changeImg, 100);
+            $("#startID").prop("disabled", true);
+            $("#stopID").prop("disabled", false)
+        }
+
+
+        var index = 1;
+
+        function changeImg() {
+            $("#img1ID").attr("src", "images/King-Of-Glory/" + index + ".jpg");
+            index++;
+            if (index > 4) {
+                index = 0;
+            }
+        }
+
+        function imgStop() {
+            clearInterval(changeImgObj);
+            $("#img2ID").attr("src", $("#img1ID").attr("src"))
+            $("#startID").prop("disabled", false);
+            $("#stopID").prop("disabled",true)
+
+        }
+    </script>
+</head>
+<body>
+
+<!-- 小像框 -->
+<div style="border-style:dotted;width:160px;height:100px">
+    <img id="img1ID" src="../images/King-Of-Glory/0.jpg" style="width:160px;height:100px"/>
+</div>
+
+<!-- 大像框 -->
+<div
+        style="border-style:double;width:800px;height:500px;position:absolute;left:500px;top:10px">
+    <img id="img2ID" src="../images/King-Of-Glory/0.jpg" width="800px" height="500px"/>
+</div>
+
+<!-- 开始按钮 -->
+<input
+        id="startID"
+        type="button"
+        value="点击开始"
+        style="width:150px;height:150px;font-size:22px"
+
+        onclick="imgStart()">
+
+<!-- 停止按钮 -->
+<input
+        id="stopID"
+        type="button"
+        value="点击停止"
+        style="width:150px;height:150px;font-size:22px"
+        onclick="imgStop()">
+
+
+<script language='javascript' type='text/javascript'>
+    //准备一个一维数组，装用户的像片路径
+    var imgs = [
+        "images/King-Of-Glory/0.jpg",
+        "images/King-Of-Glory/1.jpg",
+        "images/King-Of-Glory/2.jpg",
+        "images/King-Of-Glory/3.jpg",
+        "images/King-Of-Glory/4.jpg",
+    ];
+
+</script>
+</body>
+</html>

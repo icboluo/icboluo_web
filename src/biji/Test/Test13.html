@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function selectAll() {
+            var allObj = document.getElementById("all");
+            var itemArr = document.getElementsByName("item");
+            for (var i = 0; i < itemArr.length; i++) {
+                var itemObj = itemArr[i];
+                itemObj.checked = allObj.checked;
+            }
+        }
+
+        function reverseSelect() {
+            var itemArr = document.getElementsByName("item");
+            for (var i = 0; i < itemArr.length; i++) {
+                var itemObj = itemArr[i];
+                itemObj.checked = !itemObj.checked;
+            }
+        }
+
+        function total() {
+            var itemArr = document.getElementsByName("item");
+            var totalPrice = 0;
+            for (var i = 0; i < itemArr.length; i++) {
+                var itemObj = itemArr[i];
+                if (itemObj.checked) {
+                    totalPrice += parseInt(itemObj.value);
+                }
+            }
+            alert(totalPrice);
+        }
+    </script>
+</head>
+<body>
+<h3>商品价格列表</h3>
+<input type="checkbox" name="item" value="1500"/> 山地自行车1500<br/>
+<input type="checkbox" name="item" value="200"/> 时尚女装200<br/>
+<input type="checkbox" name="item" value="3000"/> 笔记本电脑3000元<br/>
+<input type="checkbox" name="item" value="800"/> 情侣手表800<br/>
+<input type="checkbox" name="item" value="2000"/> 桑塔纳2000<br/>
+<hr/>
+<input type="checkbox" id="all" onclick="selectAll()"/>全选/全不选 &nbsp;
+<input type="button" id="reverse" onclick="reverseSelect()" value=" 反 选 "/>&nbsp;
+<input type="button" value=" 结 账 " onclick="total()"/>&nbsp;<span id="result"></span>
+</body>
+</html>

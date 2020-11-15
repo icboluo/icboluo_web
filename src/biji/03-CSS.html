@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--css的样式引入：外部样式：创建一个.css后缀的文件，
+    并关联<link rel="stylesheet" type="text/css" href="../css/demo.css">-->
+    <style>/*css的样式引入：内部样式：head加seyle标签，添加选择器，输入样式键值对*/
+        font{/*标签选择器，body所有font都被修改*/
+            color:blue;
+            size: 300px;
+            font-family: 楷体;
+        }
+        #myId{backgroud-color: #ff0000;}/*id选择器,唯一id*/
+        .myClass{background-color:blue;}/*类选择器，某类的某个标签*/
+
+        #myId font{}/*层级选择器，用空格表示，表示内部、下一级、子标签*/
+        input[type="password"] {}/*属性选择器，用【】表示，获取 指定用有某种属性和属性值的标签*/
+        input，font，div{}/*并集选择器，逗号并且*/
+        a:link{color: #000;}/*伪类选择器：冒号 给超链接设置颜色 link visited hover active */
+
+        /*disply:none,inline block 隐藏 行内 块级*/
+        /*float：right，left 右左浮动*/
+        /*border 1px solider red ：边界*/
+        /* background-color image repeat position 背景颜色 图片 重复 方式位置 */
+        /*盒子：margin(边缘):10px,20px,30px,40px上右下左,padding(填料，内边距):20px
+        box-sizing（怪异盒子模型）设置了内边距，那么盒子的大小不会变化，但是内容部分有变小*/
+
+
+    </style>
+</head>
+<body>
+<!--css的样式引入：行内样式：在对应标签的开始标签中设置，属性值是键值对-->
+<font style="color: red;font-size: 50px">黑马程序员</font>
+<font id="myId">1</font>
+<font class="myClass">2</font>
+<div>3</div>
+
+<input type="password">
+</body>
+</html>

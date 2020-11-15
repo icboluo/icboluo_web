@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>隔行换色</title>
+    <style>
+        table {
+            margin: auto;
+            /*border-collapse: collapse;*/
+        }
+
+        tr {
+            text-align: center;
+            height: 60px;
+        }
+
+        .redStyle {
+            background: lightpink;
+        }
+
+        .redStyle:hover {
+            background: green;
+        }
+
+        .yellowStyle {
+            background: lightyellow;
+        }
+
+        .yellowStyle:hover {
+            background: greenyellow;
+        }
+
+
+        .greenStyle {
+            background: lightgreen;
+        }
+
+
+        .greenStyle:hover {
+            background: gold;
+        }
+
+    </style>
+
+    <script>
+
+        function add_method() {
+            var ID = document.getElementById("ID").value;
+            var name = document.getElementById("name").value;
+            var describe = document.getElementById("describe").value;
+
+            var table = document.getElementsByTagName("table")[0];
+            table.innerHTML += "<tr>" +
+                "<td><input type='checkbox'></td>" +
+                "<td>"+ID+"</td>" +
+                "<td>"+name+"</td>" +
+                "<td>"+name+"</td>" +
+                "<td><a href='#'>修改</a>|<a href='#'>删除</a></td>" +
+                "</tr>";
+
+        }
+        window.onload = function () {
+
+            /*  document.getElementById("add_btn").onclick = function () {
+
+                  var ID = document.getElementById("ID").value;
+                  var name = document.getElementById("name").value;
+                  var describe = document.getElementById("describe").value;
+
+                  var table = document.getElementsByTagName("table")[0];
+                  table.innerHTML += "<tr>" +
+                      "<td><input type='checkbox'></td>" +
+                      "<td>"+ID+"</td>" +
+                      "<td>"+name+"</td>" +
+                      "<td>"+name+"</td>" +
+                      "<td><a href='#'>修改</a>|<a href='#'>删除</a></td>" +
+                      "</tr>";
+              };*/
+
+            var background;
+            var trArr = document.getElementsByTagName("tr");
+            for (var i = 2; i < trArr.length; i++) {
+
+                var trObj = trArr[i];
+                if (i % 2 === 0) {
+                    trObj.className = "yellowStyle";
+                } else {
+                    trObj.className = "redStyle";
+                }
++
+                // trArr[i].onmouseover = function () {
+                //     background = this.className;
+                //     this.className = "greenStyle";
+                // };
+                // trArr[i].onmouseout = function () {
+                //     this.className = background;
+                // }
+
+                trArr[i].addEventListener("onmouseover", function () {
+                    background = this.className;
+                    this.className = "greenStyle";
+                });
+            }
+
+        }
+    </script>
+</head>
+<body>
+<table id="tab1" border="1" width="800" align="center">
+    <tr>
+        <td colspan="5">
+            <input type="text" id="ID" placeholder="请输入分类ID">
+            <input type="text" id="name" placeholder="请输入分类名称">
+            <input type="text" id="describe" placeholder="请输入分类描述">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="添加" id="add_btn" onclick="add_method()"/>&nbsp;&nbsp;
+            <input type="button" value="删除">
+        </td>
+    </tr>
+    <tr style="background-color: #ccc;">
+        <th></th>
+        <th>分类ID</th>
+        <th>分类名称</th>
+        <th>分类描述</th>
+        <th>操作</th>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>1</td>
+        <td>手机数码</td>
+        <td>手机数码类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>2</td>
+        <td>电脑办公</td>
+        <td>电脑办公类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>3</td>
+        <td>鞋靴箱包</td>
+        <td>鞋靴箱包类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>4</td>
+        <td>家居饰品</td>
+        <td>家居饰品类商品</td>
+        <td><a href="">修改</a>|<a href="">删除</a></td>
+    </tr>
+</table>
+</body>
+</html>

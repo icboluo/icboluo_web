@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>会动的时钟</title>
+    <script>
+        window.onload = function () {
+            changeTime();
+            setInterval(changeTime, 1000)
+        };
+
+        function changeTime() {
+            var divObj = document.getElementById("myDiv");
+            var date = new Date();
+            var time = date.toLocaleString();
+            divObj.innerHTML = time;
+        }
+    </script>
+</head>
+<body>
+<div id="myDiv"></div>
+</body>
+</html>
