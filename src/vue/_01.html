@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<!--vue 实例的作用范围会在当前id的内部，内部的内部也行-->
+{{ message }}
+<div id="app" class="app-class">
+  {{ message }}
+  <span>{{ message }}</span>
+  <h2>{{ phone.name }} {{ phone.mobile }}</h2>
+  <ul>
+    <li>{{ city[0] }}</li>
+    <li>{{ city[1] }}</li>
+    <li>{{ city[2] }}</li>
+  </ul>
+</div>
+<div id="vbq">
+  <h2 v-text="message+'!!!'">这里的不会被保留</h2>
+  <h2>{{ info }}只有这里的会被保留</h2>
+  <p v-text="htm"></p>
+  <p v-html="htm"></p>
+</div>
+<!--这个是导开发环境的包？？？-->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+  var app = new Vue({
+    //el：挂载点，这是使用id选择器，也可以使用类选择器，比较少
+    el: "#app",
+    // el:".app-class",
+    data: {
+      message: "hello vue",
+      phone: {
+        name: "中国移动",
+        mobile: 10086
+      },
+      city: ["北京", "上海", "四川"]
+    }
+  })
+  var vbq = new Vue({
+    el: "#vbq",
+    data: {
+      message: "v-标签",
+      info: "v table",
+      htm: "<a href=\"http://www.baidu.com\">baidu</a>",
+      oon: "",
+    }
+  })
+</script>
+</body>
+</html>
