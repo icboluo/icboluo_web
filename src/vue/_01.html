@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style>
+    .active {
+      border: 1px solid red;
+    }
+  </style>
 </head>
 <body>
 <!--vue 实例的作用范围会在当前id的内部，内部的内部也行-->
@@ -22,11 +27,65 @@
   <h2>{{ info }}只有这里的会被保留</h2>
   <p v-text="htm"></p>
   <p v-html="htm"></p>
+  <input type="button" value="v-on指令" v-on:click="onTab">
+  <input type="button" value="v-on指令简写" @click="onTab">
+  <input type="button" value="双击事件" @dblclick="onTab">
+  <!--  2个大括号就是 v-test-->
+  <h2 @click="changeFood">{{ food }}</h2>
+  <div class="input-num">
+    <button @click="sub">
+      -
+    </button>
+    <span>{{ num }}</span>
+    <button @click="add">
+      +
+    </button>
+  </div>
+  <input type="button" value="is show img" @click="changeShow">
+  <img src="img/tv01.jpg" v-show="isShow" alt="">
+  <p v-show="isShow">v - show 指令</p>
+  <img v-bind:src="imgSrc" alt="">
+  <br>
+  <!--  v-bind可以省略-->
+  <img :src="imgSrc" alt="" :class="isShow?'active':''">
+  <br>
+  <!--  active 是否生效，取决于后面的boolean-->
+  <img :src="imgSrc" alt="" :class="{active:isShow}">
+  <br>
+  <img :src="imgArr[index]" alt="">
+  <a href="javascript:void(0)" @click="pre" v-show="index!==0" class="left">
+    <img src="./img/left.png" alt="">
+  </a>
+  <a href="javascript:void(0)" @click="next" v-show="index<imgArr.length-1" class="right">
+    <img src="./img/right.png" alt="">
+  </a>
+  <ul>
+    <li v-for="item in intArr">v-for 标签 {{ item }}</li>
+  </ul>
+  <ul>
+    <li v-for="(it,inde) in intArr">{{ it }}v-for 标签 {{ inde }}</li>
+  </ul>
+  <input type="button" value="addObjArr" @click="addObjArr">
+  <h2 v-for="item in objArr" v-bind:title="item.name">
+    {{ item.name }}
+  </h2>
+  <br>
+  <input type="button" value="点击" @click="doIt">
+  <input type="button" value="有参点击" @click="doIt2(54646,'agsgas')">
+  <input type="text" @keyup.enter="doIt">
+  <br>
+  <!--  双向绑定-->
+  <input type="text" v-model="message">
+  <br>
+</div>
+<div id="jsb">
+  <h1>记事本</h1>
+
 </div>
 <!--这个是导开发环境的包？？？-->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
-  var app = new Vue({
+  const app = new Vue({
     //el：挂载点，这是使用id选择器，也可以使用类选择器，比较少
     el: "#app",
     // el:".app-class",
@@ -38,16 +97,86 @@
       },
       city: ["北京", "上海", "四川"]
     }
-  })
-  var vbq = new Vue({
+  });
+  const vbq = new Vue({
     el: "#vbq",
     data: {
       message: "v-标签",
       info: "v table",
       htm: "<a href=\"http://www.baidu.com\">baidu</a>",
-      oon: "",
+      food: "西红柿",
+      num: 1,
+      isShow: false,
+      imgSrc: "img/tv01.jpg",
+      imgArr: [
+        "img/tv01.jpg",
+        "img/tv02.jpg",
+        "img/tv03.jpg",
+        "img/tv04.jpg",
+        "img/tv05.jpg",
+      ],
+      intArr: [1, 5, 7, 5],
+      objArr: [
+        {
+          name: "oName"
+        }
+      ],
+      index: 0,
+    },
+    methods: {
+      onTab: function () {
+        alert("v-on 标签")
+      },
+      changeFood: function () {
+        console.log(this.food)
+      },
+      add: function () {
+        if (this.num < 3) {
+          this.num++;
+        } else {
+          alert("已达到最大长度")
+        }
+      },
+      sub: function () {
+        if (this.num > 0) {
+          this.num--;
+        } else {
+          alert("已达到最小长度")
+        }
+      },
+      changeShow() {
+        this.isShow = !this.isShow;
+      },
+      pre: function () {
+        this.index--;
+      },
+      next: function () {
+        this.index++;
+      },
+      addObjArr: function () {
+        this.objArr.push({name: "name2"})
+      },
+      doIt: function () {
+        console.log("do it")
+      },
+      doIt2: function (p1, p2) {
+        console.log("do it")
+        console.log(p1 + p2)
+      }
     }
-  })
+  });
+  const jsb = new Vue({
+    el: "#jsb",
+    data: {},
+    methods: {
+      add: function () {
+
+      },
+      del: function () {
+
+      }
+    }
+  });
 </script>
 </body>
 </html>
