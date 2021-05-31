@@ -1,15 +1,17 @@
 <template>
   <div id="app">
-    <note/>
+<router-view></router-view>
   </div>
 </template>
 
 <script>
 import Note from './components/Note.vue'
+import Login from './view/Login'
 
 export default {
   components: {
-    Note
+    Note,
+    Login
   }
 }
 </script>
