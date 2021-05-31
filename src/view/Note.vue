@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import Common from './Common'
+import Common from '../components/Common'
 
 export default {
   comments: {Common},

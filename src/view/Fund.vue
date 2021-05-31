@@ -1,0 +1,113 @@
+<template>
+  <div>
+    <el-input v-model="fundId" placeholder="请输入内容"></el-input>
+    <el-button type="primary" plain @click="init">
+      搜索
+    </el-button>
+    <el-button type="primary" plain @click="cal">
+      计算
+    </el-button>
+    <el-table
+      :data="tableData"
+      style="width: 100%">
+
+      <el-table-column
+        prop="id"
+        label="id">
+      </el-table-column>
+      <el-table-column
+        prop="fundId"
+        label="基金id">
+      </el-table-column>
+      <el-table-column
+        prop="increaseRateDay"
+        label="日增长率">
+      </el-table-column>
+      <el-table-column
+        prop="subscribeStatus"
+        label="申购状态">
+      </el-table-column>
+      <el-table-column
+        prop="netValueDate"
+        label="净值日期">
+      </el-table-column>
+      <el-table-column
+        prop="netAssetValue"
+        label="单位净值">
+      </el-table-column>
+      <el-table-column
+        prop="netValueCumulative"
+        label="累计净值">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        label="创建时间">
+      </el-table-column>
+      <el-table-column
+        prop="updateTime"
+        label="更新时间">
+      </el-table-column>
+    </el-table>
+
+    <div class="block">
+      <el-pagination
+        layout="prev, pager, next"
+        :total="1000"
+        @current-change="handlerCurChange"
+        :current-page.sync="currentPage">
+      </el-pagination>
+    </div>
+  </div>
+</template>
+
+<script>
+import Common from '../components/Common'
+
+export default {
+  data () {
+    return {
+      tableData: [],
+      fundId: null,
+      currentPage: 1,
+      view: null
+    }
+  },
+  methods: {
+    init () {
+      this.$axios.get(Common.fundUrlPre + '/fundData/init',
+        {
+          params: {
+            fundId: this.fundId,
+            pageNum: this.currentPage
+          }
+        }
+      )
+        .then(r => {
+          const data = r.data.data
+          const list = data.list
+          this.tableData = list
+        }).catch(function (error) {
+          console.log(error)
+        })
+    },
+    handlerCurChange (val) {
+      console.log(`cur page num is ${val}`)
+      this.init()
+    },
+    cal () {
+      this.$axios.get(Common.fundUrlPre + '/fundData/cal',
+        {
+          params: {fundId: this.fundId}
+        }
+      )
+        .then(r => {
+          this.view = r.data.data
+          alert(this.view)
+        })
+    }
+  }
+}
+</script>
+<style scoped>
+
+</style>
