@@ -7,25 +7,26 @@
     <el-button type="primary" plain @click="cal">
       计算
     </el-button>
+
+    count  {{view.count}}
+    max  {{view.max}}
+    min  {{view.min}}
+    avg  {{view.avg}}
     <el-table
       :data="tableData"
       style="width: 100%">
 
       <el-table-column
-        prop="id"
-        label="id">
-      </el-table-column>
-      <el-table-column
         prop="fundId"
         label="基金id">
       </el-table-column>
       <el-table-column
-        prop="increaseRateDay"
-        label="日增长率">
+        prop="fundName"
+        label="基金名称">
       </el-table-column>
       <el-table-column
-        prop="subscribeStatus"
-        label="申购状态">
+        prop="increaseRateDay"
+        label="日增长率">
       </el-table-column>
       <el-table-column
         prop="netValueDate"
@@ -69,7 +70,12 @@ export default {
       tableData: [],
       fundId: null,
       currentPage: 1,
-      view: null
+      view: {
+        count: null,
+        min: null,
+        max: null,
+        avg: null
+      }
     }
   },
   methods: {
@@ -102,7 +108,6 @@ export default {
       )
         .then(r => {
           this.view = r.data.data
-          alert(this.view)
         })
     }
   }
