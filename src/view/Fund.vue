@@ -1,64 +1,28 @@
 <template>
-  <div>
-    <el-input v-model="fundId" placeholder="请输入内容"></el-input>
-    <el-button type="primary" plain @click="init">
-      搜索
-    </el-button>
-    <el-button type="primary" plain @click="cal">
-      计算
-    </el-button>
-
-    count  {{view.count}}
-    max  {{view.max}}
-    min  {{view.min}}
-    avg  {{view.avg}}
+<div>
+  <el-button type="primary" plain @click="init">
+    搜索
+  </el-button>
     <el-table
       :data="tableData"
       style="width: 100%">
 
       <el-table-column
-        prop="fundId"
-        label="基金id">
+        label="基金id"
+        width="100">
+        <template slot-scope="scope">
+          <el-button @click="handleClick(scope.row)" type="text" size="small">{{ scope.row.id }}</el-button>
+        </template>
       </el-table-column>
-      <el-table-column
-        prop="fundName"
-        label="基金名称">
-      </el-table-column>
-      <el-table-column
-        prop="increaseRateDay"
-        label="日增长率">
-      </el-table-column>
-      <el-table-column
-        prop="netValueDate"
-        label="净值日期">
-      </el-table-column>
-      <el-table-column
-        prop="netAssetValue"
-        label="单位净值">
-      </el-table-column>
-      <el-table-column
-        prop="netValueCumulative"
-        label="累计净值">
-      </el-table-column>
-      <el-table-column
-        prop="createTime"
-        label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="updateTime"
-        label="更新时间">
-      </el-table-column>
-    </el-table>
 
-    <div class="block">
-      <el-pagination
-        layout="prev, pager, next"
-        :total="1000"
-        @current-change="handlerCurChange"
-        :current-page.sync="currentPage">
-      </el-pagination>
-    </div>
-  </div>
+      <el-table-column
+        prop="name"
+        label="基金名称"
+        width="180">
+      </el-table-column>
+
+    </el-table>
+</div>
 </template>
 
 <script>
@@ -68,19 +32,12 @@ export default {
   data () {
     return {
       tableData: [],
-      fundId: null,
-      currentPage: 1,
-      view: {
-        count: null,
-        min: null,
-        max: null,
-        avg: null
-      }
+      total: 1000
     }
   },
   methods: {
     init () {
-      this.$axios.get(Common.fundUrlPre + '/fundData/init',
+      this.$axios.get(Common.fundUrlPre + '/fundAttention/init',
         {
           params: {
             fundId: this.fundId,
@@ -90,29 +47,29 @@ export default {
       )
         .then(r => {
           const data = r.data.data
-          const list = data.list
-          this.tableData = list
+          this.tableData = data.list
+          this.total = data.total
         }).catch(function (error) {
           console.log(error)
         })
     },
-    handlerCurChange (val) {
-      console.log(`cur page num is ${val}`)
-      this.init()
-    },
-    cal () {
-      this.$axios.get(Common.fundUrlPre + '/fundData/cal',
+    handleClick (row) {
+      this.$router.push(
         {
-          params: {fundId: this.fundId}
+          path: '/fundData',
+          query: {
+            fundId: row.id
+          }
         }
       )
-        .then(r => {
-          this.view = r.data.data
-        })
     }
+  },
+  mounted () {
+    this.init()
   }
 }
 </script>
+
 <style scoped>
 
 </style>
