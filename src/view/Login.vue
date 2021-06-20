@@ -19,6 +19,9 @@
       <el-button type="primary" @click="note">
         note
       </el-button>
+      <el-button type="danger" @click="note2">
+        note2
+      </el-button>
       <el-button type="danger" @click="fund">
         fund
       </el-button>
@@ -44,6 +47,13 @@ export default {
       this.$router.push(
         {
           path: '/note'
+        }
+      )
+    },
+    note2 () {
+      this.$router.push(
+        {
+          path: '/note2'
         }
       )
     },

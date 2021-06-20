@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '../components/HelloWorld'
 import Login from '../view/Login'
 import Note from '../view/Note'
+import Note2 from '../view/Note2'
 import FundData from '../view/FundData'
 import Fund from '../view/Fund'
 
@@ -29,6 +30,11 @@ export default new Router({
       path: '/note',
       name: 'Note',
       component: Note
+    },
+    {
+      path: '/note2',
+      name: 'Note2',
+      component: Note2
     },
     {
       path: '/fundData',

@@ -5,7 +5,7 @@
 <script>
 export default {
   name: 'Common',
-  urlPre: 'http://localhost:1514',
+  noteUrlPre: 'http://127.0.0.1:1514',
   fundUrlPre: 'http://127.0.0.1:8888',
   data () {
     return {

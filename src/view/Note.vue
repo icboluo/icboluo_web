@@ -90,7 +90,7 @@ export default {
     }
   },
   mounted: function () {
-    this.$axios.get(Common.urlPre + '/selectProblem')
+    this.$axios.get(Common.noteUrlPre + '/selectProblem')
       .then(r => {
         this.data = r.data.data
         this.object = r.data.data.object
@@ -103,7 +103,7 @@ export default {
   },
   methods: {
     public: function (url) {
-      this.$axios.get(Common.urlPre + url)
+      this.$axios.get(Common.noteUrlPre + url)
         .then(r => {
           this.message = r.data.message
           this.code = r.data.code
@@ -125,7 +125,7 @@ export default {
       this.public('/toOnlyRead')
     },
     amount: function () {
-      this.$axios.get(Common.urlPre + '/selectAmount')
+      this.$axios.get(Common.noteUrlPre + '/selectAmount')
         .then(r => {
           var map = r.data.data.object
           console.log(map)
