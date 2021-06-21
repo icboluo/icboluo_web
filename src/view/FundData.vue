@@ -1,7 +1,15 @@
 <template>
   <div>
-    <el-input v-model="fundId" placeholder="请输入内容"></el-input>
-    <el-button type="primary" plain @click="init">
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-input v-model="fundId" placeholder="请输入内容"></el-input>
+      </el-col>
+      <el-col :span="12">
+        <el-input v-model="startTime" placeholder="请输入内容"></el-input>
+      </el-col>
+    </el-row>
+
+    <el-button type="primary" plain @click="initCal">
       搜索
     </el-button>
     <el-input v-model="simCal.source" placeholder="请输入source"></el-input>
@@ -139,6 +147,7 @@ export default {
       fundId: this.$route.query.fundId,
       currentPage: 1,
       total: 1000,
+      startTime: null,
       view: {
         count: null,
         min: null,
@@ -170,7 +179,8 @@ export default {
         {
           params: {
             fundId: this.fundId,
-            pageNum: this.currentPage
+            pageNum: this.currentPage,
+            startTime: this.startTime
           }
         }
       )
@@ -188,7 +198,10 @@ export default {
     cal () {
       this.$axios.get(Common.fundUrlPre + '/fundData/cal',
         {
-          params: {fundId: this.fundId}
+          params: {
+            fundId: this.fundId,
+            startTime: this.startTime
+          }
         }
       )
         .then(r => {
@@ -207,6 +220,10 @@ export default {
         .then(r => {
           this.simCal.res = r.data.data
         })
+    },
+    initCal () {
+      this.init()
+      this.cal()
     }
   },
   mounted () {

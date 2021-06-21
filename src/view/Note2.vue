@@ -31,13 +31,13 @@
       </el-col>
     </el-row>
 
-    <el-row>
+<!--    <el-row>
       <el-col v-for="(item,index) in selectByFiledRes" :span="24">
         <div class="grid-content bg-purple-light">
           res {{ index }} {{ item }}
         </div>
       </el-col>
-    </el-row>
+    </el-row>-->
     <el-row>
       <el-col :span="8">
         <div class="grid-content bg-purple-dark">
