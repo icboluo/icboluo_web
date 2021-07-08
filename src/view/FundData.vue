@@ -1,11 +1,36 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col :span="12">
-        <el-input v-model="fundId" placeholder="请输入内容"></el-input>
+      <el-col :span="6">
+        <el-input v-model="fundId" placeholder="please input fund id"></el-input>
       </el-col>
-      <el-col :span="12">
-        <el-input v-model="startTime" placeholder="请输入内容"></el-input>
+      <el-col :span="6">
+        <div class="block">
+          <span class="demonstration">带快捷选项</span>
+          <el-date-picker
+            v-model="intervalDate"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions">
+          </el-date-picker>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <el-input v-model="chooseDate" placeholder="please input compare date"></el-input>
+      </el-col>
+      <el-col :span="6">
+        <el-select v-model="chooseDateLength" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </el-col>
     </el-row>
 
@@ -147,7 +172,6 @@ export default {
       fundId: this.$route.query.fundId,
       currentPage: 1,
       total: 1000,
-      startTime: null,
       view: {
         count: null,
         min: null,
@@ -170,7 +194,59 @@ export default {
         source: null,
         target: null,
         res: null
-      }
+      },
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            picker.$emit('pick', [start1, end1])
+          }
+        }, {
+          text: '最近一个月',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            picker.$emit('pick', [start1, end1])
+          }
+        }, {
+          text: '最近三个月',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+            picker.$emit('pick', [start1, end1])
+          }
+        }]
+      },
+      intervalDate: '',
+      options: [{
+        value: '1',
+        label: '1天'
+      }, {
+        value: '2',
+        label: '2天'
+      }, {
+        value: '3',
+        label: '3天'
+      }, {
+        value: '4',
+        label: '4天'
+      }, {
+        value: '5',
+        label: '5天'
+      }],
+      chooseDate: null,
+      chooseDateLength: null
     }
   },
   methods: {
@@ -180,7 +256,10 @@ export default {
           params: {
             fundId: this.fundId,
             pageNum: this.currentPage,
-            startTime: this.startTime
+            startDate: this.intervalDate[0],
+            endDate: this.intervalDate[1],
+            chooseDateLength: this.chooseDateLength,
+            chooseDate: this.chooseDate
           }
         }
       )
@@ -200,7 +279,8 @@ export default {
         {
           params: {
             fundId: this.fundId,
-            startTime: this.startTime
+            startDate: this.intervalDate[0],
+            endDate: this.intervalDate[1]
           }
         }
       )
