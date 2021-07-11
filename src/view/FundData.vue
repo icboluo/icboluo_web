@@ -2,13 +2,11 @@
   <div>
     <el-row :gutter="20">
       <el-col :span="6">
-        <el-input v-model="fundId" placeholder="please input fund id"></el-input>
-      </el-col>
-      <el-col :span="6">
         <div class="block">
           <span class="demonstration">带快捷选项</span>
           <el-date-picker
-            v-model="intervalDate"
+            v-model="fundDataParam.intervalDate"
+            value-format="yyyy-MM-dd"
             type="daterange"
             align="right"
             unlink-panels
@@ -20,10 +18,10 @@
         </div>
       </el-col>
       <el-col :span="6">
-        <el-input v-model="chooseDate" placeholder="please input compare date"></el-input>
+        <el-input v-model="fundDataParam.chooseDate" placeholder="please input compare date"></el-input>
       </el-col>
       <el-col :span="6">
-        <el-select v-model="chooseDateLength" placeholder="请选择">
+        <el-select v-model="fundDataParam.chooseDateLength" placeholder="请选择">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -34,14 +32,33 @@
       </el-col>
     </el-row>
 
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <div class="grid-content bg-purple">
+          fund id {{ fundId }}
+        </div>
+      </el-col>
+      <el-col :span="8">
+        <div class="grid-content bg-purple">
+          fund name {{ fundInfo.name }}
+        </div>
+      </el-col>
+    </el-row>
+
     <el-button type="primary" plain @click="initCal">
       搜索
     </el-button>
-    <el-input v-model="simCal.source" placeholder="请输入source"></el-input>
-    <el-input v-model="simCal.target" placeholder="请输入target"></el-input>
-    <el-button type="primary" plain @click="httpSimCal">
-      计算增长率 {{ simCal.res }}
-    </el-button>
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <el-input v-model="simCal.source" placeholder="请输入source"></el-input>
+      </el-col>
+      <el-col :span="8">
+        <el-input v-model="simCal.target" placeholder="请输入target"></el-input>
+      </el-col>
+      <el-button type="primary" plain @click="httpSimCal">
+        计算增长率 {{ simCal.res }}
+      </el-button>
+    </el-row>
 
     <el-row :gutter="20">
       <el-col :span="8">
@@ -62,73 +79,38 @@
     </el-row>
 
     <el-row :gutter="20">
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
-          incrIncr {{ view.incrIncr }}
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
-          incrDecr {{ view.incrDecr }}
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
-          decrIncr {{ view.decrIncr }}
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
-          decrDecr {{ view.decrDecr }}
-        </div>
-      </el-col>
-    </el-row>
-
-    <el-row :gutter="20">
       <!--      一行总长24，平均分成5份-->
       <el-col :span="5">
         <div class="grid-content bg-purple">
-          monday {{ view.weekMap.MONDAY }}
+          星期一 {{ view.weekMap.MONDAY }}
         </div>
       </el-col>
       <el-col :span="5">
         <div class="grid-content bg-purple">
-          tuesday {{ view.weekMap.TUESDAY }}
+          星期二 {{ view.weekMap.TUESDAY }}
         </div>
       </el-col>
       <el-col :span="5">
         <div class="grid-content bg-purple">
-          wednesday {{ view.weekMap.WEDNESDAY }}
+          星期三 {{ view.weekMap.WEDNESDAY }}
         </div>
       </el-col>
       <el-col :span="5">
         <div class="grid-content bg-purple">
-          thursday {{ view.weekMap.THURSDAY }}
+          星期四 {{ view.weekMap.THURSDAY }}
         </div>
       </el-col>
       <el-col :span="4">
         <div class="grid-content bg-purple">
-          friday {{ view.weekMap.FRIDAY }}
+          星期五 {{ view.weekMap.FRIDAY }}
         </div>
       </el-col>
     </el-row>
 
     <el-table
-      :data="tableData"
+      :data="fundDataRet.list"
+      :cell-style="set_cell_style"
       style="width: 100%">
-
-      <el-table-column
-        prop="fundId"
-        label="基金id">
-      </el-table-column>
-      <el-table-column
-        prop="fundName"
-        label="基金名称">
-      </el-table-column>
-      <el-table-column
-        prop="increaseRateDay"
-        label="日增长率">
-      </el-table-column>
       <el-table-column
         prop="netValueDate"
         label="净值日期">
@@ -136,6 +118,10 @@
       <el-table-column
         prop="dayOfWeek"
         label="星期">
+      </el-table-column>
+      <el-table-column
+        prop="increaseRateDay"
+        label="日增长率">
       </el-table-column>
       <el-table-column
         prop="netAssetValue"
@@ -149,16 +135,59 @@
         prop="updateTime"
         label="更新时间">
       </el-table-column>
+      <el-table-column
+        prop="updateTime"
+        label="最近10天">
+        <template slot-scope="scope">
+          <el-button @click="myChooseDate(scope.row)"> {{ scope.row.id }}</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div class="block">
       <el-pagination
         layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
+        :total="fundDataRet.total"
         @current-change="handlerCurChange"
-        :current-page.sync="currentPage">
+        :current-page.sync="fundDataParam.currentPage">
       </el-pagination>
     </div>
+
+    <el-row v-for="(row,rowIndex) in parseFindRecentRetRow()" :key="row" :gutter="20">
+      <el-col v-for="(line,lineIndex) in parseFindRecentRetLineTotal(rowIndex)" :key="line"
+              :span="parseFindRecentRetLine(rowIndex)">
+        <!--          长度是3 列的索引是2，需要索引是2-->
+        <!--          长度是2 列的索引是1，需要索引是1  需要索引是列的索引-->
+        <!--          长度是5 列的索引是1，行的索引是0，需要索引是1-->
+        <!--          长度是5 列的索引是1，行的索引是1，需要索引是4  需要索引是列的索引+3*行的索引-->
+        <el-table
+          :data="findRecentRet[lineIndex+rowIndex*findRecentRetLineNumber]"
+          :cell-style="set_cell_style"
+          style="width: 100%">
+          <el-table-column
+            prop="netValueDate"
+            label="净值日期">
+          </el-table-column>
+          <el-table-column
+            prop="dayOfWeek"
+            label="星期">
+          </el-table-column>
+          <el-table-column
+            prop="increaseRateDay"
+            label="日增长率">
+          </el-table-column>
+        </el-table>
+        <span v-if="findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].nextAvg>0 " class="red">
+        nextAvg {{ findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].nextAvg }}
+        </span>
+        <span v-else class="green">
+        nextAvg {{ findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].nextAvg }}
+        </span>
+        avg {{ findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].avg }}
+        min {{ findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].min }}
+        max {{ findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].max }}
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -168,19 +197,12 @@ import Common from '../components/Common'
 export default {
   data () {
     return {
-      tableData: [],
       fundId: this.$route.query.fundId,
-      currentPage: 1,
-      total: 1000,
       view: {
         count: null,
         min: null,
         max: null,
         avg: null,
-        incrIncr: null,
-        incrDecr: null,
-        decrIncr: null,
-        decrDecr: null,
         weekMap: {
           MONDAY: null,
           TUESDAY: null,
@@ -202,9 +224,7 @@ export default {
             const end = new Date()
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            picker.$emit('pick', [start1, end1])
+            picker.$emit('pick', [start, end])
           }
         }, {
           text: '最近一个月',
@@ -212,9 +232,7 @@ export default {
             const end = new Date()
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            picker.$emit('pick', [start1, end1])
+            picker.$emit('pick', [start, end])
           }
         }, {
           text: '最近三个月',
@@ -222,13 +240,10 @@ export default {
             const end = new Date()
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
-            const end1 = new Date(+new Date(end)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            const start1 = new Date(+new Date(start)).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
-            picker.$emit('pick', [start1, end1])
+            picker.$emit('pick', [start, end])
           }
         }]
       },
-      intervalDate: '',
       options: [{
         value: '1',
         label: '1天'
@@ -245,8 +260,26 @@ export default {
         value: '5',
         label: '5天'
       }],
-      chooseDate: null,
-      chooseDateLength: null
+
+      fundInfo: {
+        id: null,
+        name: null
+      },
+      fundDataParam: {
+        currentPage: 1,
+        // 区间日期
+        intervalDate: '',
+        chooseDate: null,
+        chooseDateLength: null
+      },
+      fundDataRet: {
+        total: 1000,
+        list: null
+      },
+      // 查询最近区间返回值
+      findRecentRet: [],
+      findRecentRetVal: [],
+      findRecentRetLineNumber: 4
     }
   },
   methods: {
@@ -255,18 +288,18 @@ export default {
         {
           params: {
             fundId: this.fundId,
-            pageNum: this.currentPage,
-            startDate: this.intervalDate[0],
-            endDate: this.intervalDate[1],
-            chooseDateLength: this.chooseDateLength,
-            chooseDate: this.chooseDate
+            pageNum: this.fundDataParam.currentPage,
+            startDate: this.fundDataParam.intervalDate[0],
+            endDate: this.fundDataParam.intervalDate[1],
+            chooseDateLength: this.fundDataParam.chooseDateLength,
+            chooseDate: this.fundDataParam.chooseDate
           }
         }
       )
         .then(r => {
           const data = r.data.data
-          this.tableData = data.list
-          this.total = data.total
+          this.fundDataRet.list = data.list
+          this.fundDataRet.total = data.total
         }).catch(function (error) {
           console.log(error)
         })
@@ -279,8 +312,8 @@ export default {
         {
           params: {
             fundId: this.fundId,
-            startDate: this.intervalDate[0],
-            endDate: this.intervalDate[1]
+            startDate: this.fundDataParam.intervalDate[0],
+            endDate: this.fundDataParam.intervalDate[1]
           }
         }
       )
@@ -304,12 +337,86 @@ export default {
     initCal () {
       this.init()
       this.cal()
+    },
+    initFundInfo () {
+      this.$axios.get(Common.fundUrlPre + '/fundInfo/fundInfoInit',
+        {
+          params: {
+            id: this.fundId
+          }
+        }
+      )
+        .then(r => {
+          this.fundInfo = r.data.data
+        })
+    },
+    myChooseDate (row) {
+      this.$axios.get(Common.fundUrlPre + '/fundData/findRecentData',
+        {
+          params: {
+            fundId: this.fundId,
+            myChooseDate: row.netValueDate
+          }
+        }
+      )
+        .then(r => {
+          const data = r.data.data
+          this.findRecentRet.push(data.list)
+          this.findRecentRetVal.push(data)
+        })
+    },
+    /**
+     * 计算一共有多少行数据
+     * @returns {number}
+     */
+    parseFindRecentRetRow () {
+      const length = this.findRecentRet.length
+      return Math.floor((length + this.findRecentRetLineNumber - 1) / this.findRecentRetLineNumber)
+    },
+    /**
+     * 计算一行的宽度
+     * @param row
+     * @return {number}
+     */
+    parseFindRecentRetLine (row) {
+      const length = this.findRecentRet.length
+      // 当前行剩余元素
+      const curRowRemainder = length - row * this.findRecentRetLineNumber
+      if (curRowRemainder > this.findRecentRetLineNumber) {
+        return 24 / this.findRecentRetLineNumber
+      } else {
+        return 24 / curRowRemainder
+      }
+    },
+    /**
+     * 计算列个数
+     * @param row
+     * @return {number}
+     */
+    parseFindRecentRetLineTotal (row) {
+      const lineTotal = this.parseFindRecentRetLine(row)
+      return 24 / lineTotal
+    },
+    set_cell_style ({row, column}) {
+      if (column.label === '日增长率') {
+        if (row.increaseRateDay > 0) {
+          return 'color:#ff0000'
+        } else {
+          return 'color:#1ede27'
+        }
+      }
+      // 这里的medicalCommonName指的是在el-table-column定义的prop中的值,并不会走到这里
+      if (row.medicalCommonName === 'increaseRateDay') {
+        return 'color:#5f0606'
+      }
     }
   },
   mounted () {
     this.init()
     this.cal()
+    this.initFundInfo()
   }
+
 }
 </script>
 <style scoped>
@@ -326,8 +433,12 @@ export default {
   border-radius: 4px;
 }
 
-.bg-purple-dark {
-  background: #99a9bf;
+.green {
+  background: #1ede27;
+}
+
+.red {
+  background: #ff0000;
 }
 
 .bg-purple {
