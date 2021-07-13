@@ -61,6 +61,15 @@
     </el-row>
 
     <el-row :gutter="20">
+      请输入今天增长率
+      <el-col :span="8">
+        <el-input v-model="todayRate" placeholder="请输入source"></el-input>
+      </el-col>
+      <el-button type="primary" plain @click="addToday(todayRate)">
+        新增
+      </el-button>
+    </el-row>
+    <el-row :gutter="20">
       <el-col :span="8">
         <div class="grid-content bg-purple">
           max {{ view.max }}
@@ -197,6 +206,7 @@ import Common from '../components/Common'
 export default {
   data () {
     return {
+      todayRate: null,
       fundId: this.$route.query.fundId,
       view: {
         count: null,
@@ -409,6 +419,16 @@ export default {
       if (row.medicalCommonName === 'increaseRateDay') {
         return 'color:#5f0606'
       }
+    },
+    addToday (rate) {
+      this.$axios.get(Common.fundUrlPre + '/fundData/addToday',
+        {
+          params: {
+            fundId: this.fundId,
+            rate: rate
+          }
+        }
+      )
     }
   },
   mounted () {
