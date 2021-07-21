@@ -70,19 +70,24 @@
       </el-button>
     </el-row>
     <el-row :gutter="20">
-      <el-col :span="8">
+      <el-col :span="6">
         <div class="grid-content bg-purple">
           max {{ view.max }}
         </div>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="6">
         <div class="grid-content bg-purple">
           min {{ view.min }}
         </div>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="6">
         <div class="grid-content bg-purple">
           avg {{ view.avg }}
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="grid-content bg-purple">
+          thisPageAvg {{ fundDataRet.thisPageAvg }}
         </div>
       </el-col>
     </el-row>
@@ -284,7 +289,8 @@ export default {
       },
       fundDataRet: {
         total: 1000,
-        list: null
+        list: null,
+        thisPageAvg: null
       },
       // 查询最近区间返回值
       findRecentRet: [],
@@ -310,6 +316,7 @@ export default {
           const data = r.data.data
           this.fundDataRet.list = data.list
           this.fundDataRet.total = data.total
+          this.fundDataRet.thisPageAvg = data.thisPageAvg
         }).catch(function (error) {
           console.log(error)
         })
@@ -462,7 +469,7 @@ export default {
 }
 
 .bg-purple {
-  background: #d3dce6;
+    background: #d3dce6;
 }
 
 .bg-purple-light {

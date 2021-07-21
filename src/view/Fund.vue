@@ -1,8 +1,8 @@
 <template>
-<div>
-  <el-button type="primary" plain @click="init">
-    搜索
-  </el-button>
+  <div>
+    <el-button type="primary" plain @click="init">
+      搜索
+    </el-button>
     <el-table
       :data="tableData"
       style="width: 100%">
@@ -14,15 +14,27 @@
           <el-button @click="handleClick(scope.row)" type="text" size="small">{{ scope.row.id }}</el-button>
         </template>
       </el-table-column>
-
       <el-table-column
         prop="name"
         label="基金名称"
         width="180">
       </el-table-column>
+      <el-table-column
+        prop="avgMap"
+        label="平均值"
+        width="720">
+        <template slot-scope="avg">
+          {{ JSON.stringify(avg.row.avgMap) }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="tenAvg"
+        label="最近10天平均值"
+        width="180">
+      </el-table-column>
 
     </el-table>
-</div>
+  </div>
 </template>
 
 <script>
