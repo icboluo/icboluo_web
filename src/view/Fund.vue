@@ -19,14 +19,19 @@
         label="基金名称"
         width="180">
       </el-table-column>
-      <el-table-column
-        prop="avgMap"
-        label="平均值"
-        width="720">
+
+      <span v-for="(it,ind) in 5">
+       <el-table-column
+                prop="avgMap"
+                label="平均值"
+                width="180">
         <template slot-scope="avg">
-          {{ JSON.stringify(avg.row.avgMap) }}
+          <span v-for="(item,index) in avg.row.avgMap" v-if="index===ind+''">
+            {{ item }}
+          </span>
         </template>
       </el-table-column>
+      </span>
       <el-table-column
         prop="tenAvg"
         label="最近10天平均值"

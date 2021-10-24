@@ -153,7 +153,9 @@
         prop="updateTime"
         label="最近10天">
         <template slot-scope="scope">
-          <el-button @click="myChooseDate(scope.row)"> {{ scope.row.id }}</el-button>
+          <el-button @click="myChooseDate(scope.row)">
+            {{ scope.row.id }}
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -469,7 +471,7 @@ export default {
 }
 
 .bg-purple {
-    background: #d3dce6;
+  background: #d3dce6;
 }
 
 .bg-purple-light {

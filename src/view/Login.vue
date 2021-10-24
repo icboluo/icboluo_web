@@ -19,9 +19,6 @@
       <el-button type="primary" @click="note">
         note
       </el-button>
-      <el-button type="danger" @click="note2">
-        note2
-      </el-button>
       <el-button type="danger" @click="fund">
         fund
       </el-button>

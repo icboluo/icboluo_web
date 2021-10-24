@@ -5,12 +5,10 @@
 </template>
 
 <script>
-import Note from './view/Note.vue'
 import Login from './view/Login'
 
 export default {
   components: {
-    Note,
     Login
   }
 }
