@@ -60,16 +60,16 @@
     <el-button type="primary" @click="add">add</el-button>
 
     <el-table
-        :data="tableData.list"
-        style="width: 100%">
+      :data="tableData.list"
+      style="width: 100%">
       <el-table-column
-          prop="problem"
-          label="问题"
-          width="200">
+        prop="problem"
+        label="问题"
+        width="200">
       </el-table-column>
       <el-table-column
-          prop="result"
-          label="结果">
+        prop="result"
+        label="结果">
         <template slot-scope="scope">
           <div v-if="scope.row.shouRes">
             <el-button @click="result" type="text" size="small">
@@ -82,28 +82,28 @@
         </template>
       </el-table-column>
       <el-table-column
-          prop="finishTime"
-          label="完成次数"
-          width="180">
+        prop="finishTime"
+        label="完成次数"
+        width="180">
       </el-table-column>
       <el-table-column
-          prop="belongToScope"
-          label="所属范围"
-          width="180">
+        prop="belongToScope"
+        label="所属范围"
+        width="180">
       </el-table-column>
       <el-table-column
-          prop="type"
-          label="type"
-          width="100">
+        prop="type"
+        label="type"
+        width="100">
       </el-table-column>
       <el-table-column
-          prop="shouldFinishTime"
-          label="应该完成时间"
-          width="180">
+        prop="shouldFinishTime"
+        label="应该完成时间"
+        width="180">
       </el-table-column>
       <el-table-column
-          label="finish"
-          width="100">
+        label="finish"
+        width="100">
         <template slot-scope="scope">
           <el-button @click="finish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
@@ -111,8 +111,8 @@
         </template>
       </el-table-column>
       <el-table-column
-          label="onlyUpdate"
-          width="110">
+        label="onlyUpdate"
+        width="110">
         <template slot-scope="scope">
           <el-button @click="onlyUpdate(scope.row)" type="text" size="small">
             {{ scope.row.id }}
@@ -120,8 +120,8 @@
         </template>
       </el-table-column>
       <el-table-column
-          label="notFinish"
-          width="100">
+        label="notFinish"
+        width="100">
         <template slot-scope="scope">
           <el-button @click="notFinish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
@@ -129,8 +129,8 @@
         </template>
       </el-table-column>
       <el-table-column
-          label="onlyRead"
-          width="100">
+        label="onlyRead"
+        width="100">
         <template slot-scope="scope">
           <el-button @click="onlyRead(scope.row)" type="text" size="small">
             {{ scope.row.id }}
@@ -140,17 +140,18 @@
     </el-table>
     <div class="block">
       <el-pagination
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="tableData.total"
-          @current-change="handlerCurChange"
-          :current-page.sync="dataParam.currentPage">
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="tableData.total"
+        @current-change="handlerCurChange"
+        :current-page.sync="dataParam.currentPage">
       </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
-import Common from '../components/Common'
+
+import Common, {getRequest} from '../components/Common'
 
 export default {
   data () {
@@ -187,73 +188,68 @@ export default {
   },
   methods: {
     init () {
-      this.$axios.get(Common.noteUrlPre + '/timeNote/init',
+      getRequest(
+        Common.noteUrlPre + '/timeNote/init',
         {
-          params: {
-            pageNum: this.dataParam.currentPage
-          }
+          pageNum: this.dataParam.currentPage
         }
-      )
-        .then(r => {
-          const data = r.data.data
-          this.tableData.list = data.list
-          this.total = data.total
-          this.tableData.total = data.total
-          this.tableData.thisPageAvg = data.thisPageAvg
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        this.tableData.list = r.list
+        this.total = r.total
+        this.tableData.total = r.total
+        this.tableData.thisPageAvg = r.thisPageAvg
+      })
     },
     selectAmount () {
-      this.$axios.get(Common.noteUrlPre + '/timeNote/selectAmount',
+      getRequest(
+        Common.noteUrlPre + '/timeNote/selectAmount',
         {
           params: {}
         }
-      )
-        .then(r => {
-          const data = r.data.data
-          this.timeNoteAmount = data.timeNoteAmount
-          this.weekTimeAmount = data.weekTimeAmount
-          this.monthTimeAmount = data.monthTimeAmount
-          this.totalTimeAmount = data.totalTimeAmount
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        this.timeNoteAmount = r.timeNoteAmount
+        this.weekTimeAmount = r.weekTimeAmount
+        this.monthTimeAmount = r.monthTimeAmount
+        this.totalTimeAmount = r.totalTimeAmount
+      })
     },
     selectByFiled () {
-      this.$axios.get(Common.noteUrlPre + '/timeNote/selectByFiled',
+      getRequest(
+        Common.noteUrlPre + '/timeNote/selectByFiled',
         {
           params: {filed: this.input}
         }
-      )
-        .then(r => {
-          this.selectByFiledRes = r.data.data
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        this.selectByFiledRes = r.data
+      })
     },
     public: function (row, url) {
-      this.$axios.get(Common.noteUrlPre + url, {
-        params: {type: row.type, id: row.id}
+      getRequest(
+        Common.noteUrlPre + url,
+        {
+          params: {type: row.type, id: row.id}
+        }
+      ).then(r => {
+        this.message = r.message
+        this.code = r.code
       })
-        .then(r => {
-          this.message = r.data.message
-          this.code = r.data.code
-        }).catch(function (error) {
-          console.log(error)
-        })
     },
     finish: function (row) {
       this.public(row, '/timeNote/updateFinishTime')
+      // 刷新页面
+      location.reload()
     },
     onlyUpdate: function (row) {
       this.public(row, '/timeNote/onlyUpdateTime')
+      location.reload()
     },
     notFinish: function (row) {
       this.public(row, '/timeNote/updateNotFinishTime')
+      location.reload()
     },
     onlyRead: function (row) {
       this.public(row, '/timeNote/toOnlyRead')
+      location.reload()
     },
     result: function (index, row) {
       row.shouRes = true
@@ -264,7 +260,8 @@ export default {
       this.init()
     },
     add () {
-      this.$axios.get(Common.noteUrlPre + '/timeNote/add',
+      getRequest(
+        Common.noteUrlPre + '/timeNote/add',
         {
           params: {
             problem: this.addParam.problem,
@@ -272,12 +269,9 @@ export default {
             belongToScope: this.addParam.belongToScope
           }
         }
-      )
-        .then(r => {
-          console.log(r)
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        console.log(r)
+      })
     }
   }
 }

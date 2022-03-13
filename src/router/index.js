@@ -5,6 +5,7 @@ import Login from '../view/Login'
 import Note from '../view/Note'
 import FundData from '../view/FundData'
 import Fund from '../view/Fund'
+import Game from '../view/Game'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/fund',
       name: 'Fund',
       component: Fund
+    },
+    {
+      path: '/game',
+      name: 'Game',
+      component: Game
     }
   ]
 })

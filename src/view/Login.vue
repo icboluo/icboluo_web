@@ -22,6 +22,9 @@
       <el-button type="danger" @click="fund">
         fund
       </el-button>
+      <el-button type="danger" @click="game">
+        game
+      </el-button>
     </el-form>
 
   </div>
@@ -58,6 +61,13 @@ export default {
       this.$router.push(
         {
           path: '/fund'
+        }
+      )
+    },
+    game () {
+      this.$router.push(
+        {
+          path: '/game'
         }
       )
     }
