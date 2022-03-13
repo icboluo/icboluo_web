@@ -203,9 +203,7 @@ export default {
     selectAmount () {
       getRequest(
         Common.noteUrlPre + '/timeNote/selectAmount',
-        {
-          params: {}
-        }
+        {}
       ).then(r => {
         this.timeNoteAmount = r.timeNoteAmount
         this.weekTimeAmount = r.weekTimeAmount
@@ -217,7 +215,7 @@ export default {
       getRequest(
         Common.noteUrlPre + '/timeNote/selectByFiled',
         {
-          params: {filed: this.input}
+          filed: this.input
         }
       ).then(r => {
         this.selectByFiledRes = r.data
@@ -227,7 +225,7 @@ export default {
       getRequest(
         Common.noteUrlPre + url,
         {
-          params: {type: row.type, id: row.id}
+          type: row.type, id: row.id
         }
       ).then(r => {
         this.message = r.message
@@ -263,11 +261,9 @@ export default {
       getRequest(
         Common.noteUrlPre + '/timeNote/add',
         {
-          params: {
-            problem: this.addParam.problem,
-            result: this.addParam.result,
-            belongToScope: this.addParam.belongToScope
-          }
+          problem: this.addParam.problem,
+          result: this.addParam.result,
+          belongToScope: this.addParam.belongToScope
         }
       ).then(r => {
         console.log(r)

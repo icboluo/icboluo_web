@@ -22,9 +22,9 @@
 
       <span v-for="(it,ind) in 5">
        <el-table-column
-                prop="avgMap"
-                label="平均值"
-                width="180">
+         prop="avgMap"
+         label="平均值"
+         width="180">
         <template slot-scope="avg">
           <span v-for="(item,index) in avg.row.avgMap" v-if="index===ind+''">
             {{ item }}
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import Common from '../components/Common'
+import Common, {getRequest} from '../components/Common'
 
 export default {
   data () {
@@ -54,21 +54,16 @@ export default {
   },
   methods: {
     init () {
-      this.$axios.get(Common.fundUrlPre + '/fundAttention/init',
+      getRequest(
+        Common.fundUrlPre + '/fundAttention/init',
         {
-          params: {
-            fundId: this.fundId,
-            pageNum: this.currentPage
-          }
+          fundId: this.fundId,
+          pageNum: this.currentPage
         }
-      )
-        .then(r => {
-          const data = r.data.data
-          this.tableData = data.list
-          this.total = data.total
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        this.tableData = r.list
+        this.total = r.total
+      })
     },
     handleClick (row) {
       this.$router.push(

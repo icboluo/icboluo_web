@@ -28,7 +28,3 @@ A
 src/App.vue,5\4\5441d5289c77ce615f0e420c266cdee5d78f3ecd
 K
 src/biji/js/jquery-3.3.1.js,6\f\6fb174e1cbeb3bad37972f641c6839861e274040
-E
-src/view/FundData.vue,9\0\9081c6cbfa58bd5ec09e4062b2c7e415f19dd899
-A
-src/view/Fund.vue,9\d\9ddc3ba32a83a13c9067644433b950ad130650e7

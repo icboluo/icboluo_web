@@ -208,7 +208,7 @@
 </template>
 
 <script>
-import Common from '../components/Common'
+import Common, {getRequest} from '../components/Common'
 
 export default {
   data () {
@@ -302,87 +302,73 @@ export default {
   },
   methods: {
     init () {
-      this.$axios.get(Common.fundUrlPre + '/fundData/init',
+      getRequest(
+        Common.fundUrlPre + '/fundData/init',
         {
-          params: {
-            fundId: this.fundId,
-            pageNum: this.fundDataParam.currentPage,
-            startDate: this.fundDataParam.intervalDate[0],
-            endDate: this.fundDataParam.intervalDate[1],
-            chooseDateLength: this.fundDataParam.chooseDateLength,
-            chooseDate: this.fundDataParam.chooseDate
-          }
+          fundId: this.fundId,
+          pageNum: this.fundDataParam.currentPage,
+          startDate: this.fundDataParam.intervalDate[0],
+          endDate: this.fundDataParam.intervalDate[1],
+          chooseDateLength: this.fundDataParam.chooseDateLength,
+          chooseDate: this.fundDataParam.chooseDate
         }
-      )
-        .then(r => {
-          const data = r.data.data
-          this.fundDataRet.list = data.list
-          this.fundDataRet.total = data.total
-          this.fundDataRet.thisPageAvg = data.thisPageAvg
-        }).catch(function (error) {
-          console.log(error)
-        })
+      ).then(r => {
+        this.fundDataRet.list = r.list
+        this.fundDataRet.total = r.total
+        this.fundDataRet.thisPageAvg = r.thisPageAvg
+      })
     },
     handlerCurChange (val) {
       this.init()
     },
     cal () {
-      this.$axios.get(Common.fundUrlPre + '/fundData/cal',
+      getRequest(
+        Common.fundUrlPre + '/fundData/cal',
         {
-          params: {
-            fundId: this.fundId,
-            startDate: this.fundDataParam.intervalDate[0],
-            endDate: this.fundDataParam.intervalDate[1]
-          }
+          fundId: this.fundId,
+          startDate: this.fundDataParam.intervalDate[0],
+          endDate: this.fundDataParam.intervalDate[1]
         }
-      )
-        .then(r => {
-          this.view = r.data.data
-        })
+      ).then(r => {
+        this.view = r
+      })
     },
     httpSimCal () {
-      this.$axios.get(Common.fundUrlPre + '/fundData/simCal',
+      getRequest(
+        Common.fundUrlPre + '/fundData/simCal',
         {
-          params: {
-            source: this.simCal.source,
-            target: this.simCal.target
-          }
+          source: this.simCal.source,
+          target: this.simCal.target
         }
-      )
-        .then(r => {
-          this.simCal.res = r.data.data
-        })
+      ).then(r => {
+        this.simCal.res = r.data.data
+      })
     },
     initCal () {
       this.init()
       this.cal()
     },
     initFundInfo () {
-      this.$axios.get(Common.fundUrlPre + '/fundInfo/fundInfoInit',
+      getRequest(
+        Common.fundUrlPre + '/fundInfo/fundInfoInit',
         {
-          params: {
-            id: this.fundId
-          }
+          id: this.fundId
         }
-      )
-        .then(r => {
-          this.fundInfo = r.data.data
-        })
+      ).then(r => {
+        this.fundInfo = r
+      })
     },
     myChooseDate (row) {
-      this.$axios.get(Common.fundUrlPre + '/fundData/findRecentData',
+      getRequest(
+        Common.fundUrlPre + '/fundData/findRecentData',
         {
-          params: {
-            fundId: this.fundId,
-            myChooseDate: row.netValueDate
-          }
+          fundId: this.fundId,
+          myChooseDate: row.netValueDate
         }
-      )
-        .then(r => {
-          const data = r.data.data
-          this.findRecentRet.push(data.list)
-          this.findRecentRetVal.push(data)
-        })
+      ).then(r => {
+        this.findRecentRet.push(r.list)
+        this.findRecentRetVal.push(r)
+      })
     },
     /**
      * 计算一共有多少行数据
@@ -430,12 +416,11 @@ export default {
       }
     },
     addToday (rate) {
-      this.$axios.get(Common.fundUrlPre + '/fundData/addToday',
+      getRequest(
+        Common.fundUrlPre + '/fundData/addToday',
         {
-          params: {
-            fundId: this.fundId,
-            rate: rate
-          }
+          fundId: this.fundId,
+          rate: rate
         }
       )
     }
