@@ -19,10 +19,13 @@ function totalRow (list) {
   let row = []
   for (let i = 0; i < list.length; i++) {
     row.push(list[i])
-    if (i !== 0 && i % rowMaxSum === 0) {
+    if (i !== 0 && row.length === rowMaxSum) {
       ans.push(row)
       row = []
     }
+  }
+  if (row.length !== 0) {
+    ans.push(row)
   }
   return ans
 }

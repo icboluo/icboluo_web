@@ -11,6 +11,7 @@ export default {
   name: 'Common',
   noteUrlPre: 'http://127.0.0.1:1514',
   fundUrlPre: 'http://127.0.0.1:8888',
+  gameUrlPre: 'http://127.0.0.1:4399',
   data () {
     return {
       abc: 'ssssssss'
@@ -34,44 +35,49 @@ axios.interceptors.response.use(data => { // {status,data[]}//status表示http�
   if (data.status && data.status === 200 && data.data.status === 500) {
     // 业务逻辑错误(服务器找不到，服务器错误等，http的响应码就不是200了)
     Message.error({
-      message: data.data.msg
+      message: data.data.message
     })
     return
   }
   // 为何要判断这个msg是否存在呢，好比说若是请求表格里面的数据，在list中放的一个javabean，这时候data就是一个数组了，那就不必展现msg了
-  if (data.data.msg) {
+  if (data.data.message) {
     Message.success({
-      message: data.data.msg
+      message: data.data.message
     })
   }
   // 返回方法调用的哪里，拿到的就是服务端返回的数据
   return data.data.data
-}, err => {
   // 若是HTTP响应码是400,500等就会进入这个err函数中
+}, err => {
+  const res = err.response
   // 若是服务器没启动或者是路径错误进入此判断中
-  if (!err.response || err.response.status === 504 || err.response.status === 404) {
+  if (!res || res.status === 504 || res.status === 404) {
     Message.error({
       message: '服务调用失败,请检查'
     })
-  } else if (err.response.status === 403) { // 表示权限不足
+    return
+  }
+  if (res.status === 403) { // 表示权限不足
     Message.error({
       message: '权限不足，请联系管理员'
     })
-  } else if (err.response.status === 401) { // 表示未登陆
-    Message.error({
-      message: err.response.data.msg// 服务器返回来的信息
-    })
-  } else {
-    if (err.response.data.msg) {
-      Message.error({
-        message: err.response.data.msg
-      })
-    } else {
-      Message.error({
-        message: '未知错误'
-      })
-    }
+    return
   }
+  if (res.status === 401) { // 表示未登陆
+    Message.error({
+      message: res.data.message// 服务器返回来的信息
+    })
+    return
+  }
+  if (res.data.message) {
+    Message.error({
+      message: res.data.message
+    })
+    return
+  }
+  Message.error({
+    message: '未知错误'
+  })
 })
 
 // 请求前缀，之后若是要给服务器统一增长一个前缀，只须要更改这里就好

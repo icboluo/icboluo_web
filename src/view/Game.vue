@@ -1,47 +1,58 @@
 <template>
   <div>
-    <el-input v-model="id" placeholder="请输入id"></el-input>
-    <el-button type="primary" @click="findById">find</el-button>
-    <div>
-      <button @click="nextMonster">发现一只怪物</button>
-    </div>
+    <el-input v-model="id"
+              :disabled="false"
+              placeholder="请输入id">
+    </el-input>
 
     <div>
       <el-container>
-        <el-header>GAME</el-header>
-        <el-container v-bind:style="{height:'800px'}">
+        <el-header>
+          <div>
+            GAME
+            <el-button type="primary" @click="startGame">START</el-button>
+          </div>
+        </el-header>
+        <el-container v-bind:style="{height:'1200px'}">
           <el-aside width="200px">
             <div v-bind:style="{height:'100px'}">
-              个人信息
+              <el-button type="primary" @click="findById">个人信息</el-button>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag>年龄 {{ this.player.age }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag>年龄 {{ player.age }}</el-tag>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag>攻击 {{ this.player.attack }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag>攻击 {{ player.attack }}</el-tag>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag type="danger">血量 {{ this.player.blood }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag type="danger">血量 {{ player.blood }}</el-tag>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag type="info">经验 {{ this.player.experience }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag type="info">最大血量 {{ player.maxBlood }}</el-tag>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag type="info">级别 {{ this.player.level }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag type="info">经验 {{ player.experience }}</el-tag>
               <br>
             </div>
-            <div v-bind:style="{height:'100px'}">
-              <el-tag type="info">最大血量 {{ this.player.maxBlood }}</el-tag>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag type="info">总经验 {{ player.totalExperience }}</el-tag>
+              <br>
+            </div>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag type="info">级别 {{ player.level }}</el-tag>
               <br>
             </div>
           </el-aside>
           <el-main>
-            怪物{{ allMonster.length }}只
+            <div>
+              怪物{{ allMonster.length }}只
+              <button @click="nextMonster">发现一只怪物</button>
+            </div>
             <div>
               <el-row v-if="allMonster" v-for="(item,idx) in tableUtil.totalRow(allMonster)" :key="idx" :gutter="20">
                 <el-col v-for="(rowItem,rowIdx) in item" :key="rowIdx" :span="6">
@@ -66,6 +77,13 @@
               </el-row>
             </div>
           </el-main>
+          <el-aside width="400px">
+            <button @click="reFresh">Cultivation Career</button>
+            <div v-if="cultivationCareer" v-for="(item,idx) in cultivationCareer" :key="idx"
+                 v-bind:style="{height:'100px'}">
+              {{ item.oper }}
+            </div>
+          </el-aside>
         </el-container>
       </el-container>
     </div>
@@ -86,9 +104,10 @@ export default {
         age: 0,
         attack: 0,
         blood: 0,
+        maxBlood: 0,
         experience: 0,
-        level: null,
-        maxBlood: 0
+        totalExperience: 0,
+        level: null
       },
       monster: {
         id: null,
@@ -96,12 +115,18 @@ export default {
         blood: 0,
         show: false
       },
-      allMonster: []
+      allMonster: [],
+      cultivationCareer: null
     }
   },
   methods: {
+    startGame () {
+      getRequest(Common.gameUrlPre + '/player/startGame').then(r => {
+        this.id = r
+      })
+    },
     findById () {
-      getRequest(Common.noteUrlPre + '/player/' + this.id)
+      getRequest(Common.gameUrlPre + '/player/exhibit', {id: this.id})
         .then(r => {
           this.player = r
         })
@@ -109,27 +134,41 @@ export default {
     },
     nextMonster () {
       this.monster.show = true
-      getRequest(Common.noteUrlPre + '/player/nextMonster')
+      getRequest(Common.gameUrlPre + '/player/nextMonster')
         .then(r => {
           this.monster.id = r.id
           this.monster.attack = r.attack
           this.monster.blood = r.blood
+          this.allMonsterFun()
         })
-      this.allMonsterFun()
     },
     attack (monsterId) {
-      getRequest(Common.noteUrlPre + '/player/attack', {
+      getRequest(Common.gameUrlPre + '/player/attack', {
         playerId: this.id, monsterId: monsterId
       }
-      ).then(r => {
-        this.findById()
-      })
+      )
     },
     allMonsterFun () {
-      getRequest(Common.noteUrlPre + '/player/allMonster').then(r => {
+      getRequest(Common.gameUrlPre + '/player/allMonster').then(r => {
         this.allMonster = r
       })
+    },
+    cultivationCareerFun () {
+      getRequest(Common.gameUrlPre + '/cultivationCareer/cultivationCareer', {
+        id: this.id
+      }).then(r => {
+        this.cultivationCareer = r.list
+      })
+    },
+    reFresh () {
+      this.cultivationCareerFun()
+      window.setInterval(() => {
+        setTimeout(this.cultivationCareerFun, 0)
+      }, 9000)
     }
+  },
+  destroyed () {
+    window.clearInterval(this.timer)
   }
 }
 </script>
