@@ -13,10 +13,14 @@
             <el-button type="primary" @click="startGame">START</el-button>
           </div>
         </el-header>
-        <el-container v-bind:style="{height:'1200px'}">
+        <el-container v-bind:style="{height:'1300px'}">
           <el-aside width="200px">
             <div v-bind:style="{height:'100px'}">
               <el-button type="primary" @click="findById">个人信息</el-button>
+              <br>
+            </div>
+            <div v-if="player" v-bind:style="{height:'100px'}">
+              <el-tag>姓名 {{ player.name }}</el-tag>
               <br>
             </div>
             <div v-if="player" v-bind:style="{height:'100px'}">
@@ -31,8 +35,14 @@
               <el-tag type="danger">血量 {{ player.blood }}</el-tag>
               <br>
             </div>
-            <div v-if="player" v-bind:style="{height:'100px'}">
+            <div v-if="player" v-bind:style="{height:'180px'}">
               <el-tag type="info">最大血量 {{ player.maxBlood }}</el-tag>
+              <br>
+            </div>
+            <div v-if="player" v-bind:style="{height:'20px'}">
+              <el-progress :text-inside="true" :stroke-width="26"
+                           :percentage="'经验'+tableUtil.percentage(player.experience,player.curTotalExperience,0)">
+              </el-progress>
               <br>
             </div>
             <div v-if="player" v-bind:style="{height:'100px'}">
@@ -57,6 +67,10 @@
               <el-row v-if="allMonster" v-for="(item,idx) in tableUtil.totalRow(allMonster)" :key="idx" :gutter="20">
                 <el-col v-for="(rowItem,rowIdx) in item" :key="rowIdx" :span="6">
                   <div class="grid-content bg-purple">
+                    <div  v-bind:style="{height:'100px'}">
+                      <el-tag>姓名 {{ rowItem.name }}</el-tag>
+                      <br>
+                    </div>
                     <div v-bind:style="{height:'100px'}">
                       <el-tag>攻击 {{ rowItem.attack }}</el-tag>
                       <br>
@@ -107,7 +121,9 @@ export default {
         maxBlood: 0,
         experience: 0,
         totalExperience: 0,
-        level: null
+        curTotalExperience: 0,
+        level: 0,
+        name
       },
       monster: {
         id: null,
@@ -146,7 +162,10 @@ export default {
       getRequest(Common.gameUrlPre + '/player/attack', {
         playerId: this.id, monsterId: monsterId
       }
-      )
+      ).then(r => {
+        this.findById()
+        this.allMonsterFun()
+      })
     },
     allMonsterFun () {
       getRequest(Common.gameUrlPre + '/player/allMonster').then(r => {

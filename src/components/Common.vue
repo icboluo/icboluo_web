@@ -41,9 +41,9 @@ axios.interceptors.response.use(data => { // {status,data[]}//status表示http�
   }
   // 为何要判断这个msg是否存在呢，好比说若是请求表格里面的数据，在list中放的一个javabean，这时候data就是一个数组了，那就不必展现msg了
   if (data.data.message) {
-    Message.success({
-      message: data.data.message
-    })
+    /*    Message.success({
+          message: data.data.message
+        }) */
   }
   // 返回方法调用的哪里，拿到的就是服务端返回的数据
   return data.data.data

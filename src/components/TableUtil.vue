@@ -6,7 +6,8 @@
 
 export default {
   name: 'TableUtil',
-  totalRow
+  totalRow,
+  percentage
 }
 
 const rowMaxSum = 4
@@ -28,6 +29,16 @@ function totalRow (list) {
     ans.push(row)
   }
   return ans
+}
+
+function percentage (a, b, def) {
+  if (a === 0 && b === 0) {
+    return 100
+  }
+  if (b === 0) {
+    return def
+  }
+  return Math.floor(a * 100 / b)
 }
 
 </script>
