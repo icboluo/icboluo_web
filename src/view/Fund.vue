@@ -1,7 +1,23 @@
 <template>
   <div>
-    <el-input v-model="initPar.date" placeholder="查询时间">
-    </el-input>
+    <el-row :gutter="20">
+      <el-col :span="6">
+        <div class="block">
+          <span class="demonstration">收益计算日期（默认一年</span>
+          <el-date-picker
+            v-model="initPar.date"
+            value-format="yyyy-MM-dd"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions">
+          </el-date-picker>
+        </div>
+      </el-col>
+    </el-row>
     <el-button type="primary" plain @click="init">
       搜索
     </el-button>
@@ -40,26 +56,45 @@
         width="180">
       </el-table-column>
       <el-table-column
-        prop="fixedVote"
-        label="定投总收益"
+        prop="fixedInvestmentIncome"
+        label="万份定投收益"
         width="180">
       </el-table-column>
       <el-table-column
         prop="totalDay"
-        label="总天数"
+        label="定投总天数"
         width="180">
       </el-table-column>
       <el-table-column
-        prop="lossInvestment"
-        label="亏损投入总收益"
+        prop="lossInvestmentIncome"
+        label="万份亏损投入收益"
         width="180">
       </el-table-column>
       <el-table-column
         prop="lossTotalDay"
-        label="亏损总天数"
+        label="亏损投入总天数"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="lossRatioIncome"
+        label="万份亏损比率投入收益"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="bigLossIncome"
+        label="万份大亏损时收益"
         width="180">
       </el-table-column>
     </el-table>
+
+    <div class="block">
+      <el-pagination
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pageRes.total"
+        @current-change="init()"
+        :current-page.sync="pageQuery.pageNum">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -70,24 +105,69 @@ export default {
   data () {
     return {
       tableData: [],
-      total: 1000,
       initPar: {
         date: null
+      },
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick (picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      },
+      fundDataRet: {
+        list: null,
+        thisPageAvg: null
+      },
+      pageRes: {
+        total: 1000,
+        pageSize: 10,
+        pageNum: 1
+      },
+      pageQuery: {
+        pageSize: 10,
+        pageNum: 1
       }
     }
   },
   methods: {
     init () {
+      let params = {}
+      params.fundId = this.fundId
+      if (this.initPar.date) {
+        params.startDate = this.initPar.date[0]
+        params.endDate = this.initPar.date[1]
+      }
+      params.pageNum = this.pageQuery.pageNum
+      params.pageSize = this.pageQuery.pageSize
       getRequest(
         Common.fundUrlPre + '/fundAttention/init',
-        {
-          fundId: this.fundId,
-          pageNum: this.currentPage,
-          date: this.initPar.date
-        }
+        params
       ).then(r => {
         this.tableData = r.list
-        this.total = r.total
+        this.pageRes.pageNum = r.pageNum
+        this.pageRes.pageSize = r.pageSize
+        this.pageRes.total = r.total
       })
     },
     handleClick (row) {
