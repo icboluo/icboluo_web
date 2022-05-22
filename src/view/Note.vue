@@ -3,22 +3,22 @@
     <el-row>
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
-          totalTimeAmount {{ totalTimeAmount }}
+          totalTimeAmount {{ amount.totalTimeAmount }}
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
-          timeNoteAmount {{ timeNoteAmount }}
+          timeNoteAmount {{ amount.timeNoteAmount }}
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
-          weekTimeAmount {{ weekTimeAmount }}
+          weekTimeAmount {{ amount.weekTimeAmount }}
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
-          monthTimeAmount {{ monthTimeAmount }}
+          monthTimeAmount {{ amount.monthTimeAmount }}
         </div>
       </el-col>
     </el-row>
@@ -26,42 +26,79 @@
     <el-row>
       <el-col :span="12">
         <div class="grid-content bg-purple">
-          <el-input v-model="input" placeholder="万能查询"></el-input>
-        </div>
-      </el-col>
-    </el-row>
-
-    <!--    <el-row>
-          <el-col v-for="(item,index) in selectByFiledRes" :span="24">
-            <div class="grid-content bg-purple-light">
-              res {{ index }} {{ item }}
-            </div>
-          </el-col>
-        </el-row>-->
-    <el-row>
-      <el-col :span="8">
-        <div class="grid-content bg-purple-dark">
-          <el-input v-model="addParam.problem" placeholder="problem"></el-input>
-        </div>
-      </el-col>
-      <el-col :span="8">
-        <div class="grid-content bg-purple-dark">
-          <el-input v-model="addParam.result" placeholder="result"></el-input>
-        </div>
-      </el-col>
-      <el-col :span="8">
-        <div class="grid-content bg-purple-dark">
-          <el-input v-model="addParam.belongToScope" placeholder="belongToScope"></el-input>
+          <el-input v-model="universalQuery" placeholder="万能查询"></el-input>
         </div>
       </el-col>
     </el-row>
 
     <el-button type="primary" @click="selectByFiled">selectByFiled</el-button>
-    <el-button type="primary" @click="add">add</el-button>
+    <el-button type="primary" @click="init">init</el-button>
+
+    <el-popover
+      placement="right"
+      width="800"
+      trigger="click">
+      <el-row>
+        <el-col :span="8">
+          <div class="grid-content bg-purple-dark">
+            <el-input v-model="addParam.problem" placeholder="problem"></el-input>
+          </div>
+        </el-col>
+        <el-col :span="10">
+          <div class="grid-content bg-purple-dark">
+            <el-input v-model="addParam.result" placeholder="result"></el-input>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="grid-content bg-purple-dark">
+            <el-input v-model="addParam.belongToScope" placeholder="belongToScope"></el-input>
+          </div>
+        </el-col>
+      </el-row>
+      <!--      此块怎么做局部变量使用，只有新增一处使用到了这个变量-->
+      <el-button type="primary" @click="add(addParam.problem,addParam.result,addParam.belongToScope)">add</el-button>
+      <el-button slot="reference">add</el-button>
+    </el-popover>
 
     <el-table
-      :data="tableData.list"
+      :data="tableList"
+      :row-class-name="TableUtil.tableAddSerialNum"
       style="width: 100%">
+
+      <el-table-column
+        prop="index"
+        label="序号"
+        width="100">
+        <template slot-scope="scope">
+          <el-popover
+            placement="right"
+            width="800"
+            trigger="click">
+            <el-row>
+              <el-col :span="8">
+                <div class="grid-content bg-purple-dark">
+                  <el-input v-model="scope.row.problem" placeholder="problem"></el-input>
+                </div>
+              </el-col>
+              <el-col :span="10">
+                <div class="grid-content bg-purple-dark">
+                  <el-input v-model="scope.row.result" placeholder="result"></el-input>
+                </div>
+              </el-col>
+              <el-col :span="6">
+                <div class="grid-content bg-purple-dark">
+                  <el-input v-model="scope.row.belongToScope" placeholder="belongToScope"></el-input>
+                </div>
+              </el-col>
+            </el-row>
+            <!--      此块怎么做局部变量使用，只有新增一处使用到了这个变量-->
+            <el-button type="primary" @click="update(scope.row)">update
+            </el-button>
+            <el-button slot="reference">{{ scope.row.index }}</el-button>
+          </el-popover>
+        </template>
+      </el-table-column>
+
       <el-table-column
         prop="problem"
         label="问题"
@@ -137,11 +174,12 @@
           </el-button>
         </template>
       </el-table-column>
+
     </el-table>
     <div class="block">
       <el-pagination
         layout="total, sizes, prev, pager, next, jumper"
-        :total="tableData.total"
+        :total="pageRes.total"
         @current-change="handlerCurChange"
         :current-page.sync="dataParam.currentPage">
       </el-pagination>
@@ -152,21 +190,23 @@
 <script>
 
 import Common, {getRequest} from '../components/Common'
+import TableUtil from '../components/TableUtil'
 
 export default {
   data () {
     return {
-      timeNoteAmount: {},
-      weekTimeAmount: {},
-      monthTimeAmount: {},
-      totalTimeAmount: {},
-      input: null,
-      selectByFiledRes: [],
-      tableData: {
-        total: 1000,
-        list: null,
-        thisPageAvg: null
+      TableUtil: TableUtil,
+      // 数量
+      amount: {
+        timeNoteAmount: {},
+        weekTimeAmount: {},
+        monthTimeAmount: {},
+        totalTimeAmount: {}
       },
+      // 万能查询
+      universalQuery: null,
+      // 列表
+      tableList: null,
       dataParam: {
         currentPage: 1,
         // 区间日期
@@ -174,11 +214,19 @@ export default {
         chooseDate: null,
         chooseDateLength: null
       },
-      total: 1000,
       addParam: {
         problem: null,
         result: null,
         belongToScope: null
+      },
+      pageRes: {
+        total: 1000,
+        pageSize: 10,
+        pageNum: 1
+      },
+      pageQuery: {
+        pageSize: 10,
+        pageNum: 1
       }
     }
   },
@@ -194,10 +242,8 @@ export default {
           pageNum: this.dataParam.currentPage
         }
       ).then(r => {
-        this.tableData.list = r.list
-        this.total = r.total
-        this.tableData.total = r.total
-        this.tableData.thisPageAvg = r.thisPageAvg
+        this.tableList = r.list
+        this.pageRes.total = r.total
       })
     },
     selectAmount () {
@@ -205,20 +251,17 @@ export default {
         Common.noteUrlPre + '/timeNote/selectAmount',
         {}
       ).then(r => {
-        this.timeNoteAmount = r.timeNoteAmount
-        this.weekTimeAmount = r.weekTimeAmount
-        this.monthTimeAmount = r.monthTimeAmount
-        this.totalTimeAmount = r.totalTimeAmount
+        this.amount = r
       })
     },
     selectByFiled () {
       getRequest(
         Common.noteUrlPre + '/timeNote/selectByFiled',
         {
-          filed: this.input
+          filed: this.universalQuery
         }
       ).then(r => {
-        this.selectByFiledRes = r.data
+        this.tableList = r
       })
     },
     public: function (row, url) {
@@ -252,22 +295,39 @@ export default {
     result: function (index, row) {
       row.shouRes = true
       // 刷新单行单元格
-      this.$set(this.tableData.list, index, row)
+      this.$set(this.tableList, index, row)
     },
-    handlerCurChange (val) {
+    handlerCurChange () {
       this.init()
     },
-    add () {
+    add (problem, result, belongToScope) {
       getRequest(
         Common.noteUrlPre + '/timeNote/add',
         {
-          problem: this.addParam.problem,
-          result: this.addParam.result,
-          belongToScope: this.addParam.belongToScope
+          problem: problem,
+          result: result,
+          belongToScope: belongToScope
         }
       ).then(r => {
         console.log(r)
       })
+    },
+    update (row) {
+      getRequest(
+        Common.noteUrlPre + '/timeNote/update',
+        {
+          problem: row.problem,
+          result: row.result,
+          belongToScope: row.belongToScope,
+          type: row.type,
+          id: row.id
+        }
+      ).then(r => {
+        console.log(r)
+      }, err => {
+        return Promise.resolve(err)
+      }
+      )
     }
   }
 }

@@ -100,10 +100,12 @@
 
 <script>
 import Common, {getRequest} from '../components/Common'
+import TableUtil from '../components/TableUtil'
 
 export default {
   data () {
     return {
+      TableUtil: TableUtil,
       tableData: [],
       initPar: {
         date: null

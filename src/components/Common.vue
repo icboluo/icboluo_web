@@ -12,6 +12,7 @@ export default {
   noteUrlPre: 'http://127.0.0.1:1514',
   fundUrlPre: 'http://127.0.0.1:8888',
   gameUrlPre: 'http://127.0.0.1:4399',
+  userUrlPre: 'http://127.0.0.1:7010/user',
   data () {
     return {
       abc: 'ssssssss'
@@ -55,7 +56,7 @@ axios.interceptors.response.use(data => { // {status,data[]}//status表示http�
     Message.error({
       message: '服务调用失败,请检查'
     })
-    return
+    return Promise.reject(err)
   }
   if (res.status === 403) { // 表示权限不足
     Message.error({
@@ -73,7 +74,7 @@ axios.interceptors.response.use(data => { // {status,data[]}//status表示http�
     Message.error({
       message: res.data.message
     })
-    return
+    return Promise.reject(err)
   }
   Message.error({
     message: '未知错误'

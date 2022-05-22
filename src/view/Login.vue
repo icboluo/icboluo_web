@@ -6,24 +6,19 @@
       <el-radio-button label="top">顶部对齐</el-radio-button>
     </el-radio-group>
     <div style="margin: 20px;"></div>
-    <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-      <el-form-item label="名称">
-        <el-input v-model="formLabelAlign.name"></el-input>
+    <el-form :label-position="labelPosition" label-width="80px">
+      <el-form-item label="id">
+        <el-input v-model="id"></el-input>
       </el-form-item>
-      <el-form-item label="活动区域">
-        <el-input v-model="formLabelAlign.region"></el-input>
+      <el-form-item label="pwd">
+        <el-input v-model="pwd"></el-input>
       </el-form-item>
-      <el-form-item label="活动形式">
-        <el-input v-model="formLabelAlign.type"></el-input>
-      </el-form-item>
-      <el-button type="primary" @click="note">
-        note
+
+      <el-button type="danger" @click="register">
+        register
       </el-button>
-      <el-button type="danger" @click="fund">
-        fund
-      </el-button>
-      <el-button type="danger" @click="game">
-        game
+      <el-button type="danger" @click="login">
+        login
       </el-button>
     </el-form>
 
@@ -31,44 +26,53 @@
 </template>
 
 <script>
+import Common, {getRequest} from '../components/Common'
+import {Message} from 'element-ui'
+
 export default {
   data () {
     return {
       labelPosition: 'right',
-      formLabelAlign: {
-        name: '',
-        region: '',
-        type: ''
-      }
+      id: null,
+      pwd: null
     }
   },
   methods: {
-    note () {
-      this.$router.push(
+    register () {
+      getRequest(
+        Common.userUrlPre + '/register',
         {
-          path: '/note'
+          id: this.id,
+          pwd: this.pwd
         }
+      ).then(() => {
+        Message.success({
+          message: 'register successful'
+        })
+      }, err => {
+        return Promise.resolve(err)
+      }
       )
     },
-    note2 () {
-      this.$router.push(
+    login () {
+      getRequest(
+        Common.userUrlPre + '/login',
         {
-          path: '/note2'
+          id: this.id,
+          pwd: this.pwd
         }
-      )
-    },
-    fund () {
-      this.$router.push(
-        {
-          path: '/fund'
-        }
-      )
-    },
-    game () {
-      this.$router.push(
-        {
-          path: '/game'
-        }
+      ).then(() => {
+        Message.success({
+          message: 'login successful'
+        })
+        this.$router.push(
+          {
+            path: '/frontPage'
+          }
+        )
+      }, err => {
+        return Promise.resolve(err)
+      }
       )
     }
   }

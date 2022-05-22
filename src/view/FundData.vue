@@ -318,7 +318,7 @@ export default {
         this.fundDataRet.thisPageAvg = r.thisPageAvg
       })
     },
-    handlerCurChange (val) {
+    handlerCurChange () {
       this.init()
     },
     cal () {
