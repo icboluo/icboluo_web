@@ -4,7 +4,7 @@
 
 <script>
 import axios from "axios"; // 一个基于 promise 的 HTTP 库 npm install axios便可安装
-import { ElMessage } from "element-plus"; // 这里用的element-ui中的Message消息提示插件
+import { ElMessage } from "element-plus";
 
 export default {
   name: "Common",
@@ -89,7 +89,8 @@ axios.interceptors.response.use(
       });
       return Promise.reject(err);
     }
-    Message.error({
+    ElMessage({
+      type: "error",
       message: "未知错误"
     });
   }
@@ -99,17 +100,38 @@ axios.interceptors.response.use(
 let base = "";
 // get请求接口
 export const getRequest = (url, params) => {
-  return axios({
-    method: "get",
-    params: params,
-    url: `${base}${url}`
-  });
+  // return axios({
+  //   method: "get",
+  //   params: params,
+  //   url: `${base}${url}`
+  // });
+  return -1
 };
 
 async function sendGet(url: string, param: any) {
   var axiosResponse = await axios.get(url);
   console.log();
   return axiosResponse;
+}
+
+interface Res<T = any> {
+  data: T;
+  code: number;
+  msg: string;
+
+  isSuccess(): boolean;
+}
+
+class ResImpl<T = any> implements Res<T> {
+  data: T;
+  code: number;
+  msg: string;
+
+  constructor(data: T, code: number, msg: string) {
+    this.data = data;
+    this.code = code;
+    this.msg = msg;
+  }
 }
 </script>
 
