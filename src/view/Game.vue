@@ -105,8 +105,8 @@
 </template>
 
 <script>
-import Common, {getRequest} from '../components/Common'
-import TableUtil from '../components/TableUtil'
+import Common from "@/components/Common.vue";
+import TableUtil from "@/components/TableUtil.vue";
 
 export default {
   name: 'Game',

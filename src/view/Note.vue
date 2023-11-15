@@ -189,8 +189,9 @@
 
 <script>
 
-import Common, {getRequest} from '../components/Common'
-import TableUtil from '../components/TableUtil'
+
+import TableUtil from "@/components/TableUtil.vue";
+import Common from "@/components/Common.vue";
 
 export default {
   data () {

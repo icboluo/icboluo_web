@@ -1,12 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import HelloWorld from '@/components/HelloWorld.vue'
+import Login from "@/view/Login.vue";
+import FundData from "@/view/FundData.vue";
+import FrontPage from "@/view/FrontPage.vue";
+import Note from "@/view/Note.vue";
+import Fund from "@/view/Fund.vue";
+import Game from "@/view/Game.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/home',
       name: 'home',
       component: HomeView
     },
@@ -22,37 +28,37 @@ const router = createRouter({
       path: '/helloWorld',
       name: 'HelloWorld',
       component: HelloWorld
+    },
+    {
+      path: '/',
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/fundData',
+      name: 'FundData',
+      component: FundData
+    },
+    {
+      path: '/frontPage',
+      name: 'FrontPage',
+      component: FrontPage,
+      children: [
+        {
+          // 这个/在这里代表子目录，如果不加，会到全局去找目录路由（而不是子目录中找） .../note（上面是没有的
+          path: '/note',
+          component: Note
+        },
+        {
+          path: '/fund',
+          component: Fund
+        },
+        {
+          path: '/game',
+          component: Game
+        }
+      ]
     }
-    // {
-    //   path: '/',
-    //   name: 'Login',
-    //   component: Login
-    // },
-    // {
-    //   path: '/fundData',
-    //   name: 'FundData',
-    //   component: FundData
-    // },
-    // {
-    //   path: '/frontPage',
-    //   name: 'FrontPage',
-    //   component: FrontPage,
-    //   children: [
-    //     {
-    //       // 这个/在这里代表子目录，如果不加，会到全局去找目录路由（而不是子目录中找） .../note（上面是没有的
-    //       path: '/note',
-    //       component: Note
-    //     },
-    //     {
-    //       path: '/fund',
-    //       component: Fund
-    //     },
-    //     {
-    //       path: '/game',
-    //       component: Game
-    //     }
-    //   ]
-    // }
   ]
 })
 

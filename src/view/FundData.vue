@@ -208,7 +208,8 @@
 </template>
 
 <script>
-import Common, {getRequest} from '../components/Common'
+
+import Common from "@/components/Common.vue";
 
 export default {
   data () {

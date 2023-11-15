@@ -5,7 +5,7 @@
       <el-radio-button label="right">右对齐</el-radio-button>
       <el-radio-button label="top">顶部对齐</el-radio-button>
     </el-radio-group>
-    <div style="margin: 20px;"></div>
+    <div style="margin: 20px"></div>
     <el-form :label-position="labelPosition" label-width="80px">
       <el-form-item label="id">
         <el-input v-model="id"></el-input>
@@ -14,23 +14,19 @@
         <el-input v-model="pwd"></el-input>
       </el-form-item>
 
-      <el-button type="danger" @click="register">
-        register
-      </el-button>
-      <el-button type="danger" @click="login">
-        login
-      </el-button>
+      <el-button type="danger" @click="register"> register</el-button>
+      <el-button type="danger" @click="login"> login</el-button>
     </el-form>
-
   </div>
 </template>
 
 <script>
-import Common, {getRequest} from '../components/Common'
-import {Message} from 'element-ui'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import Common from "@/components/Common.vue";
 
 export default {
-  data () {
+  data() {
     return {
       labelPosition: 'right',
       id: null,
@@ -38,47 +34,44 @@ export default {
     }
   },
   methods: {
-    register () {
-      getRequest(
-        Common.userUrlPre + '/register',
-        {
-          id: this.id,
-          pwd: this.pwd
+    register() {
+      getRequest(Common.userUrlPre + '/register', {
+        id: this.id,
+        pwd: this.pwd
+      }).then(
+        () => {
+          ElMessage({
+            type: 'success',
+            message: 'register successful'
+          })
+        },
+        (err) => {
+          return Promise.resolve(err)
         }
-      ).then(() => {
-        Message.success({
-          message: 'register successful'
-        })
-      }, err => {
-        return Promise.resolve(err)
-      }
       )
     },
-    login () {
-      getRequest(
-        Common.userUrlPre + '/login',
-        {
-          id: this.id,
-          pwd: this.pwd
-        }
-      ).then(() => {
-        Message.success({
-          message: 'login successful'
-        })
-        this.$router.push(
-          {
+    login() {
+      getRequest(Common.userUrlPre + '/login', {
+        id: this.id,
+        pwd: this.pwd
+      }).then(
+        () => {
+          ElMessage({
+            type: 'success',
+            message: 'login successful'
+          })
+          const router = useRouter()
+          router.push({
             path: '/frontPage'
-          }
-        )
-      }, err => {
-        return Promise.resolve(err)
-      }
+          })
+        },
+        (err) => {
+          return Promise.resolve(err)
+        }
       )
     }
   }
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
