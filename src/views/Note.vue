@@ -2,24 +2,16 @@
   <div>
     <el-row>
       <el-col :span="6">
-        <div class="grid-content bg-purple-dark">
-          totalTimeAmount {{ amount.totalTimeAmount }}
-        </div>
+        <div class="grid-content bg-purple-dark">totalTimeAmount {{ amount.totalTimeAmount }}</div>
       </el-col>
       <el-col :span="6">
-        <div class="grid-content bg-purple-dark">
-          timeNoteAmount {{ amount.timeNoteAmount }}
-        </div>
+        <div class="grid-content bg-purple-dark">timeNoteAmount {{ amount.timeNoteAmount }}</div>
       </el-col>
       <el-col :span="6">
-        <div class="grid-content bg-purple-dark">
-          weekTimeAmount {{ amount.weekTimeAmount }}
-        </div>
+        <div class="grid-content bg-purple-dark">weekTimeAmount {{ amount.weekTimeAmount }}</div>
       </el-col>
       <el-col :span="6">
-        <div class="grid-content bg-purple-dark">
-          monthTimeAmount {{ amount.monthTimeAmount }}
-        </div>
+        <div class="grid-content bg-purple-dark">monthTimeAmount {{ amount.monthTimeAmount }}</div>
       </el-col>
     </el-row>
 
@@ -34,10 +26,7 @@
     <el-button type="primary" @click="selectByFiled">selectByFiled</el-button>
     <el-button type="primary" @click="init">init</el-button>
 
-    <el-popover
-      placement="right"
-      width="800"
-      trigger="click">
+    <el-popover placement="right" width="800" trigger="click">
       <el-row>
         <el-col :span="8">
           <div class="grid-content bg-purple-dark">
@@ -56,24 +45,18 @@
         </el-col>
       </el-row>
       <!--      此块怎么做局部变量使用，只有新增一处使用到了这个变量-->
-      <el-button type="primary" @click="add(addParam.problem,addParam.result,addParam.belongToScope)">add</el-button>
+      <el-button
+        type="primary"
+        @click="add(addParam.problem, addParam.result, addParam.belongToScope)"
+        >add
+      </el-button>
       <el-button slot="reference">add</el-button>
     </el-popover>
 
-    <el-table
-      :data="tableList"
-      :row-class-name="TableUtil.tableAddSerialNum"
-      style="width: 100%">
-
-      <el-table-column
-        prop="index"
-        label="序号"
-        width="100">
+    <el-table :data="tableList" :row-class-name="TableUtil.tableAddSerialNum" style="width: 100%">
+      <el-table-column prop="index" label="序号" width="100">
         <template slot-scope="scope">
-          <el-popover
-            placement="right"
-            width="800"
-            trigger="click">
+          <el-popover placement="right" width="800" trigger="click">
             <el-row>
               <el-col :span="8">
                 <div class="grid-content bg-purple-dark">
@@ -87,26 +70,22 @@
               </el-col>
               <el-col :span="6">
                 <div class="grid-content bg-purple-dark">
-                  <el-input v-model="scope.row.belongToScope" placeholder="belongToScope"></el-input>
+                  <el-input
+                    v-model="scope.row.belongToScope"
+                    placeholder="belongToScope"
+                  ></el-input>
                 </div>
               </el-col>
             </el-row>
             <!--      此块怎么做局部变量使用，只有新增一处使用到了这个变量-->
-            <el-button type="primary" @click="update(scope.row)">update
-            </el-button>
+            <el-button type="primary" @click="update(scope.row)">update</el-button>
             <el-button slot="reference">{{ scope.row.index }}</el-button>
           </el-popover>
         </template>
       </el-table-column>
 
-      <el-table-column
-        prop="problem"
-        label="问题"
-        width="200">
-      </el-table-column>
-      <el-table-column
-        prop="result"
-        label="结果">
+      <el-table-column prop="problem" label="问题" width="200"></el-table-column>
+      <el-table-column prop="result" label="结果">
         <template slot-scope="scope">
           <div v-if="scope.row.shouRes">
             <el-button @click="result" type="text" size="small">
@@ -114,224 +93,176 @@
             </el-button>
           </div>
           <div v-else>
-            <button @click="result(scope.$index,scope.row)">result</button>
+            <button @click="result(scope.$index, scope.row)">result</button>
           </div>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="finishTime"
-        label="完成次数"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="belongToScope"
-        label="所属范围"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="type"
-        label="type"
-        width="100">
-      </el-table-column>
-      <el-table-column
-        prop="shouldFinishTime"
-        label="应该完成时间"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="finish"
-        width="100">
+      <el-table-column prop="finishTime" label="完成次数" width="180"></el-table-column>
+      <el-table-column prop="belongToScope" label="所属范围" width="180"></el-table-column>
+      <el-table-column prop="type" label="type" width="100"></el-table-column>
+      <el-table-column prop="shouldFinishTime" label="应该完成时间" width="180"></el-table-column>
+      <el-table-column label="finish" width="100">
         <template slot-scope="scope">
           <el-button @click="finish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column
-        label="onlyUpdate"
-        width="110">
+      <el-table-column label="onlyUpdate" width="110">
         <template slot-scope="scope">
           <el-button @click="onlyUpdate(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column
-        label="notFinish"
-        width="100">
+      <el-table-column label="notFinish" width="100">
         <template slot-scope="scope">
           <el-button @click="notFinish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column
-        label="onlyRead"
-        width="100">
+      <el-table-column label="onlyRead" width="100">
         <template slot-scope="scope">
           <el-button @click="onlyRead(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
-
     </el-table>
     <div class="block">
       <el-pagination
         layout="total, sizes, prev, pager, next, jumper"
         :total="pageRes.total"
         @current-change="handlerCurChange"
-        :current-page.sync="dataParam.currentPage">
+        :current-page.sync="dataParam.currentPage"
+      >
       </el-pagination>
     </div>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import TableUtil from '@/components/TableUtil.vue'
+import constant from '@/util/Constant'
+import { reactive, ref } from 'vue'
+import request from '@/util/Request'
+// 数量
+let amount = reactive({
+  timeNoteAmount: {},
+  weekTimeAmount: {},
+  monthTimeAmount: {},
+  totalTimeAmount: {}
+})
+// 万能查询
+const universalQuery = ref()
+// 列表
+let tableList = ref()
+const dataParam = reactive({
+  currentPage: 1,
+  // 区间日期
+  intervalDate: '',
+  chooseDate: null,
+  chooseDateLength: null
+})
+const addParam = reactive({
+  problem: null,
+  result: null,
+  belongToScope: null
+})
+const pageRes = reactive({
+  total: 1000,
+  pageSize: 10,
+  pageNum: 1
+})
+const pageQuery = reactive({
+  pageSize: 10,
+  pageNum: 1
+})
 
+async function mounted() {
+  selectAmount()
+  init()
+}
 
-import TableUtil from "@/components/TableUtil.vue";
-import Common from "@/components/Common.vue";
-import constant from "@/util/Constant";
+async function init() {
+  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/init', {
+    pageNum: dataParam.currentPage
+  })
+  tableList = data.list
+  pageRes.total = data.total
+}
 
-export default {
-  data () {
-    return {
-      TableUtil: TableUtil,
-      // 数量
-      amount: {
-        timeNoteAmount: {},
-        weekTimeAmount: {},
-        monthTimeAmount: {},
-        totalTimeAmount: {}
-      },
-      // 万能查询
-      universalQuery: null,
-      // 列表
-      tableList: null,
-      dataParam: {
-        currentPage: 1,
-        // 区间日期
-        intervalDate: '',
-        chooseDate: null,
-        chooseDateLength: null
-      },
-      addParam: {
-        problem: null,
-        result: null,
-        belongToScope: null
-      },
-      pageRes: {
-        total: 1000,
-        pageSize: 10,
-        pageNum: 1
-      },
-      pageQuery: {
-        pageSize: 10,
-        pageNum: 1
-      }
-    }
-  },
-  mounted () {
-    this.selectAmount()
-    this.init()
-  },
-  methods: {
-    init () {
-      getRequest(
-        constant.noteUrlPre + '/timeNote/init',
-        {
-          pageNum: this.dataParam.currentPage
-        }
-      ).then(r => {
-        this.tableList = r.list
-        this.pageRes.total = r.total
-      })
-    },
-    selectAmount () {
-      getRequest(
-        constant.noteUrlPre + '/timeNote/selectAmount',
-        {}
-      ).then(r => {
-        this.amount = r
-      })
-    },
-    selectByFiled () {
-      getRequest(
-        constant.noteUrlPre + '/timeNote/selectByFiled',
-        {
-          filed: this.universalQuery
-        }
-      ).then(r => {
-        this.tableList = r
-      })
-    },
-    public: function (row, url) {
-      getRequest(
-        constant.noteUrlPre + url,
-        {
-          type: row.type, id: row.id
-        }
-      ).then(r => {
-        this.message = r.message
-        this.code = r.code
-      })
-    },
-    finish: function (row) {
-      this.public(row, '/timeNote/updateFinishTime')
-      // 刷新页面
-      location.reload()
-    },
-    onlyUpdate: function (row) {
-      this.public(row, '/timeNote/onlyUpdateTime')
-      location.reload()
-    },
-    notFinish: function (row) {
-      this.public(row, '/timeNote/updateNotFinishTime')
-      location.reload()
-    },
-    onlyRead: function (row) {
-      this.public(row, '/timeNote/toOnlyRead')
-      location.reload()
-    },
-    result: function (index, row) {
-      row.shouRes = true
-      // 刷新单行单元格
-      this.$set(this.tableList, index, row)
-    },
-    handlerCurChange () {
-      this.init()
-    },
-    add (problem, result, belongToScope) {
-      getRequest(
-        constant.noteUrlPre + '/timeNote/add',
-        {
-          problem: problem,
-          result: result,
-          belongToScope: belongToScope
-        }
-      ).then(r => {
-        console.log(r)
-      })
-    },
-    update (row) {
-      getRequest(
-        constant.noteUrlPre + '/timeNote/update',
-        {
-          problem: row.problem,
-          result: row.result,
-          belongToScope: row.belongToScope,
-          type: row.type,
-          id: row.id
-        }
-      ).then(r => {
-        console.log(r)
-      }, err => {
-        return Promise.resolve(err)
-      }
-      )
-    }
-  }
+async function selectAmount() {
+  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/selectAmount', {})
+  amount = data
+}
+
+async function selectByFiled() {
+  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/selectByFiled', {
+    filed: universalQuery
+  })
+  tableList = data
+}
+
+async function publi(row, url) {
+  const data = request.simpleGet(constant.noteUrlPre + url, {
+    type: row.type,
+    id: row.id
+  })
+  message = data.message
+  code = data.code
+}
+
+async function finish(row) {
+  publi(row, '/timeNote/updateFinishTime')
+  // 刷新页面
+  location.reload()
+}
+
+async function onlyUpdate(row) {
+  publi(row, '/timeNote/onlyUpdateTime')
+  location.reload()
+}
+
+async function notFinish(row) {
+  publi(row, '/timeNote/updateNotFinishTime')
+  location.reload()
+}
+
+async function onlyRead(row) {
+  publi(row, '/timeNote/toOnlyRead')
+  location.reload()
+}
+
+async function result(index, row) {
+  row.shouRes = true
+  // 刷新单行单元格
+  this.$set(tableList, index, row)
+}
+
+async function handlerCurChange() {
+  init()
+}
+
+async function add(problem, result, belongToScope) {
+  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/add', {
+    problem: problem,
+    result: result,
+    belongToScope: belongToScope
+  })
+  console.log(data)
+}
+
+async function update(row) {
+  const data = request.get(constant.noteUrlPre + '/timeNote/update', {
+    problem: row.problem,
+    result: row.result,
+    belongToScope: row.belongToScope,
+    type: row.type,
+    id: row.id
+  })
+  console.log(data)
 }
 </script>
 
@@ -339,12 +270,11 @@ export default {
 .el-row {
   margin-bottom: 20px;
 
-&
-:last-child {
-  margin-bottom: 0;
+  & :last-child {
+    margin-bottom: 0;
+  }
 }
 
-}
 .el-col {
   border-radius: 4px;
 }

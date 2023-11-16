@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import HelloWorld from '@/components/HelloWorld.vue'
-import Login from "@/views/Login.vue";
+import HelloWorld from '../components/HelloWorld.vue'
+import Login from "../views/Login.vue";
 import FundData from "@/views/FundData.vue";
-import FrontPage from "@/views/FrontPage.vue";
+import FrontPage from "../views/FrontPage.vue";
 import Note from "@/views/Note.vue";
 import Fund from "@/views/Fund.vue";
 import Game from "@/views/Game.vue";
