@@ -192,6 +192,7 @@
 
 import TableUtil from "@/components/TableUtil.vue";
 import Common from "@/components/Common.vue";
+import constant from "@/util/Constant";
 
 export default {
   data () {
@@ -238,7 +239,7 @@ export default {
   methods: {
     init () {
       getRequest(
-        Common.noteUrlPre + '/timeNote/init',
+        constant.noteUrlPre + '/timeNote/init',
         {
           pageNum: this.dataParam.currentPage
         }
@@ -249,7 +250,7 @@ export default {
     },
     selectAmount () {
       getRequest(
-        Common.noteUrlPre + '/timeNote/selectAmount',
+        constant.noteUrlPre + '/timeNote/selectAmount',
         {}
       ).then(r => {
         this.amount = r
@@ -257,7 +258,7 @@ export default {
     },
     selectByFiled () {
       getRequest(
-        Common.noteUrlPre + '/timeNote/selectByFiled',
+        constant.noteUrlPre + '/timeNote/selectByFiled',
         {
           filed: this.universalQuery
         }
@@ -267,7 +268,7 @@ export default {
     },
     public: function (row, url) {
       getRequest(
-        Common.noteUrlPre + url,
+        constant.noteUrlPre + url,
         {
           type: row.type, id: row.id
         }
@@ -303,7 +304,7 @@ export default {
     },
     add (problem, result, belongToScope) {
       getRequest(
-        Common.noteUrlPre + '/timeNote/add',
+        constant.noteUrlPre + '/timeNote/add',
         {
           problem: problem,
           result: result,
@@ -315,7 +316,7 @@ export default {
     },
     update (row) {
       getRequest(
-        Common.noteUrlPre + '/timeNote/update',
+        constant.noteUrlPre + '/timeNote/update',
         {
           problem: row.problem,
           result: row.result,

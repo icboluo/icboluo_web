@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import HelloWorld from '@/components/HelloWorld.vue'
-import Login from "@/view/Login.vue";
-import FundData from "@/view/FundData.vue";
-import FrontPage from "@/view/FrontPage.vue";
-import Note from "@/view/Note.vue";
-import Fund from "@/view/Fund.vue";
-import Game from "@/view/Game.vue";
+import Login from "@/views/Login.vue";
+import FundData from "@/views/FundData.vue";
+import FrontPage from "@/views/FrontPage.vue";
+import Note from "@/views/Note.vue";
+import Fund from "@/views/Fund.vue";
+import Game from "@/views/Game.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
