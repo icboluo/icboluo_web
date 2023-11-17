@@ -55,7 +55,7 @@
 
     <el-table :data="tableList" :row-class-name="TableUtil.tableAddSerialNum" style="width: 100%">
       <el-table-column prop="index" label="序号" width="100">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-popover placement="right" width="800" trigger="click">
             <el-row>
               <el-col :span="8">
@@ -86,7 +86,7 @@
 
       <el-table-column prop="problem" label="问题" width="200"></el-table-column>
       <el-table-column prop="result" label="结果">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <div v-if="scope.row.shouRes">
             <el-button @click="result" type="text" size="small">
               {{ scope.row.result }}
@@ -102,28 +102,28 @@
       <el-table-column prop="type" label="type" width="100"></el-table-column>
       <el-table-column prop="shouldFinishTime" label="应该完成时间" width="180"></el-table-column>
       <el-table-column label="finish" width="100">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button @click="finish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="onlyUpdate" width="110">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button @click="onlyUpdate(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="notFinish" width="100">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button @click="notFinish(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="onlyRead" width="100">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button @click="onlyRead(scope.row)" type="text" size="small">
             {{ scope.row.id }}
           </el-button>

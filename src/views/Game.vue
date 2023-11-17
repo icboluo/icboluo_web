@@ -16,6 +16,7 @@
               <el-button type="primary" @click="findById">个人信息</el-button>
               <br />
             </div>
+            {{ player }}
             <div v-if="player" v-bind:style="{ height: '100px' }">
               <el-tag>姓名 {{ player.name }}</el-tag>
               <br />
@@ -116,10 +117,10 @@
 </template>
 
 <script setup lang="ts">
-import Common from '@/components/Common.vue'
 import { reactive, ref } from 'vue'
 import request from '@/util/Request'
-import tableUtil from "@/components/TableUtil.vue";
+import tableUtil from '@/components/TableUtil.vue'
+import constant from '@/util/Constant'
 
 let id = ref()
 let player = reactive({
@@ -143,14 +144,14 @@ let allMonster = ref([])
 let cultivationCareer = ref()
 
 async function startGame() {
-  const res = await request.get(Common.gameUrlPre + '/player/startGame')
+  const res = await request.get(constant.gameUrlPre + '/player/startGame')
   if (res.isSuccessOrPopBox()) {
     id = res.data
   }
 }
 
 async function findById() {
-  let res = await request.get(Common.gameUrlPre + '/player/exhibit', { id: id })
+  let res = await request.get(constant.gameUrlPre + '/player/exhibit', { id: id.value })
   if (res.isSuccessOrPopBox()) {
     player = res.data
     await allMonsterFun()
@@ -159,7 +160,7 @@ async function findById() {
 
 async function nextMonster() {
   monster.show = true
-  let res = await request.get(Common.gameUrlPre + '/player/nextMonster')
+  let res = await request.get(constant.gameUrlPre + '/player/nextMonster')
   if (res.isSuccessOrPopBox()) {
     monster.id = res.data.id
     monster.attack = res.data.attack
@@ -169,8 +170,8 @@ async function nextMonster() {
 }
 
 async function attack(monsterId: string) {
-  let res = await request.get(Common.gameUrlPre + '/player/attack', {
-    playerId: id,
+  let res = await request.get(constant.gameUrlPre + '/player/attack', {
+    playerId: id.value,
     monsterId: monsterId
   })
   if (res.isSuccessOrPopBox()) {
@@ -180,15 +181,15 @@ async function attack(monsterId: string) {
 }
 
 async function allMonsterFun() {
-  let res = await request.get(Common.gameUrlPre + '/player/allMonster')
+  let res = await request.get(constant.gameUrlPre + '/player/allMonster')
   if (res.isSuccessOrPopBox()) {
     allMonster = res.data
   }
 }
 
 async function cultivationCareerFun() {
-  let res = await request.get(Common.gameUrlPre + '/cultivationCareer/cultivationCareer', {
-    id: id
+  let res = await request.get(constant.gameUrlPre + '/cultivationCareer/cultivationCareer', {
+    id: id.value
   })
   if (res.isSuccessOrPopBox()) {
     cultivationCareer = res.data.list
@@ -207,7 +208,5 @@ function destroyed() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 ;
