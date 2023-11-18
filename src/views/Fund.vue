@@ -28,7 +28,6 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="基金名称" width="180"></el-table-column>
 
       <span v-for="(it, idx) in 5" :key="it">
         <el-table-column prop="avgMap" label="`年${(it)}平均值`" width="180">
@@ -39,43 +38,69 @@
           </template>
         </el-table-column>
       </span>
-      <el-table-column prop="tenAvg" label="最近10天平均值" width="180"></el-table-column>
-      <el-table-column prop="fixedInvestmentIncome" label="万份定投收益" width="180">
-      </el-table-column>
-      <el-table-column prop="totalDay" label="定投总天数" width="180"></el-table-column>
-      <el-table-column prop="lossInvestmentIncome" label="万份亏损投入收益" width="180">
-      </el-table-column>
-      <el-table-column prop="lossTotalDay" label="亏损投入总天数" width="180"></el-table-column>
-      <el-table-column prop="lossRatioIncome" label="万份亏损比率投入收益" width="180">
-      </el-table-column>
-      <el-table-column prop="bigLossIncome" label="万份大亏损时收益" width="180"></el-table-column>
     </el-table>
-
-    <div class="block">
-      <el-pagination
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pageRes.total"
-        @current-change="init()"
-        :current-page.sync="pageQuery.pageNum"
-      >
-      </el-pagination>
-    </div>
+    <base-table
+      :table-info="tableInfo"
+      :page-info="pageInfo"
+      @handler-cur-change="handlerCurChange"
+    ></base-table>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Common from '@/components/Common.vue'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { get } from '@/util/Request'
-import * as constants from 'constants'
 import constant from '@/util/Constant'
+import type { PageInfo, PageQuery, TableInfo } from '@/components/BaseTable.vue'
+import BaseTable from '@/components/BaseTable.vue'
 
 let tableData = ref([])
-let fundId = ref()
 const initPar = reactive({
   date: null
 })
+const tableInfo = reactive<TableInfo>({
+  header: [
+    {
+      fieldName: 'id',
+      showName: '基金id'
+    },
+    {
+      fieldName: 'name',
+      showName: '基金名称'
+    },
+    {
+      fieldName: 'tenAvg',
+      showName: '最近10天平均值'
+    },
+    {
+      fieldName: 'fixedInvestmentIncome',
+      showName: '万份定投收益'
+    },
+    {
+      fieldName: 'totalDay',
+      showName: '定投总天数'
+    },
+    {
+      fieldName: 'lossInvestmentIncome',
+      showName: '万份亏损投入收益'
+    },
+    {
+      fieldName: 'lossTotalDay',
+      showName: '亏损投入总天数'
+    },
+    {
+      fieldName: 'lossRatioIncome',
+      showName: '万份亏损比率投入收益'
+    },
+    {
+      fieldName: 'bigLossIncome',
+      showName: '万份大亏损时收益'
+    }
+  ],
+  data1: []
+})
+
 const pickerOptions = reactive({
   shortcuts: [
     {
@@ -111,33 +136,34 @@ const fundDataRet = reactive({
   list: null,
   thisPageAvg: null
 })
-const pageRes = reactive({
+const pageInfo = reactive<PageInfo>({
   total: 1000,
   pageSize: 10,
   pageNum: 1
 })
-const pageQuery = reactive({
+const pageQuery = reactive<PageQuery>({
   pageSize: 10,
   pageNum: 1
 })
 const router = useRouter()
 
 async function init() {
-  let params = {}
-  params.fundId = fundId
   if (initPar.date) {
-    params.startDate = initPar.date[0]
-    params.endDate = initPar.date[1]
+    pageQuery.startDate = initPar.date[0]
+    pageQuery.endDate = initPar.date[1]
   }
-  params.pageNum = pageQuery.pageNum
-  params.pageSize = pageQuery.pageSize
-  let res = await get(constant.fundUrlPre + '/fundAttention/init', params)
+  let res = await get(constant.fundUrlPre + '/fundAttention/init', pageQuery)
   if (res.isSuccessOrPopBox()) {
-    tableData = res.data.list
-    pageRes.pageNum = res.data.pageNum
-    pageRes.pageSize = res.data.pageSize
-    pageRes.total = res.data.total
+    tableInfo.data1 = res.data.list
+    pageInfo.pageNum = res.data.pageNum
+    pageInfo.pageSize = res.data.pageSize
+    pageInfo.total = res.data.total
   }
+}
+
+function handlerCurChange(curPage: number) {
+  pageQuery.pageNum = curPage
+  init()
 }
 
 function handleClick(row: any) {
@@ -149,9 +175,9 @@ function handleClick(row: any) {
   })
 }
 
-function mounted() {
+onMounted(() => {
   init()
-}
+})
 </script>
 
 <style scoped></style>

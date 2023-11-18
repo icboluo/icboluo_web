@@ -16,7 +16,6 @@
               <el-button type="primary" @click="findById">个人信息</el-button>
               <br />
             </div>
-            {{ player }}
             <div v-if="player" v-bind:style="{ height: '100px' }">
               <el-tag>姓名 {{ player.name }}</el-tag>
               <br />
@@ -117,13 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onUnmounted, reactive, ref } from 'vue'
 import request from '@/util/Request'
 import tableUtil from '@/components/TableUtil.vue'
 import constant from '@/util/Constant'
 
 let id = ref()
-let player = reactive({
+let player = ref({
   age: 0,
   attack: 0,
   blood: 0,
@@ -142,18 +141,19 @@ const monster = reactive({
 })
 let allMonster = ref([])
 let cultivationCareer = ref()
+let timer = ref()
 
 async function startGame() {
   const res = await request.get(constant.gameUrlPre + '/player/startGame')
   if (res.isSuccessOrPopBox()) {
-    id = res.data
+    id.value = res.data
   }
 }
 
 async function findById() {
   let res = await request.get(constant.gameUrlPre + '/player/exhibit', { id: id.value })
   if (res.isSuccessOrPopBox()) {
-    player = res.data
+    player.value = res.data
     await allMonsterFun()
   }
 }
@@ -183,29 +183,30 @@ async function attack(monsterId: string) {
 async function allMonsterFun() {
   let res = await request.get(constant.gameUrlPre + '/player/allMonster')
   if (res.isSuccessOrPopBox()) {
-    allMonster = res.data
+    allMonster.value = res.data
   }
 }
 
-async function cultivationCareerFun() {
+async function cultivationCareerFunCycle() {
   let res = await request.get(constant.gameUrlPre + '/cultivationCareer/cultivationCareer', {
     id: id.value
   })
   if (res.isSuccessOrPopBox()) {
-    cultivationCareer = res.data.list
+    cultivationCareer.value = res.data.list
   }
+  await findById()
 }
 
 async function reFresh() {
-  await cultivationCareerFun()
-  window.setInterval(() => {
-    setTimeout(cultivationCareerFun, 0)
+  await cultivationCareerFunCycle()
+  timer.value = window.setInterval(() => {
+    setTimeout(cultivationCareerFunCycle, 0)
   }, 9000)
 }
 
-function destroyed() {
-  window.clearInterval(timer)
-}
+onUnmounted(() => {
+  clearInterval(timer.value)
+})
 </script>
 
 <style scoped></style>

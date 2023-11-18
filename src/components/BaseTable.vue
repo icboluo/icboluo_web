@@ -7,10 +7,10 @@
       :key="idx"
     />
   </el-table>
-  <div class="block">
+  <div v-if="pageInfo" class="block">
     <el-pagination
       layout="total, sizes, prev, pager, next, jumper"
-      :total="pageInfo?.total"
+      :total="pageInfo.total"
       @current-change="handlerCurChange"
     >
     </el-pagination>
@@ -45,7 +45,14 @@ export interface Header {
 }
 
 export interface PageInfo {
-  total:number
+  total: number
+  pageSize: number
+  pageNum: number
+}
+
+export interface PageQuery {
+  pageSize: number
+  pageNum: number
 }
 </script>
 

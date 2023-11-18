@@ -104,13 +104,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Document, Menu as IconMenu, Location, Setting } from '@element-plus/icons-vue'
 
-const labelPosition = ref('right')
 const isCollapse = ref(true)
-const formLabelAlign = reactive({
-  name: '',
-  region: '',
-  type: ''
-})
 const router = useRouter()
 
 const handleOpen = (key: string, keyPath: string[]) => {
