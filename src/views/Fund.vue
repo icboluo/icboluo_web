@@ -21,14 +21,6 @@
     </el-row>
     <el-button type="primary" plain @click="init"> 搜索</el-button>
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column label="基金id" width="100">
-        <template slot-scope="scope">
-          <el-button @click="handleClick(scope.row)" type="text" size="small"
-            >{{ scope.row.id }}
-          </el-button>
-        </template>
-      </el-table-column>
-
       <span v-for="(it, idx) in 5" :key="it">
         <el-table-column prop="avgMap" label="`年${(it)}平均值`" width="180">
           <template slot-scope="avg">
@@ -43,7 +35,13 @@
       :table-info="tableInfo"
       :page-info="pageInfo"
       @handler-cur-change="handlerCurChange"
-    ></base-table>
+    >
+      <template v-slot:buttonSlot="id">
+        <el-button @click="handleClick(id)" type="text" size="small">
+          {{ id }}
+        </el-button>
+      </template>
+    </base-table>
   </div>
 </template>
 
@@ -63,7 +61,8 @@ const tableInfo = reactive<TableInfo>({
   header: [
     {
       fieldName: 'id',
-      showName: '基金id'
+      showName: '基金id',
+      isButtonSlot: true
     },
     {
       fieldName: 'name',
@@ -166,11 +165,11 @@ function handlerCurChange(curPage: number) {
   init()
 }
 
-function handleClick(row: any) {
+function handleClick(id: any) {
   router.push({
     path: '/fundData',
     query: {
-      fundId: row.id
+      fundId: id
     }
   })
 }

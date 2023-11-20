@@ -7,7 +7,8 @@
       :label="item.showName || item.label"
       :key="idx"
     >
-      <template v-if="item.isButtonSlot" #header>
+      <!--      这里 default和不写是一致的，代表处理的是表体，如果写header代表处理的是表头-->
+      <template v-if="item.isButtonSlot" #default>
         <slot name="buttonSlot" :fieldVal="item" :idx="idx"></slot>
       </template>
     </el-table-column>
@@ -23,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TableColumnCtx } from 'element-plus'
+import type { PaginationProps, TableColumnCtx } from 'element-plus'
 
 // 不可重复定义
 defineProps({
@@ -52,7 +53,7 @@ export interface Header extends TableColumnCtx<any> {
   isButtonSlot: boolean
 }
 
-export interface PageInfo {
+export interface PageInfo extends PaginationProps {
   total: number
   pageSize: number
   pageNum: number
