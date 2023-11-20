@@ -104,7 +104,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Document, Menu as IconMenu, Location, Setting } from '@element-plus/icons-vue'
 
-const isCollapse = ref(true)
+const isCollapse = ref(false)
 const router = useRouter()
 
 const handleOpen = (key: string, keyPath: string[]) => {

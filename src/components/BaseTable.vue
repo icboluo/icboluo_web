@@ -2,10 +2,15 @@
   <el-table :data="tableInfo?.data1" style="width: 100%">
     <el-table-column
       v-for="(item, idx) in tableInfo?.header"
-      :prop="item.fieldName"
-      :label="item.showName"
+      v-bind="item"
+      :prop="item.fieldName || item.prop"
+      :label="item.showName || item.label"
       :key="idx"
-    />
+    >
+      <template v-if="item.isButtonSlot" #header>
+        <slot name="buttonSlot" :fieldVal="item" :idx="idx"></slot>
+      </template>
+    </el-table-column>
   </el-table>
   <div v-if="pageInfo" class="block">
     <el-pagination
@@ -18,8 +23,10 @@
 </template>
 
 <script setup lang="ts">
+import type { TableColumnCtx } from 'element-plus'
+
 // 不可重复定义
-const allProps = defineProps({
+defineProps({
   tableInfo: {
     type: Object as () => TableInfo
   },
@@ -39,9 +46,10 @@ export interface TableInfo {
   data1: object[]
 }
 
-export interface Header {
+export interface Header extends TableColumnCtx<any> {
   fieldName: string
   showName: string
+  isButtonSlot: boolean
 }
 
 export interface PageInfo {
@@ -54,6 +62,12 @@ export interface PageQuery {
   pageSize: number
   pageNum: number
 }
+
+// 勿删，有使用
 </script>
 
-<style scoped></style>
+<style>
+.color1 {
+  color: #e10b65;
+}
+</style>
