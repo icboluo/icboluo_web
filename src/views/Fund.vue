@@ -20,25 +20,14 @@
       </el-col>
     </el-row>
     <el-button type="primary" plain @click="init"> 搜索</el-button>
-    <el-table :data="tableData" style="width: 100%">
-      <span v-for="(it, idx) in 5" :key="it">
-        <el-table-column prop="avgMap" label="`年${(it)}平均值`" width="180">
-          <template slot-scope="avg">
-            <span v-for="(item, index) in avg.row.avgMap" v-if="index === idx + ''" :key="item">
-              {{ item }}
-            </span>
-          </template>
-        </el-table-column>
-      </span>
-    </el-table>
     <base-table
       :table-info="tableInfo"
       :page-info="pageInfo"
-      @handler-cur-change="handlerCurChange"
+      @init="init1"
     >
       <template v-slot:buttonSlot="id">
-        <el-button @click="handleClick(id)" type="text" size="small">
-          {{ id }}
+        <el-button @click="handleClick(id.fieldVal)" type="text" size="small">
+          {{ id.fieldVal }}
         </el-button>
       </template>
     </base-table>
@@ -46,14 +35,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { getPage } from "@/util/Request";
 import constant from "@/util/Constant";
 import type { PageInfo, TableInfo } from "@/components/BaseTable.vue";
 import BaseTable from "@/components/BaseTable.vue";
 
-let tableData = ref([]);
 const initPar = reactive({
   date: null
 });
@@ -71,6 +59,10 @@ const tableInfo = reactive<TableInfo>({
     {
       fieldName: "tenAvg",
       showName: "最近10天平均值"
+    },
+    {
+      fieldName: "avgMap",
+      showName: "`年${(it)}平均值`"
     },
     {
       fieldName: "fixedInvestmentIncome",
@@ -131,14 +123,11 @@ const pickerOptions = reactive({
     }
   ]
 });
-const fundDataRet = reactive({
-  list: null,
-  thisPageAvg: null
-});
+
 const pageInfo = reactive<PageInfo>({
   total: 1000,
-  pageSize: 10,
-  pageNum: 1
+  pageSize: 5,
+  pageNum: 1,
 });
 const router = useRouter();
 
@@ -154,8 +143,7 @@ async function init() {
   }
 }
 
-function handlerCurChange(curPage: number) {
-  pageInfo.pageNum = curPage;
+function init1() {
   init();
 }
 

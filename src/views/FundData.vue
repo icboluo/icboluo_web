@@ -113,16 +113,14 @@
         </template>
       </el-table-column>
     </el-table>
+    <base-table
+      :table-info="tableInfo"
+      :page-info="pageInfo"
+      :cell-style="set_cell_style"
+      @init="init"
+    >
 
-    <div class="block">
-      <el-pagination
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="fundDataRet.total"
-        @current-change="handlerCurChange"
-        :current-page.sync="fundDataParam.currentPage"
-      >
-      </el-pagination>
-    </div>
+    </base-table>
 
     <el-row v-for="(row, rowIndex) in parseFindRecentRetRow()" :key="row" :gutter="20">
       <el-col
@@ -161,16 +159,48 @@
 </template>
 
 <script setup lang="ts">
-import Common from '@/components/Common.vue'
-import { reactive, Ref, ref } from "vue";
-import request from '@/util/Request'
-import { useRouter } from 'vue-router'
+import Common from "@/components/Common.vue";
+import { onMounted, reactive, Ref, ref } from "vue";
+import request from "@/util/Request";
+import { useRouter } from "vue-router";
+import constant from "@/util/Constant";
+import BaseTable, { PageInfo, TableInfo } from "@/components/BaseTable.vue";
 
-let router = useRouter()
+let router = useRouter();
 
-const fundId = ref()
-const todayRate = ref(router.query.fundId)
-let view = reactive({
+const fundId = ref('001302');
+const todayRate = ref(fundId.value);
+const tableInfo = reactive<TableInfo>({
+    header: [
+      {
+        fieldName: "netValueDate",
+        showName: "净值日期"
+      }, {
+        fieldName: "dayOfWeek",
+        showName: "星期"
+      }, {
+        fieldName: "increaseRateDay",
+        showName: "日增长率"
+      }, {
+        fieldName: "netAssetValue",
+        showName: "单位净值"
+      }, {
+        fieldName: "netValueCumulative",
+        showName: "累计净值"
+      }, {
+        fieldName: "updateTime",
+        showName: "更新时间"
+      }
+    ],
+    data1: []
+  }
+);
+const pageInfo = reactive<PageInfo>({
+  total: 1000,
+  pageSize: 10,
+  pageNum: 1
+});
+let view = ref({
   count: null,
   min: null,
   max: null,
@@ -183,141 +213,136 @@ let view = reactive({
     FRIDAY: null
   },
   monthMap: null
-})
+});
 const simCal = reactive({
   source: null,
   target: null,
   res: null
-})
+});
 const pickerOptions = reactive({
   shortcuts: [
     {
-      text: '最近一周',
+      text: "最近一周",
       onClick(picker) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-        picker.$emit('pick', [start, end])
+        const end = new Date();
+        const start = new Date();
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+        picker.$emit("pick", [start, end]);
       }
     },
     {
-      text: '最近一个月',
+      text: "最近一个月",
       onClick(picker) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-        picker.$emit('pick', [start, end])
+        const end = new Date();
+        const start = new Date();
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+        picker.$emit("pick", [start, end]);
       }
     },
     {
-      text: '最近三个月',
+      text: "最近三个月",
       onClick(picker) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
-        picker.$emit('pick', [start, end])
+        const end = new Date();
+        const start = new Date();
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+        picker.$emit("pick", [start, end]);
       }
     }
   ]
-})
+});
 
 const options = reactive([
   {
-    value: '1',
-    label: '1天'
+    value: "1",
+    label: "1天"
   },
   {
-    value: '2',
-    label: '2天'
+    value: "2",
+    label: "2天"
   },
   {
-    value: '3',
-    label: '3天'
+    value: "3",
+    label: "3天"
   },
   {
-    value: '4',
-    label: '4天'
+    value: "4",
+    label: "4天"
   },
   {
-    value: '5',
-    label: '5天'
+    value: "5",
+    label: "5天"
   }
-])
-let fundInfo = reactive({
+]);
+let fundInfo = ref({
   id: null,
   name: null
-})
+});
 const fundDataParam = reactive({
   currentPage: 1,
   // 区间日期
-  intervalDate: '',
+  intervalDate: "",
   chooseDate: null,
   chooseDateLength: null
-})
+});
 const fundDataRet = reactive({
   total: 1000,
   list: null,
   thisPageAvg: null
-})
+});
+
 // 查询最近区间返回值
-const findRecentRet = ref([])
-const findRecentRetVal = ref([])
-const findRecentRetLineNumber: Ref<number> = ref()
+const findRecentRet = ref([]);
+const findRecentRetVal = ref([]);
+const findRecentRetLineNumber: Ref<number> = ref();
 
 async function init() {
-  const data = request.simpleGet(Common.fundUrlPre + '/fundData/init', {
-    fundId: fundId,
-    pageNum: fundDataParam.currentPage,
+  const res = await request.getPage(constant.fundUrlPre + "/fundData/init", pageInfo, {
+    fundId: fundId.value,
     startDate: fundDataParam.intervalDate[0],
     endDate: fundDataParam.intervalDate[1],
     chooseDateLength: fundDataParam.chooseDateLength,
     chooseDate: fundDataParam.chooseDate
-  })
-  fundDataRet.list = data.list
-  fundDataRet.total = data.total
-  fundDataRet.thisPageAvg = data.isPageAvg
-}
-
-async function handlerCurChange() {
-  await init()
+  });
+  tableInfo.data1 = res.data.list;
+  fundDataRet.thisPageAvg = res.isPageAvg;
 }
 
 async function cal() {
-  const data = request.simpleGet(Common.fundUrlPre + '/fundData/cal', {
-    fundId: fundId,
+  const res = await request.simpleGet(constant.fundUrlPre + "/fundData/cal", {
+    fundId: fundId.value,
     startDate: fundDataParam.intervalDate[0],
     endDate: fundDataParam.intervalDate[1]
-  })
-  view = data
+  });
+  view.value = res;
 }
 
 async function httpSimCal() {
-  const data = request.simpleGet(Common.fundUrlPre + '/fundData/simCal', {
+  const data = request.simpleGet(constant.fundUrlPre + "/fundData/simCal", {
     source: simCal.source,
     target: simCal.target
-  })
-  simCal.res = data.data.data
+  });
+  simCal.res = data.data.data;
 }
 
 function initCal() {
-  init()
-  cal()
+  init();
+  cal();
 }
 
 async function initFundInfo() {
-  const data = request.simpleGet(Common.fundUrlPre + '/fundInfo/fundInfoInit', {
-    id: fundId
-  })
-  fundInfo = data
+  const res = await request.simpleGet(constant.fundUrlPre + "/fundInfo/fundInfoInit", {
+    id: fundId.value
+  });
+  fundInfo.value = res;
 }
 
 async function myChooseDate(row) {
-  const data = request.simpleGet(Common.fundUrlPre + '/fundData/findRecentData', {
+  const data = request.simpleGet(constant.fundUrlPre + "/fundData/findRecentData", {
     fundId: fundId,
     myChooseDate: row.netValueDate
-  })
-  findRecentRet.push(data.list)
-  findRecentRetVal.push(data)
+  });
+  findRecentRet.push(data.list);
+  findRecentRetVal.push(data);
 }
 
 /**
@@ -325,8 +350,8 @@ async function myChooseDate(row) {
  * @returns {number}
  */
 async function parseFindRecentRetRow() {
-  const length = findRecentRet.length
-  return Math.floor((length + findRecentRetLineNumber - 1) / findRecentRetLineNumber)
+  const length = findRecentRet.length;
+  return Math.floor((length + findRecentRetLineNumber - 1) / findRecentRetLineNumber);
 }
 
 /**
@@ -335,13 +360,13 @@ async function parseFindRecentRetRow() {
  * @return {number}
  */
 async function parseFindRecentRetLine(row: number): Promise<number> {
-  const length = findRecentRet.length
+  const length = findRecentRet.length;
   // 当前行剩余元素
-  const curRowRemainder = length - row * findRecentRetLineNumber
+  const curRowRemainder = length - row * findRecentRetLineNumber;
   if (curRowRemainder > findRecentRetLineNumber) {
-    return 24 / findRecentRetLineNumber
+    return 24 / findRecentRetLineNumber;
   } else {
-    return 24 / curRowRemainder
+    return 24 / curRowRemainder;
   }
 }
 
@@ -351,42 +376,47 @@ async function parseFindRecentRetLine(row: number): Promise<number> {
  * @return {number}
  */
 async function parseFindRecentRetLineTotal(row: number) {
-  const lineTotal: number = await parseFindRecentRetLine(row)
-  return 24 / lineTotal
+  const lineTotal: number = await parseFindRecentRetLine(row);
+  return 24 / lineTotal;
 }
 
 async function set_cell_style({ row, column }) {
-  if (column.label === '日增长率') {
+  if (column.label === "日增长率") {
     if (row.increaseRateDay > 0) {
-      return 'color:#ff0000'
+      return "color:#ff0000";
     } else {
-      return 'color:#1ede27'
+      return "color:#1ede27";
     }
   }
   // 这里的medicalCommonName指的是在el-table-column定义的prop中的值,并不会走到这里
-  if (row.medicalCommonName === 'increaseRateDay') {
-    return 'color:#5f0606'
+  if (row.medicalCommonName === "increaseRateDay") {
+    return "color:#5f0606";
   }
 }
 
 async function addToday(rate) {
-  await request.simpleGet(Common.fundUrlPre + '/fundData/addToday', {
-    fundId: fundId,
+  await request.simpleGet(Common.fundUrlPre + "/fundData/addToday", {
+    fundId: fundId.value,
     rate: rate
-  })
+  });
 }
 
-init()
-cal()
-initFundInfo()
+onMounted(() => {
+  init();
+  cal();
+  initFundInfo();
+});
+
 </script>
 <style scoped>
 .el-row {
   margin-bottom: 20px;
 
-  & :last-child {
-    margin-bottom: 0;
-  }
+&
+:last-child {
+  margin-bottom: 0;
+}
+
 }
 
 .el-col {

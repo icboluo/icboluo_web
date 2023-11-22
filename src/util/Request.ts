@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { ElMessage } from "element-plus";
-import { PageInfo } from "@/components/BaseTable.vue";
 
 interface InterfaceRes<T = any> {
   data: T;
@@ -81,7 +80,10 @@ export async function getPage<T extends PageInfo>(url: string, pageInfo: PageInf
   if (!param) {
     param = {};
   }
-  Object.assign(param, pageInfo);
+  Object.assign(param, {
+    pageSize: pageInfo.pageSize,
+    pageNum: pageInfo.pageNum
+  });
   const axiosResponse: AxiosResponse<InterfaceRes> = await axios.get(url, { params: param });
   const resImpl = new ResImpl(axiosResponse);
   pageInfo.pageNum = resImpl.data.pageNum;
@@ -90,16 +92,19 @@ export async function getPage<T extends PageInfo>(url: string, pageInfo: PageInf
   return resImpl;
 }
 
-// TODO 没有中断效果
 export async function simpleGet(url: string, param: any): Promise<any> {
   let res = await get(url, param);
   if (res.isSuccessOrPopBox()) {
     return res.data;
+  }else{
+    // 异步抛异常
+    await Promise.reject("interface.error")
   }
 }
 
 export default {
   axiosGet,
   get,
-  simpleGet
+  simpleGet,
+  getPage
 };
