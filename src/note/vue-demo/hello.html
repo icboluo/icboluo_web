@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>hello</title>
+</head>
+<body>
+<div id="app">
+    <input type="text" v-model="name">
+    <button @click="num++">+</button>
+    <h1>
+        <span v-text="name">wawaww</span> 999999<br>
+        {{num*2}}sds
+    </h1>
+    <button @click="handleClick">点我试试</button>
+    <p v-text="msg"></p>
+    <p v-html="msg"></p>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: "#app",
+        data: {
+            name: "78787",
+            num: 1,
+            msg:"<font color='blue' size='7'>ddddddddddddddddd</font></font>"
+        },
+        methods: {
+            handleClick() {
+                console.log("点我干嘛")
+            }
+        },
+        beforeCreate() {
+            console.log("beforecreate")
+        },
+        created() {
+            console.log("created");
+            setTimeout(()  =>  {
+                this.name = "wawawawa";
+                console.log("wawawawa")
+            }, 1000)
+        },
+        beforeMount() {
+            console.log("beforeMount")
+        },
+        mounted() {
+            console.log("mounted")
+        },
+        beforeUpdate() {
+            console.log("beforeUpdate")
+        },
+        updated() {
+            console.log("update")
+        }
+    });
+
+</script>
+</body>
+</html>

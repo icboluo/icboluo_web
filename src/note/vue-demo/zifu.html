@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zifutongxing</title>
+</head>
+
+<body>
+<div id="app">
+    <btn @incr="plus" @decr="minus"></btn>
+    <h1>num:{{num}}</h1>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+    const btn = {
+        template: `
+<h1>
+    <button @click="handleIncr">+</button>
+    <button @click="handleDecr">-</button>
+</h1>
+`,
+        methods: {
+            handleIncr() {
+                this.$emit("incr",2)
+            },
+            handleDecr() {
+                this.$emit("decr")
+            },
+        }
+    };
+    Vue.component("btn", btn);
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            num: 0
+        },
+        methods: {
+            plus(amount) {
+                this.num+=amount
+            },
+            minus() {
+                this.num--
+            }
+        }
+    });
+</script>
+</body>
+</html>

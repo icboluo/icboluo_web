@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>compute</title>
+</head>
+<body>
+<div id="app">
+  <btn @incr="plus" @decr="minus"></btn>
+  <h1>num：{{num}}</h1>
+</div>
+
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+  // 定义组件
+  const btn = {
+    template: `
+    <h1>
+      <button @click="handleIncr">+</button>
+      <button @click="handleDecr">-</button>
+    </h1>
+    `,
+    methods: {
+      handleIncr(){
+        // 触发父亲自定义的事件incr
+        this.$emit("incr", 2)
+      },
+      handleDecr(){
+        // 触发父亲自定义的事件decr
+        this.$emit("decr")
+      }
+    }
+  };
+
+  // 注册组件，全局注册
+  Vue.component("btn", btn);
+
+  // 局部注册
+  const vm = new Vue({
+    el: "#app",
+    data:{
+      num: 0
+    },
+    methods: {
+      plus(amount){
+        this.num+=amount;
+      },
+      minus(){
+        this.num--;
+      }
+    }
+  })
+</script>
+</body>
+</html>

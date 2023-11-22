@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>compute</title>
+</head>
+<body>
+<div id="app">
+  <h1>
+    您的生日是：{{birth}} <br>
+    您的生日是：{{birth}} <br>
+    您的生日是：{{birth}} <br>
+  </h1>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+  const vm = new Vue({
+    el: "#app",
+    data: {
+      birthday: 1429032123201 // 毫秒值
+    },
+    computed: {// 计算属性，名字叫属性，但其实是一个函数
+      birth(){
+        console.log("1");
+        const d = new Date(this.birthday);
+        return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+      }
+    }
+  })
+</script>
+</body>
+</html>

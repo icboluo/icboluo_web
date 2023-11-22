@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>compute</title>
+</head>
+<body>
+<div id="app">
+  <h1><span>百度一下，你就知道</span></h1>
+  <input type="text" v-model="search.key"> <br>
+  <input type="text" v-model="search.key2"> <br>
+  <h1>
+    {{search.key}}
+  </h1>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+  const vm = new Vue({
+    el: "#app",
+    data: {
+      // key: "",
+      search: {
+        key: "",
+        key2: ""
+      }
+    },
+    watch: {
+      key(newVal, oldVal) {
+        console.log(newVal, ", ", oldVal)
+      },
+      // "search.key"(newVal, oldVal){
+      //   console.log(newVal, ", ", oldVal)
+      // },
+      search: {
+        deep: true,
+        handler(val){
+          console.log(val.key, val.key2);
+        }
+      }
+    }
+  })
+</script>
+</body>
+</html>

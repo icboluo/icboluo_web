@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>for</title>
+    <style type="text/css">
+        td{
+            width: 100px;
+
+        }
+        tr{
+            background-color: aqua;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <button @click="show=!show">取反</button>
+<table v-if="show">
+    <tr v-for="(user,index) in users" :key="index" v-if="index%2===0"
+    style="background-color: deeppink;">
+        <td v-text="index"></td>
+        <td v-for="v  in  user" v-text="v"></td>
+    </tr>
+    <tr  v-else style="background-color: cadetblue;">
+        <td v-text="index"></td>
+        <td v-for="v  in  user" v-text="v"></td>
+    </tr>
+    <ul>
+        <li v-for="v in 5">{{v}}</li>
+        <li v-for="v in 'abc'">{{v}}</li>
+    </ul>
+</table>
+    <table v-show="show">
+    <tr v-for="(v,k) in person">
+        <td v-text="k"></td>
+        <td v-text="v"></td>
+    </tr>
+</table>
+    </ul>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script type="text/javascript">
+    var vm = new Vue({
+        el:"#app",
+        data:{
+            users:[
+                {name:'柳岩', gender:'女', age: 21},
+                {name:'虎哥', gender:'男', age: 30},
+                {name:'范冰冰', gender:'女', age: 24},
+                {name:'刘亦菲', gender:'女', age: 18},
+                {name:'古力娜扎', gender:'女', age: 25}
+            ],
+            show:true,
+            person: {name:'柳岩', gender:'女', age: 21}
+        }
+    })
+</script>
+</body>
+</html>

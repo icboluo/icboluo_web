@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>fuzitongxing</title>
+</head>
+
+<body>
+<div id="app">
+    <introduce :msg="message" :nums="arr"></introduce>
+</div>
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script>
+    const introduce = {
+        template: `
+    <div>
+    <h1>{{msg}}</h1>
+    <h1>
+    <span v-for="num in nums">{{num}},</span>
+    </h1>
+       </div>
+`,
+        //props: ["msg","nums"]
+        props:{
+            msg:{
+                type:String,
+                required:true
+            },
+            nums:{
+                type: Array,
+                required: false,
+                default:[9,9,9,9,9,9,]
+            }
+        }
+
+    };
+    Vue.component("introduce", introduce);
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            message: "hello vue",
+            arr: [1, 2, 3, 4, 5]
+        }
+    });
+</script>
+</body>
+</html>
