@@ -8,8 +8,8 @@
       :key="idx"
     >
       <!--      这里 default和不写是一致的，代表处理的是表体，如果写header代表处理的是表头-->
-      <template v-if="item.isButtonSlot" #default>
-        <slot name="buttonSlot" :fieldVal="item" :idx="idx"></slot>
+      <template v-if="item.isButtonSlot" v-slot="cell">
+        <slot name="buttonSlot" :fieldVal="cell.row[item.fieldName]" :idx="idx"></slot>
       </template>
     </el-table-column>
   </el-table>
@@ -55,11 +55,6 @@ export interface Header extends TableColumnCtx<any> {
 
 export interface PageInfo extends PaginationProps {
   total: number
-  pageSize: number
-  pageNum: number
-}
-
-export interface PageQuery {
   pageSize: number
   pageNum: number
 }

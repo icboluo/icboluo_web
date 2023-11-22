@@ -19,25 +19,25 @@ axios.interceptors.request.use(
 )
 // 拦截服务端响应的信息
 axios.interceptors.response.use(
-  (data) => {
-    // {status,data[]}//status表示http响应码{status:200},data[]表示后端的RespBean对象{status:200,msg:"",obj}
+  (axiosResponse) => {
+    // {status,axiosResponse[]}//status表示http响应码{status:200},axiosResponse[]表示后端的RespBean对象{status:200,msg:"",obj}
     // HTTP响应码是200，后端本身定义了500，在RespBean中，定义为业务逻辑错误
-    if (data.status && data.status === 200 && data.data.status === 500) {
+    if (axiosResponse.status && axiosResponse.status === 200 && axiosResponse.data.status === 500) {
       // 业务逻辑错误(服务器找不到，服务器错误等，http的响应码就不是200了)
       ElMessage({
         type: 'error',
-        message: data.data.message
+        message: axiosResponse.data.message
       })
       return
     }
     // 为何要判断这个msg是否存在呢，好比说若是请求表格里面的数据，在list中放的一个javabean，这时候data就是一个数组了，那就不必展现msg了
-    if (data.data.message) {
+    if (axiosResponse.data.message) {
       /*    Message.success({
-          message: data.data.message
+          message: axiosResponse.axiosResponse.message
         }) */
     }
     // 返回方法调用的哪里，拿到的就是服务端返回的数据
-    return data.data
+    return axiosResponse
     // 若是HTTP响应码是400,500等就会进入这个err函数中
   },
   (err) => {
