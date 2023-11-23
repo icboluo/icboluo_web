@@ -27,7 +27,7 @@
             <el-menu-item-group>
               <template slot="title">列表</template>
               <el-menu-item index="/note">列表展示</el-menu-item>
-              <el-menu-item index="4-2">选项2</el-menu-item>
+              <el-menu-item index="/tableList">TableList</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="配置">
               <el-menu-item index="4-3">选项3</el-menu-item>

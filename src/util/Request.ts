@@ -7,7 +7,7 @@ interface InterfaceRes<T = any> {
   message: string;
 }
 
-interface Res<T = any> extends AxiosResponse {
+interface Res<T = any> extends AxiosResponse<T> {
   /**
    * 状态码
    */
@@ -76,7 +76,7 @@ export async function get(url: string, param: any): Promise<Res> {
   return resImpl;
 }
 
-export async function getPage<T extends PageInfo>(url: string, pageInfo: PageInfo, param?: any): Promise<Res<PageInfo>> {
+export async function getPage(url: string, pageInfo: PageInfo, param?: any): Promise<Res<PageInfo>> {
   if (!param) {
     param = {};
   }
@@ -92,13 +92,23 @@ export async function getPage<T extends PageInfo>(url: string, pageInfo: PageInf
   return resImpl;
 }
 
-export async function simpleGet(url: string, param: any): Promise<any> {
-  let res = await get(url, param);
+export async function simpleGetPage(url: string, pageInfo: PageInfo, param?: any): Promise<PageInfo> {
+  const res = await getPage(url, pageInfo, param);
   if (res.isSuccessOrPopBox()) {
     return res.data;
-  }else{
+  } else {
     // 异步抛异常
-    await Promise.reject("interface.error")
+    return Promise.reject("interface.error");
+  }
+}
+
+export async function simpleGet(url: string, param: any): Promise<any> {
+  const res = await get(url, param);
+  if (res.isSuccessOrPopBox()) {
+    return res.data;
+  } else {
+    // 异步抛异常
+    return Promise.reject("interface.error");
   }
 }
 
@@ -106,5 +116,6 @@ export default {
   axiosGet,
   get,
   simpleGet,
-  getPage
+  getPage,
+  simpleGetPage
 };

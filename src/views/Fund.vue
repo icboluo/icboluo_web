@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import { onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { getPage } from "@/util/Request";
+import { simpleGetPage } from "@/util/Request";
 import constant from "@/util/Constant";
 import type { PageInfo, TableInfo } from "@/components/BaseTable.vue";
 import BaseTable from "@/components/BaseTable.vue";
@@ -61,7 +61,7 @@ const tableInfo = reactive<TableInfo>({
       showName: "最近10天平均值"
     },
     {
-      fieldName: "avgMap",
+      fieldName: "avgMap2",
       showName: "`年${(it)}平均值`"
     },
     {
@@ -127,20 +127,21 @@ const pickerOptions = reactive({
 const pageInfo = reactive<PageInfo>({
   total: 1000,
   pageSize: 5,
-  pageNum: 1,
+  pageNum: 1
 });
 const router = useRouter();
 
 async function init() {
-  const param = {};
+  const param: any = {};
   if (initPar.date) {
     param.startDate = initPar.date[0];
     param.endDate = initPar.date[1];
   }
-  let res = await getPage(constant.fundUrlPre + "/fundAttention/init", pageInfo, param);
-  if (res.isSuccessOrPopBox()) {
-    tableInfo.data1 = res.data.list;
-  }
+  let res = await simpleGetPage(constant.fundUrlPre + "/fundAttention/init", pageInfo, param);
+  tableInfo.data1 = res.list.map((item: any) => ({
+    ...item,
+    avgMap2: item.avgMap[2]
+  }));
 }
 
 function init1() {

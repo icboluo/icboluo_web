@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col :span="6">
+      <el-col :span="8">
         <div class="block">
           <span class="demonstration">带快捷选项</span>
           <el-date-picker
@@ -18,13 +18,13 @@
           </el-date-picker>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="8">
         <el-input
           v-model="fundDataParam.chooseDate"
           placeholder="please input compare date"
         ></el-input>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="8">
         <el-select v-model="fundDataParam.chooseDateLength" placeholder="请选择">
           <el-option
             v-for="item in options"
@@ -97,32 +97,22 @@
         <div class="grid-content bg-purple">星期五 {{ view.weekMap.FRIDAY }}</div>
       </el-col>
     </el-row>
-
-    <el-table :data="fundDataRet.list" :cell-style="set_cell_style" style="width: 100%">
-      <el-table-column prop="netValueDate" label="净值日期"></el-table-column>
-      <el-table-column prop="dayOfWeek" label="星期"></el-table-column>
-      <el-table-column prop="increaseRateDay" label="日增长率"></el-table-column>
-      <el-table-column prop="netAssetValue" label="单位净值"></el-table-column>
-      <el-table-column prop="netValueCumulative" label="累计净值"></el-table-column>
-      <el-table-column prop="updateTime" label="更新时间"></el-table-column>
-      <el-table-column prop="updateTime" label="最近10天">
-        <template slot-scope="scope">
-          <el-button @click="myChooseDate(scope.row)">
-            {{ scope.row.id }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
     <base-table
       :table-info="tableInfo"
       :page-info="pageInfo"
       :cell-style="set_cell_style"
       @init="init"
     >
+      <template v-slot:buttonSlot="netValueDate">
+        <el-button @click="myChooseDate(netValueDate.fieldVal)" type="text" size="small">
+          {{ netValueDate.fieldVal }}
+        </el-button>
+      </template>
 
     </base-table>
 
-    <el-row v-for="(row, rowIndex) in parseFindRecentRetRow()" :key="row" :gutter="20">
+    <el-row v-for="(row, rowIndex) in parseFindRecentRetRow" :key="row" :gutter="20">
+      123 {{ row }} {{ rowIndex }}
       <el-col
         v-for="(line, lineIndex) in parseFindRecentRetLineTotal(rowIndex)"
         :key="line"
@@ -162,13 +152,13 @@
 import Common from "@/components/Common.vue";
 import { onMounted, reactive, Ref, ref } from "vue";
 import request from "@/util/Request";
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import constant from "@/util/Constant";
 import BaseTable, { PageInfo, TableInfo } from "@/components/BaseTable.vue";
 
-let router = useRouter();
+let route = useRoute();
 
-const fundId = ref('001302');
+const fundId = ref(route.query.fundId);
 const todayRate = ref(fundId.value);
 const tableInfo = reactive<TableInfo>({
     header: [
@@ -190,6 +180,10 @@ const tableInfo = reactive<TableInfo>({
       }, {
         fieldName: "updateTime",
         showName: "更新时间"
+      }, {
+        fieldName: "netValueDate",
+        showName: "最近10天",
+        isButtonSlot: true
       }
     ],
     data1: []
@@ -219,6 +213,7 @@ const simCal = reactive({
   target: null,
   res: null
 });
+const parseFindRecentRetRow = ref(1);
 const pickerOptions = reactive({
   shortcuts: [
     {
@@ -293,7 +288,7 @@ const fundDataRet = reactive({
 // 查询最近区间返回值
 const findRecentRet = ref([]);
 const findRecentRetVal = ref([]);
-const findRecentRetLineNumber: Ref<number> = ref();
+const findRecentRetLineNumber: Ref<number> = ref(1);
 
 async function init() {
   const res = await request.getPage(constant.fundUrlPre + "/fundData/init", pageInfo, {
@@ -317,11 +312,11 @@ async function cal() {
 }
 
 async function httpSimCal() {
-  const data = request.simpleGet(constant.fundUrlPre + "/fundData/simCal", {
+  const data = await request.simpleGet(constant.fundUrlPre + "/fundData/simCal", {
     source: simCal.source,
     target: simCal.target
   });
-  simCal.res = data.data.data;
+  simCal.res = data;
 }
 
 function initCal() {
@@ -336,22 +331,17 @@ async function initFundInfo() {
   fundInfo.value = res;
 }
 
-async function myChooseDate(row) {
-  const data = request.simpleGet(constant.fundUrlPre + "/fundData/findRecentData", {
-    fundId: fundId,
-    myChooseDate: row.netValueDate
+async function myChooseDate(netValueDate: Date) {
+  const data = await request.simpleGet(constant.fundUrlPre + "/fundData/findRecentData", {
+    fundId: fundId.value,
+    myChooseDate: netValueDate
   });
-  findRecentRet.push(data.list);
-  findRecentRetVal.push(data);
-}
+  findRecentRet.value = data.list;
+  findRecentRetVal.value = data;
 
-/**
- * 计算一共有多少行数据
- * @returns {number}
- */
-async function parseFindRecentRetRow() {
-  const length = findRecentRet.length;
-  return Math.floor((length + findRecentRetLineNumber - 1) / findRecentRetLineNumber);
+  // 计算一共有多少行数据
+  const length = findRecentRet.value.length;
+  parseFindRecentRetRow.value = Math.floor((length + findRecentRetLineNumber.value - 1) / findRecentRetLineNumber.value);
 }
 
 /**
@@ -359,12 +349,12 @@ async function parseFindRecentRetRow() {
  * @param row
  * @return {number}
  */
-async function parseFindRecentRetLine(row: number): Promise<number> {
-  const length = findRecentRet.length;
+function parseFindRecentRetLine(row: number): number {
+  const length = findRecentRet.value.length;
   // 当前行剩余元素
-  const curRowRemainder = length - row * findRecentRetLineNumber;
-  if (curRowRemainder > findRecentRetLineNumber) {
-    return 24 / findRecentRetLineNumber;
+  const curRowRemainder = length - row * findRecentRetLineNumber.value;
+  if (curRowRemainder > findRecentRetLineNumber.value) {
+    return 24 / findRecentRetLineNumber.value;
   } else {
     return 24 / curRowRemainder;
   }
@@ -375,8 +365,8 @@ async function parseFindRecentRetLine(row: number): Promise<number> {
  * @param row
  * @return {number}
  */
-async function parseFindRecentRetLineTotal(row: number) {
-  const lineTotal: number = await parseFindRecentRetLine(row);
+function parseFindRecentRetLineTotal(row: number) {
+  const lineTotal: number = parseFindRecentRetLine(row);
   return 24 / lineTotal;
 }
 
