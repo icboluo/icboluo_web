@@ -57,13 +57,33 @@
       <el-button type="primary" plain @click="httpSimCal"> 计算增长率 {{ simCal.res }}</el-button>
     </el-row>
 
-    <el-row :gutter="20">
-      请输入今天增长率
-      <el-col :span="8">
-        <el-input v-model="todayRate" placeholder="请输入source"></el-input>
-      </el-col>
-      <el-button type="primary" plain @click="addToday(todayRate)"> 新增</el-button>
-    </el-row>
+    <!-- Form -->
+    <el-button text @click="dialogFormVisible = true">
+      新增
+    </el-button>
+
+    <el-dialog v-model="dialogFormVisible" title="Shipping address">
+      <el-form :model="form">
+        <el-form-item label="请输入今天增长率" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="Zones" :label-width="formLabelWidth">
+          <el-select v-model="form.region" placeholder="Please select a zone">
+            <el-option label="Zone No.1" value="shanghai" />
+            <el-option label="Zone No.2" value="beijing" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="addToday(form.name)">
+          Confirm
+        </el-button>
+      </span>
+      </template>
+    </el-dialog>
+
     <el-row :gutter="20">
       <el-col :span="6">
         <div class="grid-content bg-purple">max {{ view.max }}</div>
@@ -75,7 +95,7 @@
         <div class="grid-content bg-purple">avg {{ view.avg }}</div>
       </el-col>
       <el-col :span="6">
-        <div class="grid-content bg-purple">thisPageAvg {{ fundDataRet.thisPageAvg }}</div>
+        <div class="grid-content bg-purple">thisPageAvg {{ thisPageAvg }}</div>
       </el-col>
     </el-row>
 
@@ -104,7 +124,7 @@
       @init="init"
     >
       <template v-slot:buttonSlot="netValueDate">
-        <el-button @click="myChooseDate(netValueDate.fieldVal)" type="text" size="small">
+        <el-button @click="myChooseDate(netValueDate.fieldVal)" link type="primary" size="small">
           {{ netValueDate.fieldVal }}
         </el-button>
       </template>
@@ -112,7 +132,6 @@
     </base-table>
 
     <el-row v-for="(row, rowIndex) in parseFindRecentRetRow" :key="row" :gutter="20">
-      123 {{ row }} {{ rowIndex }}
       <el-col
         v-for="(line, lineIndex) in parseFindRecentRetLineTotal(rowIndex)"
         :key="line"
@@ -149,8 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import Common from "@/components/Common.vue";
-import { onMounted, reactive, Ref, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import request from "@/util/Request";
 import { useRoute } from "vue-router";
 import constant from "@/util/Constant";
@@ -158,8 +176,22 @@ import BaseTable, { PageInfo, TableInfo } from "@/components/BaseTable.vue";
 
 let route = useRoute();
 
+const dialogFormVisible = ref(false)
+const formLabelWidth = '140px'
+
+const form = reactive({
+  name: '',
+  region: '',
+  date1: '',
+  date2: '',
+  delivery: false,
+  type: [],
+  resource: '',
+  desc: '',
+})
+
+
 const fundId = ref(route.query.fundId);
-const todayRate = ref(fundId.value);
 const tableInfo = reactive<TableInfo>({
     header: [
       {
@@ -272,6 +304,7 @@ let fundInfo = ref({
   id: null,
   name: null
 });
+const thisPageAvg = ref();
 const fundDataParam = reactive({
   currentPage: 1,
   // 区间日期
@@ -279,27 +312,22 @@ const fundDataParam = reactive({
   chooseDate: null,
   chooseDateLength: null
 });
-const fundDataRet = reactive({
-  total: 1000,
-  list: null,
-  thisPageAvg: null
-});
 
 // 查询最近区间返回值
 const findRecentRet = ref([]);
 const findRecentRetVal = ref([]);
-const findRecentRetLineNumber: Ref<number> = ref(1);
+const findRecentRetLineNumber: number = 4;
 
 async function init() {
-  const res = await request.getPage(constant.fundUrlPre + "/fundData/init", pageInfo, {
+  const res = await request.simpleGetPage(constant.fundUrlPre + "/fundData/init", pageInfo, {
     fundId: fundId.value,
     startDate: fundDataParam.intervalDate[0],
     endDate: fundDataParam.intervalDate[1],
     chooseDateLength: fundDataParam.chooseDateLength,
     chooseDate: fundDataParam.chooseDate
   });
-  tableInfo.data1 = res.data.list;
-  fundDataRet.thisPageAvg = res.isPageAvg;
+  tableInfo.data1 = res.list;
+  thisPageAvg.value = res.isPageAvg;
 }
 
 async function cal() {
@@ -336,12 +364,12 @@ async function myChooseDate(netValueDate: Date) {
     fundId: fundId.value,
     myChooseDate: netValueDate
   });
-  findRecentRet.value = data.list;
-  findRecentRetVal.value = data;
+  findRecentRet.value.push(data.list);
+  findRecentRetVal.value.push(data);
 
   // 计算一共有多少行数据
   const length = findRecentRet.value.length;
-  parseFindRecentRetRow.value = Math.floor((length + findRecentRetLineNumber.value - 1) / findRecentRetLineNumber.value);
+  parseFindRecentRetRow.value = Math.floor((length + findRecentRetLineNumber - 1) / findRecentRetLineNumber);
 }
 
 /**
@@ -352,9 +380,9 @@ async function myChooseDate(netValueDate: Date) {
 function parseFindRecentRetLine(row: number): number {
   const length = findRecentRet.value.length;
   // 当前行剩余元素
-  const curRowRemainder = length - row * findRecentRetLineNumber.value;
-  if (curRowRemainder > findRecentRetLineNumber.value) {
-    return 24 / findRecentRetLineNumber.value;
+  const curRowRemainder = length - row * findRecentRetLineNumber;
+  if (curRowRemainder > findRecentRetLineNumber) {
+    return 24 / findRecentRetLineNumber;
   } else {
     return 24 / curRowRemainder;
   }
@@ -373,19 +401,26 @@ function parseFindRecentRetLineTotal(row: number) {
 async function set_cell_style({ row, column }) {
   if (column.label === "日增长率") {
     if (row.increaseRateDay > 0) {
-      return "color:#ff0000";
+      return {
+        color: "#ff0000"
+      };
     } else {
-      return "color:#1ede27";
+      return {
+        color: "#1ede27"
+      };
     }
   }
   // 这里的medicalCommonName指的是在el-table-column定义的prop中的值,并不会走到这里
   if (row.medicalCommonName === "increaseRateDay") {
-    return "color:#5f0606";
+    return {
+      color: "#5f0606"
+    };
   }
 }
 
 async function addToday(rate) {
-  await request.simpleGet(Common.fundUrlPre + "/fundData/addToday", {
+  dialogFormVisible.value=false
+  await request.simpleGet(constant.fundUrlPre + "/fundData/addToday", {
     fundId: fundId.value,
     rate: rate
   });

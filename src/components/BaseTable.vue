@@ -1,5 +1,7 @@
 <template>
-  <el-table :data="tableInfo?.data1" style="width: 100%">
+  <el-table :data="tableInfo?.data1"
+            v-bind="$attrs"
+            style="width: 100%">
     <el-table-column
       v-for="(item, idx) in tableInfo?.header"
       v-bind="item"
@@ -15,8 +17,8 @@
   </el-table>
   <div v-if="pageInfo" class="block">
     <el-pagination
-      layout="total, sizes, prev, pager, next, jumper"
       v-bind="pageInfo"
+      layout="total, sizes, prev, pager, next, jumper"
       :page-sizes="pageInfo.pageSizes||[3,5,10,20]"
       @size-change="(pageSize:number)=>handleSizeChange(pageSize,pageInfo)"
       @current-change="(curPage:number)=>handleCurrentChange(curPage,pageInfo)"

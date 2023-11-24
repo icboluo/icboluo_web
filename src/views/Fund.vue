@@ -26,7 +26,7 @@
       @init="init1"
     >
       <template v-slot:buttonSlot="id">
-        <el-button @click="handleClick(id.fieldVal)" type="text" size="small">
+        <el-button @click="handleClick(id.fieldVal)" link type="primary" size="small">
           {{ id.fieldVal }}
         </el-button>
       </template>
