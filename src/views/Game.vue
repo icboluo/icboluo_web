@@ -7,7 +7,7 @@
             所有角色
             <template #dropdown>
               <el-dropdown-menu>
-                <template v-for="(item) in dropdownShow">
+                <template v-for="item in dropdownShow">
                   <el-dropdown-item @click="findById(item.id)">
                     {{ item }}
                   </el-dropdown-item>
@@ -48,7 +48,8 @@
               <el-progress
                 :text-inside="true"
                 :stroke-width="26"
-                :percentage="'经验'+alUtil.percentage(player.experience, player.curTotalExperience, 0)"
+                :percentage="experiencePercentage"
+                :format="(a: number) => '经验' + a + '%'"
               >
               </el-progress>
               <br />
@@ -122,15 +123,17 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, reactive, ref } from "vue";
-import request from "@/util/Request";
-import constant from "@/util/Constant";
-import alUtil from "@/util/AlUtil";
+import { computed, onUnmounted, reactive, ref } from 'vue'
+import request from '@/util/Request'
+import constant from '@/util/Constant'
+import alUtil from '@/util/AlUtil'
 
-let dropdownShow = ref([{
-  id: 0,
-  name: ""
-}]);
+let dropdownShow = ref([
+  {
+    id: 0,
+    name: ''
+  }
+])
 let player = reactive({
   id: 0,
   age: 0,
@@ -140,79 +143,82 @@ let player = reactive({
   experience: 0,
   totalExperience: 0,
   curTotalExperience: 0,
-  level: "",
-  name: ""
-});
+  level: '',
+  name: ''
+})
 
-let allMonster = ref([]);
-let cultivationCareer = ref();
-let timer = ref();
+const experiencePercentage = computed(() => {
+  return alUtil.percentage(player.experience, player.curTotalExperience, 0)
+})
+let allMonster = ref([])
+let cultivationCareer = ref()
+let timer = ref()
 
 async function myRole() {
-  const res = await request.simpleGet(constant.gameUrlPre + "/player/myRole");
-  dropdownShow.value = res;
+  const res = await request.simpleGet(constant.gameUrlPre + '/player/myRole')
+  dropdownShow.value = res
 }
 
 async function addRole() {
-  await request.simpleGet(constant.gameUrlPre + "/player/addRole");
+  await request.simpleGet(constant.gameUrlPre + '/player/addRole')
 }
 
 async function findById(id?: number) {
   if (id) {
-    player.id = id;
+    player.id = id
   }
-  let res = await request.simpleGet(constant.gameUrlPre + "/player/exhibit", { id: player.id });
-  player.id = res.id;
-  player.age = res.age;
+  let res = await request.simpleGet(constant.gameUrlPre + '/player/exhibit', { id: player.id })
+  player.id = res.id
+  player.age = res.age
 
-  player.attack = res.attack;
-  player.blood = res.blood;
-  player.maxBlood = res.maxBlood;
-  player.experience = res.experience;
-  player.totalExperience = res.totalExperience;
-  player.curTotalExperience = res.curTotalExperience;
-  player.level = res.level;
-  player.name = res.name;
-  await allMonsterFun();
+  player.attack = res.attack
+  player.blood = res.blood
+  player.maxBlood = res.maxBlood
+  player.experience = res.experience
+  player.totalExperience = res.totalExperience
+  player.curTotalExperience = res.curTotalExperience
+  player.level = res.level
+  player.name = res.name
+  await allMonsterFun()
 }
 
 async function nextMonster() {
-  await request.simpleGet(constant.gameUrlPre + "/player/nextMonster");
-  await allMonsterFun();
+  await request.simpleGet(constant.gameUrlPre + '/player/nextMonster')
+  await allMonsterFun()
 }
 
 async function attack(monsterId: string) {
-  await request.simpleGet(constant.gameUrlPre + "/player/attack", {
+  await request.simpleGet(constant.gameUrlPre + '/player/attack', {
     playerId: player.id,
     monsterId: monsterId
-  });
-  await findById();
-  await allMonsterFun();
+  })
+  await findById()
+  await allMonsterFun()
 }
 
 async function allMonsterFun() {
-  let res = await request.simpleGet(constant.gameUrlPre + "/player/allMonster");
-  allMonster.value = res;
+  let res = await request.simpleGet(constant.gameUrlPre + '/player/allMonster')
+  allMonster.value = res
 }
 
 async function cultivationCareerFunCycle() {
-  let res = await request.simpleGet(constant.gameUrlPre + "/cultivationCareer/cultivationCareer", {
+  let res = await request.simpleGet(constant.gameUrlPre + '/cultivationCareer/cultivationCareer', {
     id: player.id
-  });
-  cultivationCareer.value = res.list;
-  await findById();
+  })
+  cultivationCareer.value = res.list
+  await findById()
 }
 
 async function reFresh() {
-  await cultivationCareerFunCycle();
+  await cultivationCareerFunCycle()
   timer.value = window.setInterval(() => {
-    setTimeout(cultivationCareerFunCycle, 0);
-  }, 9000);
+    setTimeout(cultivationCareerFunCycle, 0)
+  }, 9000)
 }
 
 onUnmounted(() => {
-  clearInterval(timer.value);
-});
+  clearInterval(timer.value)
+})
 </script>
 
 <style scoped></style>

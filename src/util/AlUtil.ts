@@ -27,7 +27,7 @@ export function toDoubleArray<T>(list: T[]): T[][] {
  * @param a 分子
  * @param b 分母
  * @param def 默认值
- * @return {number|*}
+ * @return 百分比数字
  */
 export function percentage(a: number, b: number, def: number) {
   if (a === 0 && b === 0) {
