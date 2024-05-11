@@ -2,20 +2,58 @@
   <div>
     <el-row :gutter="20">
       <el-col :span="8">
+        <el-input v-model="simCal.source" placeholder="请输入source"></el-input>
+      </el-col>
+      <el-col :span="8">
+        <el-input v-model="simCal.target" placeholder="请输入target"></el-input>
+      </el-col>
+      <el-button type="primary" plain @click="httpSimCal"> 计算增长率 {{ simCal.res }}</el-button>
+    </el-row>
+
+    <el-button text @click="dialogFormVisible = true"> 新增</el-button>
+    <el-dialog v-model="dialogFormVisible" title="Shipping address">
+      <el-form :model="form">
+        <el-form-item label="请输入今天增长率" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="Zones" :label-width="formLabelWidth">
+          <el-select v-model="form.region" placeholder="Please select a zone">
+            <el-option label="Zone No.1" value="shanghai" />
+            <el-option label="Zone No.2" value="beijing" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="addToday(form.name)"> Confirm </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <div class="grid-content bg-purple">fund id {{ fundId }}</div>
+      </el-col>
+      <el-col :span="8">
+        <div class="grid-content bg-purple">fund name {{ fundInfo.name }}</div>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20">
+      <el-col :span="8">
         <div class="block">
-          <span class="demonstration">带快捷选项</span>
+          <span class="demonstration">时间周期</span>
           <el-date-picker
             v-model="fundDataParam.intervalDate"
-            value-format="yyyy-MM-dd"
             type="daterange"
-            align="right"
             unlink-panels
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :picker-options="pickerOptions"
-          >
-          </el-date-picker>
+            range-separator="To"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            :shortcuts="shortcuts"
+            :size="size"
+          />
         </div>
       </el-col>
       <el-col :span="8">
@@ -37,52 +75,8 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <div class="grid-content bg-purple">fund id {{ fundId }}</div>
-      </el-col>
-      <el-col :span="8">
-        <div class="grid-content bg-purple">fund name {{ fundInfo.name }}</div>
-      </el-col>
-    </el-row>
-
     <el-button type="primary" plain @click="initCal"> 搜索</el-button>
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-input v-model="simCal.source" placeholder="请输入source"></el-input>
-      </el-col>
-      <el-col :span="8">
-        <el-input v-model="simCal.target" placeholder="请输入target"></el-input>
-      </el-col>
-      <el-button type="primary" plain @click="httpSimCal"> 计算增长率 {{ simCal.res }}</el-button>
-    </el-row>
-
-    <!-- Form -->
-    <el-button text @click="dialogFormVisible = true">
-      新增
-    </el-button>
-
-    <el-dialog v-model="dialogFormVisible" title="Shipping address">
-      <el-form :model="form">
-        <el-form-item label="请输入今天增长率" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="Zones" :label-width="formLabelWidth">
-          <el-select v-model="form.region" placeholder="Please select a zone">
-            <el-option label="Zone No.1" value="shanghai" />
-            <el-option label="Zone No.2" value="beijing" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="addToday(form.name)">
-          Confirm
-        </el-button>
-      </span>
-      </template>
-    </el-dialog>
+    <el-button type="primary" plain @click="searchSimpleTrend"> 搜索相似趋势</el-button>
 
     <el-row :gutter="20">
       <el-col :span="6">
@@ -128,7 +122,6 @@
           {{ netValueDate.fieldVal }}
         </el-button>
       </template>
-
     </base-table>
 
     <el-row v-for="(row, rowIndex) in parseFindRecentRetRow" :key="row" :gutter="20">
@@ -142,7 +135,7 @@
         <!--          长度是5 列的索引是1，行的索引是0，需要索引是1-->
         <!--          长度是5 列的索引是1，行的索引是1，需要索引是4  需要索引是列的索引+3*行的索引-->
         <el-table
-          :data="findRecentRet[lineIndex + rowIndex * findRecentRetLineNumber]"
+          :data="findRecentRetVal[lineIndex + rowIndex * findRecentRetLineNumber].list"
           :cell-style="set_cell_style"
           style="width: 100%"
         >
@@ -168,16 +161,47 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
-import request from "@/util/Request";
-import { useRoute } from "vue-router";
-import constant from "@/util/Constant";
-import BaseTable, { PageInfo, TableInfo } from "@/components/BaseTable.vue";
+import { onMounted, reactive, ref } from 'vue'
+import request from '@/util/Request'
+import { useRoute } from 'vue-router'
+import constant from '@/util/Constant'
+import BaseTable, { PageInfo, TableInfo } from '@/components/BaseTable.vue'
 
-let route = useRoute();
+let route = useRoute()
 
 const dialogFormVisible = ref(false)
 const formLabelWidth = '140px'
+const size = ref<'default' | 'large' | 'small'>('default')
+
+const shortcuts = [
+  {
+    text: 'Last week',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+      return [start, end]
+    }
+  },
+  {
+    text: 'Last month',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+      return [start, end]
+    }
+  },
+  {
+    text: 'Last 3 months',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+      return [start, end]
+    }
+  }
+]
 
 const form = reactive({
   name: '',
@@ -187,45 +211,49 @@ const form = reactive({
   delivery: false,
   type: [],
   resource: '',
-  desc: '',
+  desc: ''
 })
 
-
-const fundId = ref(route.query.fundId);
+const fundId = ref(route.query.fundId)
 const tableInfo = reactive<TableInfo>({
-    header: [
-      {
-        fieldName: "netValueDate",
-        showName: "净值日期"
-      }, {
-        fieldName: "dayOfWeek",
-        showName: "星期"
-      }, {
-        fieldName: "increaseRateDay",
-        showName: "日增长率"
-      }, {
-        fieldName: "netAssetValue",
-        showName: "单位净值"
-      }, {
-        fieldName: "netValueCumulative",
-        showName: "累计净值"
-      }, {
-        fieldName: "updateTime",
-        showName: "更新时间"
-      }, {
-        fieldName: "netValueDate",
-        showName: "最近10天",
-        isButtonSlot: true
-      }
-    ],
-    data1: []
-  }
-);
+  header: [
+    {
+      fieldName: 'netValueDate',
+      showName: '净值日期'
+    },
+    {
+      fieldName: 'dayOfWeek',
+      showName: '星期'
+    },
+    {
+      fieldName: 'increaseRateDay',
+      showName: '日增长率'
+    },
+    {
+      fieldName: 'netAssetValue',
+      showName: '单位净值'
+    },
+    {
+      fieldName: 'netValueCumulative',
+      showName: '累计净值'
+    },
+    {
+      fieldName: 'updateTime',
+      showName: '更新时间'
+    },
+    {
+      fieldName: 'netValueDate',
+      showName: '最近10天',
+      isButtonSlot: true
+    }
+  ],
+  data1: []
+})
 const pageInfo = reactive<PageInfo>({
   total: 1000,
   pageSize: 10,
   pageNum: 1
-});
+})
 let view = ref({
   count: null,
   min: null,
@@ -239,137 +267,138 @@ let view = ref({
     FRIDAY: null
   },
   monthMap: null
-});
+})
 const simCal = reactive({
   source: null,
   target: null,
   res: null
-});
-const parseFindRecentRetRow = ref(1);
-const pickerOptions = reactive({
-  shortcuts: [
-    {
-      text: "最近一周",
-      onClick(picker) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-        picker.$emit("pick", [start, end]);
-      }
-    },
-    {
-      text: "最近一个月",
-      onClick(picker) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-        picker.$emit("pick", [start, end]);
-      }
-    },
-    {
-      text: "最近三个月",
-      onClick(picker) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-        picker.$emit("pick", [start, end]);
-      }
-    }
-  ]
-});
+})
+const parseFindRecentRetRow = ref(1)
 
 const options = reactive([
   {
-    value: "1",
-    label: "1天"
+    value: '1',
+    label: '1天'
   },
   {
-    value: "2",
-    label: "2天"
+    value: '2',
+    label: '2天'
   },
   {
-    value: "3",
-    label: "3天"
+    value: '3',
+    label: '3天'
   },
   {
-    value: "4",
-    label: "4天"
+    value: '4',
+    label: '4天'
   },
   {
-    value: "5",
-    label: "5天"
+    value: '5',
+    label: '5天'
   }
-]);
+])
 let fundInfo = ref({
   id: null,
   name: null
-});
-const thisPageAvg = ref();
+})
+const thisPageAvg = ref()
 const fundDataParam = reactive({
   currentPage: 1,
   // 区间日期
-  intervalDate: "",
+  intervalDate: '',
   chooseDate: null,
   chooseDateLength: null
-});
+})
+
+interface F {
+  list: []
+  count: number
+  min: number
+  max: number
+  avg: number
+  /**
+   * 紧接着10天的平均值
+   */
+  nextAvg: number
+}
 
 // 查询最近区间返回值
-const findRecentRet = ref([]);
-const findRecentRetVal = ref([]);
-const findRecentRetLineNumber: number = 4;
+const findRecentRetVal = reactive<F[]>([])
+const findRecentRetLineNumber: number = 4
 
-async function init() {
-  const res = await request.simpleGetPage(constant.fundUrlPre + "/fundData/init", pageInfo, {
-    fundId: fundId.value,
-    startDate: fundDataParam.intervalDate[0],
-    endDate: fundDataParam.intervalDate[1],
-    chooseDateLength: fundDataParam.chooseDateLength,
-    chooseDate: fundDataParam.chooseDate
-  });
-  tableInfo.data1 = res.list;
-  thisPageAvg.value = res.isPageAvg;
+async function init(param: any) {
+  if (fundDataParam.intervalDate) {
+    param.startDate = fundDataParam.intervalDate[0]
+    param.endDate = fundDataParam.intervalDate[1]
+  }
+  const res = await request.simplePostPage(constant.fundUrlPre + '/fundData/init', pageInfo, param)
+  tableInfo.data1 = res.list
+  thisPageAvg.value = res.isPageAvg
 }
 
 async function cal() {
-  const res = await request.simpleGet(constant.fundUrlPre + "/fundData/cal", {
+  let param = {
     fundId: fundId.value,
-    startDate: fundDataParam.intervalDate[0],
-    endDate: fundDataParam.intervalDate[1]
-  });
-  view.value = res;
+    startDate: null as string | null,
+    endDate: null as string | null
+  }
+  if (fundDataParam.intervalDate) {
+    param.startDate = fundDataParam.intervalDate[0]
+    param.endDate = fundDataParam.intervalDate[1]
+  }
+  const res = await request.simpleGet(constant.fundUrlPre + '/fundData/cal', param)
+  view.value = res
 }
 
 async function httpSimCal() {
-  const data = await request.simpleGet(constant.fundUrlPre + "/fundData/simCal", {
+  const data = await request.simpleGet(constant.fundUrlPre + '/fundData/simCal', {
     source: simCal.source,
     target: simCal.target
-  });
-  simCal.res = data;
+  })
+  simCal.res = data
 }
 
 function initCal() {
-  init();
-  cal();
+  let param = {
+    fundId: fundId.value,
+    startDate: null as string | null,
+    endDate: null as string | null
+  }
+  init(param)
+  cal()
+}
+
+function searchSimpleTrend() {
+  let param = {
+    fundId: fundId.value,
+    startDate: null as string | null,
+    endDate: null as string | null,
+    chooseDateLength: fundDataParam.chooseDateLength,
+    chooseDate: fundDataParam.chooseDate
+  }
+  init(param)
+  cal()
 }
 
 async function initFundInfo() {
-  const res = await request.simpleGet(constant.fundUrlPre + "/fundInfo/fundInfoInit", {
+  const res = await request.simpleGet(constant.fundUrlPre + '/fundInfo/fundInfoInit', {
     id: fundId.value
-  });
-  fundInfo.value = res;
+  })
+  fundInfo.value = res
 }
 
 async function myChooseDate(netValueDate: Date) {
-  const data = await request.simpleGet(constant.fundUrlPre + "/fundData/findRecentData", {
+  const data = await request.simpleGet(constant.fundUrlPre + '/fundData/findRecentData', {
     fundId: fundId.value,
     myChooseDate: netValueDate
-  });
-  findRecentRet.value.push(data.list);
-  findRecentRetVal.value.push(data);
+  })
+  findRecentRetVal.push(data)
 
   // 计算一共有多少行数据
-  const length = findRecentRet.value.length;
-  parseFindRecentRetRow.value = Math.floor((length + findRecentRetLineNumber - 1) / findRecentRetLineNumber);
+  const length = findRecentRetVal.length
+  parseFindRecentRetRow.value = Math.floor(
+    (length + findRecentRetLineNumber - 1) / findRecentRetLineNumber
+  )
 }
 
 /**
@@ -378,13 +407,13 @@ async function myChooseDate(netValueDate: Date) {
  * @return {number}
  */
 function parseFindRecentRetLine(row: number): number {
-  const length = findRecentRet.value.length;
+  const length = findRecentRetVal.length
   // 当前行剩余元素
-  const curRowRemainder = length - row * findRecentRetLineNumber;
+  const curRowRemainder = length - row * findRecentRetLineNumber
   if (curRowRemainder > findRecentRetLineNumber) {
-    return 24 / findRecentRetLineNumber;
+    return 24 / findRecentRetLineNumber
   } else {
-    return 24 / curRowRemainder;
+    return 24 / curRowRemainder
   }
 }
 
@@ -394,54 +423,51 @@ function parseFindRecentRetLine(row: number): number {
  * @return {number}
  */
 function parseFindRecentRetLineTotal(row: number) {
-  const lineTotal: number = parseFindRecentRetLine(row);
-  return 24 / lineTotal;
+  const lineTotal: number = parseFindRecentRetLine(row)
+  return 24 / lineTotal
 }
 
 async function set_cell_style({ row, column }) {
-  if (column.label === "日增长率") {
+  if (column.label === '日增长率') {
     if (row.increaseRateDay > 0) {
       return {
-        color: "#ff0000"
-      };
+        color: '#ff0000'
+      }
     } else {
       return {
-        color: "#1ede27"
-      };
+        color: '#1ede27'
+      }
     }
   }
   // 这里的medicalCommonName指的是在el-table-column定义的prop中的值,并不会走到这里
-  if (row.medicalCommonName === "increaseRateDay") {
+  if (row.medicalCommonName === 'increaseRateDay') {
     return {
-      color: "#5f0606"
-    };
+      color: '#5f0606'
+    }
   }
 }
 
 async function addToday(rate) {
-  dialogFormVisible.value=false
-  await request.simpleGet(constant.fundUrlPre + "/fundData/addToday", {
+  dialogFormVisible.value = false
+  await request.simpleGet(constant.fundUrlPre + '/fundData/addToday', {
     fundId: fundId.value,
     rate: rate
-  });
+  })
 }
 
 onMounted(() => {
-  init();
-  cal();
-  initFundInfo();
-});
-
+  init()
+  cal()
+  initFundInfo()
+})
 </script>
 <style scoped>
 .el-row {
   margin-bottom: 20px;
 
-&
-:last-child {
-  margin-bottom: 0;
-}
-
+  & :last-child {
+    margin-bottom: 0;
+  }
 }
 
 .el-col {
@@ -472,5 +498,30 @@ onMounted(() => {
 .row-bg {
   padding: 10px 0;
   background-color: #f9fafc;
+}
+
+.demo-date-picker {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.demo-date-picker .block {
+  padding: 30px 0;
+  text-align: center;
+  border-right: solid 1px var(--el-border-color);
+  flex: 1;
+}
+
+.demo-date-picker .block:last-child {
+  border-right: none;
+}
+
+.demo-date-picker .demonstration {
+  display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 </style>

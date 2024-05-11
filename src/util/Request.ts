@@ -127,10 +127,67 @@ export async function simpleGetPage(
   }
 }
 
+export async function axiosPost(url: string, param: any) {
+  const axiosResponse = await axios.post(url, { params: param })
+  return axiosResponse
+}
+
+export async function post(url: string, param: any): Promise<Res> {
+  const axiosResponse = await axios.post(url, { params: param })
+  const resImpl = new ResImpl(axiosResponse)
+  return resImpl
+}
+
+export async function simplePost(url: string, param: any): Promise<any> {
+  const res = await post(url, param)
+  if (res.isSuccessOrPopBox()) {
+    return res.data
+  } else {
+    // 异步抛异常
+    return Promise.reject(new Error('interface.error'))
+  }
+}
+
+export async function postPage(
+  url: string,
+  pageInfo: PageInfo,
+  param?: any
+): Promise<Res<PageInfo>> {
+  if (!param) {
+    param = {}
+  }
+  Object.assign(param, {
+    pageSize: pageInfo.pageSize,
+    pageNum: pageInfo.pageNum
+  })
+  const axiosResponse: AxiosResponse<InterfaceRes> = await axios.post(url, param)
+  const resImpl = new ResImpl(axiosResponse)
+  pageInfo.pageNum = resImpl.data.pageNum
+  pageInfo.pageSize = resImpl.data.pageSize
+  pageInfo.total = resImpl.data.total
+  return resImpl
+}
+
+export async function simplePostPage(
+  url: string,
+  pageInfo: PageInfo,
+  param?: any
+): Promise<PageInfo> {
+  const res = await postPage(url, pageInfo, param)
+  if (res.isSuccessOrPopBox()) {
+    return res.data
+  } else {
+    // 异步抛异常
+    return Promise.reject(new Error('interface.error'))
+  }
+}
+
 export default {
   axiosGet,
   get,
   simpleGet,
   getPage,
-  simpleGetPage
+  simpleGetPage,
+  simplePost,
+  simplePostPage
 }
