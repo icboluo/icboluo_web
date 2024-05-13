@@ -186,7 +186,7 @@ async function mounted() {
 }
 
 async function init() {
-  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/init', {
+  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/init', {
     pageNum: dataParam.currentPage
   })
   tableList = data.list
@@ -194,19 +194,19 @@ async function init() {
 }
 
 async function selectAmount() {
-  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/selectAmount', {})
+  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/selectAmount', {})
   amount = data
 }
 
 async function selectByFiled() {
-  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/selectByFiled', {
+  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/selectByFiled', {
     filed: universalQuery
   })
   tableList = data
 }
 
 async function publi(row, url) {
-  const data = request.simpleGet(constant.noteUrlPre + url, {
+  const data = await request.simpleGet(constant.noteUrlPre + url, {
     type: row.type,
     id: row.id
   })

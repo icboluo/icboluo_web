@@ -3,16 +3,17 @@
     <el-table-column
       v-for="(item, idx) in tableInfo?.header"
       v-bind="item"
-      :prop="item.fieldName || item.prop"
+      :prop="item.fieldName || item.prop || item.buttonName"
       :label="item.showName || item.label"
       :key="idx"
     >
       <!--      这里 default和不写是一致的，代表处理的是表体，如果写header代表处理的是表头-->
       <template v-if="item.isButtonSlot" v-slot="cell">
-        <slot name="buttonSlot" :fieldVal="cell.row[item.fieldName]" :idx="idx"></slot>
+        <slot name="buttonSlot" :fieldVal="cell.row[item.aa()]" :idx="idx"></slot>
       </template>
     </el-table-column>
   </el-table>
+
   <div v-if="pageInfo" class="block">
     <el-pagination
       v-bind="pageInfo"
@@ -44,11 +45,7 @@ defineProps({
 /**
  * init 时间不可与 handlerSizeChange handlerCurChange 事件混用
  */
-const allEmits = defineEmits([
-  'handlerSizeChange',
-  'handlerCurChange',
-  'init'
-])
+const allEmits = defineEmits(['handlerSizeChange', 'handlerCurChange', 'init'])
 
 let inst: ComponentInternalInstance | null
 onMounted(() => {
@@ -83,9 +80,19 @@ export interface TableInfo {
 }
 
 export interface Header extends TableColumnCtx<any> {
+  /**
+   * 字段名称，也就是接口字段名
+   */
   fieldName: string
+  /**
+   * 展示名称，表头名称
+   */
   showName: string
+
+  buttonName: string
   isButtonSlot: boolean
+
+  aa(): string
 }
 
 export interface PageInfo extends PaginationProps {

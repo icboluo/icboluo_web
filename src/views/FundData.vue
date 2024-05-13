@@ -244,7 +244,19 @@ const tableInfo = reactive<TableInfo>({
     {
       fieldName: 'netValueDate',
       showName: '最近10天',
-      isButtonSlot: true
+      isButtonSlot: true,
+
+      aa(){
+        return 'netValueDate'
+      }
+    },
+    {
+      prop: 'netValueDate',
+      showName: '删除',
+      isButtonSlot: true,
+      aa(){
+        return 'netValueDate'
+      }
     }
   ],
   data1: []
@@ -326,7 +338,7 @@ interface F {
 const findRecentRetVal = reactive<F[]>([])
 const findRecentRetLineNumber: number = 4
 
-async function init(param: any) {
+async function searchList(param: any) {
   if (fundDataParam.intervalDate) {
     param.startDate = fundDataParam.intervalDate[0]
     param.endDate = fundDataParam.intervalDate[1]
@@ -359,13 +371,17 @@ async function httpSimCal() {
 }
 
 function initCal() {
+  init()
+  cal()
+}
+
+function init() {
   let param = {
     fundId: fundId.value,
     startDate: null as string | null,
     endDate: null as string | null
   }
-  init(param)
-  cal()
+  searchList(param)
 }
 
 function searchSimpleTrend() {
@@ -376,7 +392,7 @@ function searchSimpleTrend() {
     chooseDateLength: fundDataParam.chooseDateLength,
     chooseDate: fundDataParam.chooseDate
   }
-  init(param)
+  searchList(param)
   cal()
 }
 
@@ -456,7 +472,7 @@ async function addToday(rate) {
 }
 
 onMounted(() => {
-  init()
+  searchList()
   cal()
   initFundInfo()
 })
