@@ -51,6 +51,7 @@
             range-separator="To"
             start-placeholder="Start date"
             end-placeholder="End date"
+            value-format="YYYY-MM-DD"
             :shortcuts="shortcuts"
             :size="size"
           />
@@ -245,18 +246,11 @@ const tableInfo = reactive<TableInfo>({
       fieldName: 'netValueDate',
       showName: '最近10天',
       isButtonSlot: true,
-
-      aa(){
-        return 'netValueDate'
-      }
     },
     {
       prop: 'netValueDate',
       showName: '删除',
       isButtonSlot: true,
-      aa(){
-        return 'netValueDate'
-      }
     }
   ],
   data1: []
@@ -472,7 +466,7 @@ async function addToday(rate) {
 }
 
 onMounted(() => {
-  searchList()
+  init()
   cal()
   initFundInfo()
 })

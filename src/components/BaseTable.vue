@@ -9,7 +9,12 @@
     >
       <!--      这里 default和不写是一致的，代表处理的是表体，如果写header代表处理的是表头-->
       <template v-if="item.isButtonSlot" v-slot="cell">
-        <slot name="buttonSlot" :fieldVal="cell.row[item.aa()]" :idx="idx"></slot>
+        <slot
+          name="buttonSlot"
+          :fieldVal="cell.row[item.fieldName || item.prop || item.buttonName]"
+          :fieldOperation="item.buttonOperation"
+          :idx="idx"
+        ></slot>
       </template>
     </el-table-column>
   </el-table>
@@ -91,8 +96,7 @@ export interface Header extends TableColumnCtx<any> {
 
   buttonName: string
   isButtonSlot: boolean
-
-  aa(): string
+  buttonOperation: string
 }
 
 export interface PageInfo extends PaginationProps {

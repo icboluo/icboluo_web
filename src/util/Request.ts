@@ -128,12 +128,12 @@ export async function simpleGetPage(
 }
 
 export async function axiosPost(url: string, param: any) {
-  const axiosResponse = await axios.post(url, { params: param })
+  const axiosResponse = await axios.post(url, param)
   return axiosResponse
 }
 
 export async function post(url: string, param: any): Promise<Res> {
-  const axiosResponse = await axios.post(url, { params: param })
+  const axiosResponse = await axios.post(url, param)
   const resImpl = new ResImpl(axiosResponse)
   return resImpl
 }
@@ -162,9 +162,11 @@ export async function postPage(
   })
   const axiosResponse: AxiosResponse<InterfaceRes> = await axios.post(url, param)
   const resImpl = new ResImpl(axiosResponse)
-  pageInfo.pageNum = resImpl.data.pageNum
-  pageInfo.pageSize = resImpl.data.pageSize
-  pageInfo.total = resImpl.data.total
+  if (resImpl.isSuccess()) {
+    pageInfo.pageNum = resImpl.data.pageNum
+    pageInfo.pageSize = resImpl.data.pageSize
+    pageInfo.total = resImpl.data.total
+  }
   return resImpl
 }
 

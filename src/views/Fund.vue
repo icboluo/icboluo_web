@@ -6,7 +6,7 @@
           <span class="demonstration">收益计算日期（默认一年</span>
           <el-date-picker
             v-model="initPar.date"
-            value-format="yyyy-MM-dd"
+            value-format="YYYY-MM-DD"
             type="daterange"
             align="right"
             unlink-panels
@@ -20,13 +20,15 @@
       </el-col>
     </el-row>
     <el-button type="primary" plain @click="init"> 搜索</el-button>
-    <base-table
-      :table-info="tableInfo"
-      :page-info="pageInfo"
-      @init="init1"
-    >
+
+    <base-table :table-info="tableInfo" :page-info="pageInfo" @init="init">
       <template v-slot:buttonSlot="id">
-        <el-button @click="handleClick(id.fieldVal)" link type="primary" size="small">
+        <el-button
+          @click="handleClick(id.fieldVal, id.fieldOperation)"
+          link
+          type="primary"
+          size="small"
+        >
           {{ id.fieldVal }}
         </el-button>
       </template>
@@ -35,140 +37,147 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive } from "vue";
-import { useRouter } from "vue-router";
-import { simpleGetPage } from "@/util/Request";
-import constant from "@/util/Constant";
-import type { PageInfo, TableInfo } from "@/components/BaseTable.vue";
-import BaseTable from "@/components/BaseTable.vue";
+import { onMounted, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { simpleGetPage, simplePost, simplePostPage } from "@/util/Request";
+import constant from '@/util/Constant'
+import type { PageInfo, TableInfo } from '@/components/BaseTable.vue'
+import BaseTable from '@/components/BaseTable.vue'
 
 const initPar = reactive({
   date: null
-});
+})
 const tableInfo = reactive<TableInfo>({
   header: [
     {
-      fieldName: "id",
-      showName: "基金id",
+      fieldName: 'id',
+      showName: '基金id',
       isButtonSlot: true
     },
     {
-      fieldName: "name",
-      showName: "基金名称"
+      fieldName: 'name',
+      showName: '基金名称'
     },
     {
-      fieldName: "tenAvg",
-      showName: "最近10天平均值"
+      fieldName: 'tenAvg',
+      showName: '最近10天平均值'
     },
     {
-      fieldName: "avgMap2",
-      showName: "`年${(it)}平均值`"
+      fieldName: 'avgMap2',
+      showName: '`年${(it)}平均值`'
     },
     {
-      fieldName: "fixedInvestmentIncome",
-      showName: "万份定投收益"
+      fieldName: 'fixedInvestmentIncome',
+      showName: '万份定投收益'
     },
     {
-      fieldName: "totalDay",
-      showName: "定投总天数"
+      fieldName: 'totalDay',
+      showName: '定投总天数'
     },
     {
-      fieldName: "lossInvestmentIncome",
-      showName: "万份亏损投入收益"
+      fieldName: 'lossInvestmentIncome',
+      showName: '万份亏损投入收益'
     },
     {
-      fieldName: "lossTotalDay",
-      showName: "亏损投入总天数"
+      fieldName: 'lossTotalDay',
+      showName: '亏损投入总天数'
     },
     {
-      fieldName: "lossRatioIncome",
-      showName: "万份亏损比率投入收益"
+      fieldName: 'lossRatioIncome',
+      showName: '万份亏损比率投入收益'
     },
     {
-      fieldName: "bigLossIncome",
-      showName: "万份大亏损时收益"
+      fieldName: 'bigLossIncome',
+      showName: '万份大亏损时收益'
+    },
+    {
+      fieldName: 'id',
+      showName: '删除',
+      isButtonSlot: true,
+      buttonOperation: 'delete'
     }
   ],
   data1: []
-});
+})
 
 const pickerOptions = reactive({
   shortcuts: [
     {
-      text: "最近一周",
+      text: '最近一周',
       onClick(picker: any) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-        picker.$emit("pick", [start, end]);
+        const end = new Date()
+        const start = new Date()
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+        picker.$emit('pick', [start, end])
       }
     },
     {
-      text: "最近一个月",
+      text: '最近一个月',
       onClick(picker: any) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-        picker.$emit("pick", [start, end]);
+        const end = new Date()
+        const start = new Date()
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+        picker.$emit('pick', [start, end])
       }
     },
     {
-      text: "最近三个月",
+      text: '最近三个月',
       onClick(picker: any) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-        picker.$emit("pick", [start, end]);
+        const end = new Date()
+        const start = new Date()
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+        picker.$emit('pick', [start, end])
       }
     },
     {
-      text: "最近一年",
+      text: '最近一年',
       onClick(picker: any) {
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365);
-        picker.$emit("pick", [start, end]);
+        const end = new Date()
+        const start = new Date()
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+        picker.$emit('pick', [start, end])
       }
     }
   ]
-});
+})
 
 const pageInfo = reactive<PageInfo>({
   total: 1000,
   pageSize: 5,
   pageNum: 1
-});
-const router = useRouter();
+})
+const router = useRouter()
 
 async function init() {
-  const param: any = {};
+  const param: any = {}
   if (initPar.date) {
-    param.startDate = initPar.date[0];
-    param.endDate = initPar.date[1];
+    param.startDate = initPar.date[0]
+    param.endDate = initPar.date[1]
   }
-  let res = await simpleGetPage(constant.fundUrlPre + "/fundAttention/init", pageInfo, param);
+  let res = await simplePostPage(constant.fundUrlPre + '/fundAttention/init', pageInfo, param)
   tableInfo.data1 = res.list.map((item: any) => ({
     ...item,
     avgMap2: item.avgMap[2]
-  }));
+  }))
 }
 
-function init1() {
-  init();
-}
-
-function handleClick(id: any) {
+async function handleClick(id: any, operation: string) {
+  if (operation === 'delete') {
+    await simplePost(constant.fundUrlPre + '/fundAttention/delete', id)
+    await init()
+    return
+  }
   router.push({
-    path: "/fundData",
+    path: '/fundData',
     query: {
       fundId: id
     }
-  });
+  })
 }
 
 onMounted(() => {
-  init();
-});
+  init()
+})
 </script>
 
 <style scoped></style>
