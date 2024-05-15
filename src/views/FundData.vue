@@ -165,7 +165,7 @@ import { onMounted, reactive, ref } from 'vue'
 import request from '@/util/Request'
 import { useRoute } from 'vue-router'
 import constant from '@/util/Constant'
-import BaseTable, { PageInfo, TableInfo } from '@/components/BaseTable.vue'
+import BaseTable, {  TableInfo } from '@/components/BaseTable.vue'
 
 let route = useRoute()
 
