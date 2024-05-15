@@ -114,7 +114,6 @@
     </el-row>
     <base-table
       :table-info="tableInfo"
-      :page-info="pageInfo"
       :cell-style="set_cell_style"
       @init="init"
     >
@@ -245,21 +244,22 @@ const tableInfo = reactive<TableInfo>({
     {
       fieldName: 'netValueDate',
       showName: '最近10天',
-      isButtonSlot: true,
+      isButtonSlot: true
     },
     {
       prop: 'netValueDate',
       showName: '删除',
-      isButtonSlot: true,
+      isButtonSlot: true
     }
   ],
-  data1: []
+  pageInfo: {
+    total: 1000,
+    pageSize: 10,
+    pageNum: 1,
+    list: null
+  }
 })
-const pageInfo = reactive<PageInfo>({
-  total: 1000,
-  pageSize: 10,
-  pageNum: 1
-})
+
 let view = ref({
   count: null,
   min: null,
@@ -337,8 +337,8 @@ async function searchList(param: any) {
     param.startDate = fundDataParam.intervalDate[0]
     param.endDate = fundDataParam.intervalDate[1]
   }
-  const res = await request.simplePostPage(constant.fundUrlPre + '/fundData/init', pageInfo, param)
-  tableInfo.data1 = res.list
+  const res = await request.simplePostPage(constant.fundUrlPre + '/fundData/init', tableInfo.pageInfo, param)
+  tableInfo.pageInfo.list = res.list
   thisPageAvg.value = res.isPageAvg
 }
 

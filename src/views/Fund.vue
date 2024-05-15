@@ -8,7 +8,6 @@
             v-model="initPar.date"
             value-format="YYYY-MM-DD"
             type="daterange"
-            align="right"
             unlink-panels
             range-separator="至"
             start-placeholder="开始日期"
@@ -21,7 +20,7 @@
     </el-row>
     <el-button type="primary" plain @click="init"> 搜索</el-button>
 
-    <base-table :table-info="tableInfo" :page-info="pageInfo" @init="init">
+    <base-table :table-info="tableInfo" @init="init">
       <template v-slot:buttonSlot="id">
         <el-button
           @click="handleClick(id.fieldVal, id.fieldOperation)"
@@ -39,7 +38,7 @@
 <script lang="ts" setup>
 import { onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { simpleGetPage, simplePost, simplePostPage } from "@/util/Request";
+import { simplePost, simplePostPage } from '@/util/Request'
 import constant from '@/util/Constant'
 import type { PageInfo, TableInfo } from '@/components/BaseTable.vue'
 import BaseTable from '@/components/BaseTable.vue'
@@ -97,7 +96,12 @@ const tableInfo = reactive<TableInfo>({
       buttonOperation: 'delete'
     }
   ],
-  data1: []
+  pageInfo: {
+    pageNum: 1,
+    pageSize: 5,
+    total: 100,
+    list: []
+  }
 })
 
 const pickerOptions = reactive({
@@ -141,11 +145,6 @@ const pickerOptions = reactive({
   ]
 })
 
-const pageInfo = reactive<PageInfo>({
-  total: 1000,
-  pageSize: 5,
-  pageNum: 1
-})
 const router = useRouter()
 
 async function init() {
@@ -154,8 +153,8 @@ async function init() {
     param.startDate = initPar.date[0]
     param.endDate = initPar.date[1]
   }
-  let res = await simplePostPage(constant.fundUrlPre + '/fundAttention/init', pageInfo, param)
-  tableInfo.data1 = res.list.map((item: any) => ({
+  let res = await simplePostPage(constant.fundUrlPre + '/fundAttention/init', tableInfo.pageInfo, param)
+  tableInfo.pageInfo.list = res.list.map((item: any) => ({
     ...item,
     avgMap2: item.avgMap[2]
   }))

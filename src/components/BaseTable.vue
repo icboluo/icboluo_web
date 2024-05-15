@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="tableInfo?.data1" v-bind="$attrs" style="width: 100%">
+  <el-table :data="tableInfo?.pageInfo.list" v-bind="$attrs" style="width: 100%">
     <el-table-column
       v-for="(item, idx) in tableInfo?.header"
       v-bind="item"
@@ -19,13 +19,13 @@
     </el-table-column>
   </el-table>
 
-  <div v-if="pageInfo" class="block">
+  <div v-if="tableInfo?.pageInfo" class="block">
     <el-pagination
-      v-bind="pageInfo"
+      v-bind="tableInfo?.pageInfo"
       layout="total, sizes, prev, pager, next, jumper"
-      :page-sizes="pageInfo.pageSizes || [3, 5, 10, 20]"
-      @size-change="(pageSize: number) => handleSizeChange(pageSize, pageInfo)"
-      @current-change="(curPage: number) => handleCurrentChange(curPage, pageInfo)"
+      :page-sizes="tableInfo?.pageInfo.pageSizes || [3, 5, 10, 20]"
+      @size-change="(pageSize: number) => handleSizeChange(pageSize, tableInfo?.pageInfo)"
+      @current-change="(curPage: number) => handleCurrentChange(curPage, tableInfo?.pageInfo)"
     >
     </el-pagination>
   </div>
@@ -33,7 +33,8 @@
 
 <script setup lang="ts">
 import type { PaginationProps, TableColumnCtx } from 'element-plus'
-import { ComponentInternalInstance, getCurrentInstance, onMounted } from 'vue'
+import type { ComponentInternalInstance } from 'vue'
+import { getCurrentInstance, onMounted } from 'vue'
 
 /**
  * 不可重复定义，相当于定义了一个全局变量
@@ -41,9 +42,6 @@ import { ComponentInternalInstance, getCurrentInstance, onMounted } from 'vue'
 defineProps({
   tableInfo: {
     type: Object as () => TableInfo
-  },
-  pageInfo: {
-    type: Object as () => PageInfo
   }
 })
 
@@ -61,7 +59,7 @@ const handleSizeChange = (pageSize: number, pageInfo?: PageInfo) => {
   if (pageInfo) {
     pageInfo.pageSize = pageSize
   }
-  if (inst.vnode.props.onHandlerSizeChange) {
+  if (inst?.vnode.props?.onHandlerSizeChange) {
     allEmits('handlerSizeChange', pageSize)
   } else {
     allEmits('init')
@@ -72,7 +70,7 @@ const handleCurrentChange = (curPage: number, pageInfo?: PageInfo) => {
     pageInfo.pageNum = curPage
   }
   // 如果存在该事件，优先使用自定义的事件
-  if (inst.vnode.props.onHandlerCurChange) {
+  if (inst?.vnode.props?.onHandlerCurChange) {
     allEmits('handlerCurChange', curPage)
   } else {
     allEmits('init')
@@ -81,7 +79,8 @@ const handleCurrentChange = (curPage: number, pageInfo?: PageInfo) => {
 
 export interface TableInfo {
   header: Header[]
-  data1: object[]
+  pageInfo: PageInfo,
+  body:[]
 }
 
 export interface Header extends TableColumnCtx<any> {
@@ -103,6 +102,7 @@ export interface PageInfo extends PaginationProps {
   total: number
   pageSize: number
   pageNum: number
+  list: []
 }
 
 // 勿删，有使用

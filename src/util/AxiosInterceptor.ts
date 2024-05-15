@@ -7,6 +7,7 @@ const a = ''
 // 每一次请求不可能都要手动添加一个参数吧，因此在这里定义一个拦截器，请求发送，在这里自动将请求拦截下来，自动的往请求里面加一个参数
 axios.interceptors.request.use(
   (config) => {
+    config.headers['Content-Type'] = 'application/json'
     return config
   },
   (err) => {
