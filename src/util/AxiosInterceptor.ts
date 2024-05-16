@@ -43,35 +43,27 @@ axios.interceptors.response.use(
         type: 'error',
         message: '服务调用失败,请检查'
       })
-      return Promise.reject(err)
+      return err
     }
     if (res.status === 403) {
-      // 表示权限不足
       ElMessage({
         type: 'error',
         message: '权限不足，请联系管理员'
       })
-      return
+      return err
     }
     if (res.status === 401) {
-      // 表示未登陆
       ElMessage({
         type: 'error',
-        message: res.data.message // 服务器返回来的信息
+        message: '未登录'
       })
-      return
-    }
-    if (res.data.message) {
-      ElMessage({
-        type: 'error',
-        message: res.data.message
-      })
-      return Promise.reject(err)
+      return err
     }
     ElMessage({
       type: 'error',
       message: '未知错误'
     })
+    return err
   }
 )
 export default {

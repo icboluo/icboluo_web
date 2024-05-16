@@ -47,10 +47,10 @@
             <el-menu-item-group>
               <template slot="title">分组一</template>
               <el-menu-item index="/fund">fund</el-menu-item>
-              <el-menu-item index="/fundMetric">选项2</el-menu-item>
+              <el-menu-item index="/fundMetric">metric</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="分组2">
-              <el-menu-item index="1-3">选项3</el-menu-item>
+              <el-menu-item index="/fundData">detail</el-menu-item>
             </el-menu-item-group>
             <el-sub-menu index="1-4">
               <template #title>选项4</template>

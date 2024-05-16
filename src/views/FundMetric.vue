@@ -5,7 +5,6 @@
   <el-row v-for="(row, rowIndex) in data" :key="row" :gutter="16">
     <el-col v-for="(cell, lineIndex) in row" :key="cell" :span="6">
       <div class="statistic-card">
-        {{ cell.number }}
         <div style="display: flex; align-items: center">
           <el-popover placement="right" :width="400" trigger="click">
             <template #reference>
@@ -16,7 +15,7 @@
               <el-table-column width="100" property="increaseRateDay" label="日增长率" />
               <el-table-column width="300" property="address" label="address" />
             </el-table>
-            <div v-for="row in cell.doubleDataList" :key="row">
+            <div v-for="row in cell.doubleDataList" :key="row[0].fundId">
               <el-table :data="row">
                 <el-table-column width="150" property="netValueDate" label="date" />
                 <el-table-column width="100" property="increaseRateDay" label="日增长率" />
@@ -25,7 +24,12 @@
             </div>
           </el-popover>
         </div>
-        <el-statistic :value="cell.number" :class="cell.numberClass" @click="a">
+        <el-statistic
+          :value="cell.number"
+          @click="a"
+          :formatter="(b: any) => (b == null ? 0 : b.toString())"
+          :value-style="{ color: cell.numberClass }"
+        >
           <template #title>
             <div style="display: inline-flex; align-items: center">
               {{ cell.desc }}
@@ -38,7 +42,7 @@
           </template>
         </el-statistic>
 
-        <div v-for="smallRow in cell.itemList" :key="smallRow">
+        <div v-for="smallRow in cell.itemList" :key="smallRow.id">
           <div class="statistic-footer">
             <div class="footer-item">
               <span>{{ smallRow.id }}</span>
@@ -125,16 +129,13 @@ async function click() {
     fundId: '161725'
   }
   let metric = await simplePost(constant.fundUrlPre + '/fundAttention/fundWeight', param)
-  let doubleArray = toDoubleArray2(metric, 4)
-  doubleArray.forEach((row: F[]) => {
-    row.forEach((cell: F) => {
-      cell.numberClass = calColor(cell.number)
-      cell.itemList.forEach((item) => {
-        item.class = calColor(item.name)
-      })
+  metric.forEach((cell: F) => {
+    cell.numberClass = calColor(cell.number)
+    cell.itemList.forEach((item) => {
+      item.class = calColor(item.name)
     })
   })
-  data.value = doubleArray
+  data.value = toDoubleArray2(metric, 4)
 }
 
 function calColor(val: number): string {

@@ -352,7 +352,7 @@ async function cal() {
     param.startDate = fundDataParam.intervalDate[0]
     param.endDate = fundDataParam.intervalDate[1]
   }
-  const res = await request.simpleGet(constant.fundUrlPre + '/fundData/cal', param)
+  const res = await request.simplePost(constant.fundUrlPre + '/fundData/cal', param)
   view.value = res
 }
 
