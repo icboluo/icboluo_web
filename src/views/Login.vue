@@ -9,10 +9,10 @@
     <div style="margin: 20px"></div>
     <el-form :label-position="radio2" label-width="80px">
       id
-      <el-input v-model="data.id" placeholder="Please input" />
+      <el-input v-model="userData.id" placeholder="Please input" />
       pwd
       <el-input
-        v-model="data.pwd"
+        v-model="userData.pwd"
         type="password"
         placeholder="Please input password"
         show-password
@@ -29,15 +29,16 @@ import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import Common from '@/components/Common.vue'
 import { reactive, ref } from 'vue'
-import request from '@/util/Request'
+import request, { axiosPost } from '@/util/Request'
 import constant from '@/util/Constant'
 import axiosInterceptor from '@/util/AxiosInterceptor'
+import axios from 'axios'
 
 const test = ref(Common)
 const radio1 = ref('New York')
 const radio2 = ref('New York')
 
-const data = reactive({
+const userData = reactive({
   id: '',
   pwd: ''
 })
@@ -45,9 +46,11 @@ const router = useRouter()
 
 function register() {
   console.log(axiosInterceptor.a)
-  const response = request.axiosGet(constant.userUrlPre + '/register', {
-    id: data.id,
-    pwd: data.pwd
+  const response = axios.get(constant.userUrlPre + '/register', {
+    params: {
+      id: userData.id,
+      pwd: userData.pwd
+    }
   })
   response
     .then(() => {
@@ -63,11 +66,13 @@ function register() {
 }
 
 async function login() {
-  const res = await request.get(constant.userUrlPre + '/login', {
-    id: data.id,
-    pwd: data.pwd
+  let { data } = await axios.get(constant.userUrlPre + '/login', {
+    params: {
+      id: userData.id,
+      pwd: userData.pwd
+    }
   })
-  if (res.isSuccessOrPopBox()) {
+  if (data.code === '200' || data.code === '0') {
     ElMessage({
       type: 'success',
       message: 'login successful'

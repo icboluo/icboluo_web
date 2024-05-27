@@ -186,7 +186,7 @@ async function mounted() {
 }
 
 async function init() {
-  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/init', {
+  const data = await request.simplePost(constant.noteUrlPre + '/timeNote/init', {
     pageNum: dataParam.currentPage
   })
   tableList = data.list
@@ -194,19 +194,20 @@ async function init() {
 }
 
 async function selectAmount() {
-  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/selectAmount', {})
+  const data = await request.simplePost(constant.noteUrlPre + '/timeNote/selectAmount', {})
   amount = data
 }
 
 async function selectByFiled() {
-  const data = await request.simpleGet(constant.noteUrlPre + '/timeNote/selectByFiled', {
-    filed: universalQuery
-  })
+  const data = await request.simplePost(
+    constant.noteUrlPre + '/timeNote/selectByFiled',
+    universalQuery.value
+  )
   tableList = data
 }
 
 async function publi(row, url) {
-  const data = await request.simpleGet(constant.noteUrlPre + url, {
+  const data = await request.simplePost(constant.noteUrlPre + url, {
     type: row.type,
     id: row.id
   })
@@ -246,7 +247,7 @@ async function handlerCurChange() {
 }
 
 async function add(problem, result, belongToScope) {
-  const data = request.simpleGet(constant.noteUrlPre + '/timeNote/add', {
+  const data = request.simplePost(constant.noteUrlPre + '/timeNote/add', {
     problem: problem,
     result: result,
     belongToScope: belongToScope
@@ -255,7 +256,7 @@ async function add(problem, result, belongToScope) {
 }
 
 async function update(row) {
-  const data = request.get(constant.noteUrlPre + '/timeNote/update', {
+  const data = request.simplePost(constant.noteUrlPre + '/timeNote/update', {
     problem: row.problem,
     result: row.result,
     belongToScope: row.belongToScope,

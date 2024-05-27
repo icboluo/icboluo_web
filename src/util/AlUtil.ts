@@ -42,6 +42,10 @@ export function percentage(a: number, b: number, def: number) {
   return Math.floor((a * 100) / b)
 }
 
+export enum SessionKey {
+  fundId = 'fundId'
+}
+
 export default {
   percentage
 }

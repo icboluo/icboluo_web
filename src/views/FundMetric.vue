@@ -1,15 +1,15 @@
 <template>
-  <el-input v-model="input"></el-input>
-  <el-button @click="click"></el-button>
-
   <el-row v-for="(row, rowIndex) in data" :key="row" :gutter="16">
     <el-col v-for="(cell, lineIndex) in row" :key="cell" :span="6">
       <div class="statistic-card">
         <div style="display: flex; align-items: center">
           <el-popover placement="right" :width="400" trigger="click">
             <template #reference>
-              <el-button style="margin-right: 16px">Click to activate</el-button>
+              <el-button style="margin-right: 16px">
+                <el-avatar size="small" :src="circleUrl" style="flex: auto" />
+              </el-button>
             </template>
+
             <el-table :data="cell.dataList">
               <el-table-column width="150" property="netValueDate" label="date" />
               <el-table-column width="100" property="increaseRateDay" label="日增长率" />
@@ -24,16 +24,22 @@
             </div>
           </el-popover>
         </div>
+        <div v-if="cell.recommend">
+          <el-result icon="success" class="el-result-class"></el-result>
+        </div>
+        <div v-else>
+          <el-result icon="error" class="el-result-class"></el-result>
+        </div>
+
         <el-statistic
           :value="cell.number"
-          @click="a"
           :formatter="(b: any) => (b == null ? 0 : b.toString())"
           :value-style="{ color: cell.numberClass }"
         >
           <template #title>
             <div style="display: inline-flex; align-items: center">
               {{ cell.desc }}
-              <el-tooltip effect="dark" :content="cell.metricName" placement="top">
+              <el-tooltip effect="dark" :content="cell.tip" placement="top">
                 <el-icon style="margin-left: 4px" :size="12">
                   <Warning />
                 </el-icon>
@@ -63,8 +69,8 @@
 
 <script lang="ts" setup>
 import { CaretTop, Warning } from '@element-plus/icons-vue'
-import { ref } from 'vue'
-import { toDoubleArray2 } from '@/util/AlUtil'
+import { reactive, ref, toRefs } from 'vue'
+import { SessionKey, toDoubleArray2 } from '@/util/AlUtil'
 import { simplePost } from '@/util/Request'
 import constant from '@/util/Constant'
 
@@ -78,10 +84,6 @@ interface FundData {
    * 日增长率
    */
   increaseRateDay: number
-  /**
-   * 申购状态
-   */
-  subscribeStatus: string
   /**
    * 净值日期
    */
@@ -115,18 +117,29 @@ interface F {
   doubleDataList: FundData[][]
   metricName: string
   desc: string
+  tip: string
   number: any
   itemList: C[]
+  recommend: boolean
   numberClass: string
 }
 
-let input = ref('')
+const state = reactive({
+  circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
+  squareUrl: 'https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png',
+  sizeList: ['small', '', 'large'] as const
+})
+
+const { circleUrl, squareUrl, sizeList } = toRefs(state)
+
 // 数组此块使用 reactive 是非响应式的
 let data = ref<F[][]>([])
 
+click()
+
 async function click() {
   let param = {
-    fundId: '161725'
+    fundId: sessionStorage.getItem(SessionKey.fundId)
   }
   let metric = await simplePost(constant.fundUrlPre + '/fundAttention/fundWeight', param)
   metric.forEach((cell: F) => {
@@ -146,7 +159,6 @@ function calColor(val: number): string {
   }
 }
 
-function a() {}
 </script>
 
 <style scoped>
@@ -197,5 +209,41 @@ function a() {}
 
 .grey {
   color: var(--el-text-color-regular);
+}
+
+.demo-basic {
+  text-align: center;
+}
+
+.demo-basic .sub-title {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.demo-basic .demo-basic--circle,
+.demo-basic .demo-basic--square {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.demo-basic .block:not(:last-child) {
+  border-right: 1px solid var(--el-border-color);
+}
+
+.demo-basic .block {
+  flex: 1;
+}
+
+.demo-basic .el-col:not(:last-child) {
+  border-right: 1px solid var(--el-border-color);
+}
+
+.el-result-class {
+  width: 10px;
+  height: 10px;
+  flex: auto;
+  margin: auto;
 }
 </style>

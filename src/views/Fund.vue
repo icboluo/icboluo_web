@@ -1,23 +1,22 @@
 <template>
   <div>
-    <el-row :gutter="20">
-      <el-col :span="6">
-        <div class="block">
-          <span class="demonstration">收益计算日期（默认一年</span>
-          <el-date-picker
-            v-model="initPar.date"
-            value-format="YYYY-MM-DD"
-            type="daterange"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :picker-options="pickerOptions"
-          >
-          </el-date-picker>
-        </div>
-      </el-col>
-    </el-row>
+    <div class="demo-date-picker">
+      <div class="block">
+        <span class="demonstration">收益计算日期（默认一年</span>
+        <el-date-picker
+          v-model="initPar.date"
+          value-format="YYYY-MM-DD"
+          type="daterange"
+          unlink-panels
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :shortcuts="shortcuts"
+          size="default"
+        />
+      </div>
+    </div>
+
     <el-button type="primary" plain @click="init"> 搜索</el-button>
 
     <base-table :table-info="tableInfo" @init="init">
@@ -36,12 +35,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { simplePost, simplePostPage } from '@/util/Request'
 import constant from '@/util/Constant'
-import type { PageInfo, TableInfo } from '@/components/BaseTable.vue'
+import type { TableInfo } from '@/components/BaseTable.vue'
 import BaseTable from '@/components/BaseTable.vue'
+import { SessionKey } from '@/util/AlUtil'
 
 const initPar = reactive({
   date: null
@@ -104,46 +104,62 @@ const tableInfo = reactive<TableInfo>({
   }
 })
 
-const pickerOptions = reactive({
-  shortcuts: [
-    {
-      text: '最近一周',
-      onClick(picker: any) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-        picker.$emit('pick', [start, end])
-      }
-    },
-    {
-      text: '最近一个月',
-      onClick(picker: any) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-        picker.$emit('pick', [start, end])
-      }
-    },
-    {
-      text: '最近三个月',
-      onClick(picker: any) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
-        picker.$emit('pick', [start, end])
-      }
-    },
-    {
-      text: '最近一年',
-      onClick(picker: any) {
-        const end = new Date()
-        const start = new Date()
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
-        picker.$emit('pick', [start, end])
-      }
+const shortcuts = [
+  {
+    text: '最近一周',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+      return [start, end]
     }
-  ]
-})
+  },
+  {
+    text: '最近一个月',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+      return [start, end]
+    }
+  },
+  {
+    text: '最近三个月',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+      return [start, end]
+    }
+  },
+  {
+    text: '最近一年',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+      return [start, end]
+    }
+  },
+  {
+    text: '最近二年',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 365 * 2)
+      return [start, end]
+    }
+  },
+  {
+    text: '最近三年',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 365 * 3)
+      return [start, end]
+    }
+  }
+]
 
 const router = useRouter()
 
@@ -153,7 +169,11 @@ async function init() {
     param.startDate = initPar.date[0]
     param.endDate = initPar.date[1]
   }
-  let res = await simplePostPage(constant.fundUrlPre + '/fundAttention/init', tableInfo.pageInfo, param)
+  let res = await simplePostPage(
+    constant.fundUrlPre + '/fundAttention/init',
+    tableInfo.pageInfo,
+    param
+  )
   tableInfo.pageInfo.list = res.list.map((item: any) => ({
     ...item,
     avgMap2: item.avgMap[2]
@@ -161,6 +181,7 @@ async function init() {
 }
 
 async function handleClick(id: any, operation: string) {
+  sessionStorage.setItem(SessionKey.fundId, id)
   if (operation === 'delete') {
     await simplePost(constant.fundUrlPre + '/fundAttention/delete', id)
     await init()
@@ -179,4 +200,29 @@ onMounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.demo-date-picker {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.demo-date-picker .block {
+  padding: 30px 0;
+  text-align: center;
+  border-right: solid 1px var(--el-border-color);
+  flex: 1;
+}
+
+.demo-date-picker .block:last-child {
+  border-right: none;
+}
+
+.demo-date-picker .demonstration {
+  display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+</style>

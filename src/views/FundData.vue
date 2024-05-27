@@ -112,11 +112,7 @@
         <div class="grid-content bg-purple">星期五 {{ view.weekMap.FRIDAY }}</div>
       </el-col>
     </el-row>
-    <base-table
-      :table-info="tableInfo"
-      :cell-style="set_cell_style"
-      @init="init"
-    >
+    <base-table :table-info="tableInfo" :cell-style="set_cell_style" @init="init">
       <template v-slot:buttonSlot="netValueDate">
         <el-button @click="myChooseDate(netValueDate.fieldVal)" link type="primary" size="small">
           {{ netValueDate.fieldVal }}
@@ -165,7 +161,8 @@ import { onMounted, reactive, ref } from 'vue'
 import request from '@/util/Request'
 import { useRoute } from 'vue-router'
 import constant from '@/util/Constant'
-import BaseTable, {  TableInfo } from '@/components/BaseTable.vue'
+import BaseTable, { TableInfo } from '@/components/BaseTable.vue'
+import { SessionKey } from '@/util/AlUtil'
 
 let route = useRoute()
 
@@ -337,14 +334,18 @@ async function searchList(param: any) {
     param.startDate = fundDataParam.intervalDate[0]
     param.endDate = fundDataParam.intervalDate[1]
   }
-  const res = await request.simplePostPage(constant.fundUrlPre + '/fundData/init', tableInfo.pageInfo, param)
+  const res = await request.simplePostPage(
+    constant.fundUrlPre + '/fundData/init',
+    tableInfo.pageInfo,
+    param
+  )
   tableInfo.pageInfo.list = res.list
   thisPageAvg.value = res.isPageAvg
 }
 
 async function cal() {
   let param = {
-    fundId: fundId.value,
+    fundId: sessionStorage.getItem(SessionKey.fundId),
     startDate: null as string | null,
     endDate: null as string | null
   }
@@ -357,7 +358,7 @@ async function cal() {
 }
 
 async function httpSimCal() {
-  const data = await request.simpleGet(constant.fundUrlPre + '/fundData/simCal', {
+  const data = await request.simplePost(constant.fundUrlPre + '/fundData/simCal', {
     source: simCal.source,
     target: simCal.target
   })
@@ -371,7 +372,7 @@ function initCal() {
 
 function init() {
   let param = {
-    fundId: fundId.value,
+    fundId: sessionStorage.getItem(SessionKey.fundId),
     startDate: null as string | null,
     endDate: null as string | null
   }
@@ -380,7 +381,7 @@ function init() {
 
 function searchSimpleTrend() {
   let param = {
-    fundId: fundId.value,
+    fundId: sessionStorage.getItem(SessionKey.fundId),
     startDate: null as string | null,
     endDate: null as string | null,
     chooseDateLength: fundDataParam.chooseDateLength,
@@ -391,14 +392,14 @@ function searchSimpleTrend() {
 }
 
 async function initFundInfo() {
-  const res = await request.simpleGet(constant.fundUrlPre + '/fundInfo/fundInfoInit', {
-    id: fundId.value
-  })
-  fundInfo.value = res
+  fundInfo.value = await request.simplePost(
+    constant.fundUrlPre + '/fundAttention/detail',
+    sessionStorage.getItem(SessionKey.fundId)
+  )
 }
 
 async function myChooseDate(netValueDate: Date) {
-  const data = await request.simpleGet(constant.fundUrlPre + '/fundData/findRecentData', {
+  const data = await request.simplePost(constant.fundUrlPre + '/fundData/findRecentData', {
     fundId: fundId.value,
     myChooseDate: netValueDate
   })
@@ -459,7 +460,7 @@ async function set_cell_style({ row, column }) {
 
 async function addToday(rate) {
   dialogFormVisible.value = false
-  await request.simpleGet(constant.fundUrlPre + '/fundData/addToday', {
+  await request.simplePost(constant.fundUrlPre + '/fundData/addToday', {
     fundId: fundId.value,
     rate: rate
   })

@@ -72,36 +72,13 @@ class ResImpl<T = any> implements Res<T> {
   }
 }
 
-export async function axiosGet(url: string, param: any) {
-  const axiosResponse = await axios.get(url, { params: param })
-  return axiosResponse
-}
-
-export async function get(url: string, param: any): Promise<Res> {
-  const axiosResponse = await axios.get(url, { params: param })
-  const resImpl = new ResImpl(axiosResponse)
-  return resImpl
-}
-
-export async function simpleGet(url: string, param: any): Promise<any> {
-  const res = await get(url, param)
-  if (res.isSuccessOrPopBox()) {
-    return res.data
-  } else {
-    // 异步抛异常
-    return Promise.reject(new Error('interface.error'))
-  }
-}
-
 export async function axiosPost(url: string, param: any) {
-  const axiosResponse = await axios.post(url, param)
-  return axiosResponse
+  return await axios.post(url, param)
 }
 
 export async function post(url: string, param: any): Promise<Res> {
   const axiosResponse = await axios.post(url, param)
-  const resImpl = new ResImpl(axiosResponse)
-  return resImpl
+  return new ResImpl(axiosResponse)
 }
 
 export async function simplePost(url: string, param: any): Promise<any> {
@@ -151,9 +128,6 @@ export async function simplePostPage(
 }
 
 export default {
-  axiosGet,
-  get,
-  simpleGet,
   simplePost,
   simplePostPage
 }

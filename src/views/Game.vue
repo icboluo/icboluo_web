@@ -75,7 +75,7 @@
             <div>
               <el-row
                 v-if="allMonster"
-                v-for="(item, idx) in alUtil.toDoubleArray(allMonster)"
+                v-for="(item, idx) in toDoubleArray(allMonster)"
                 :key="idx"
                 :gutter="20"
               >
@@ -126,7 +126,7 @@
 import { computed, onUnmounted, reactive, ref } from 'vue'
 import request from '@/util/Request'
 import constant from '@/util/Constant'
-import alUtil from '@/util/AlUtil'
+import alUtil, { toDoubleArray } from '@/util/AlUtil'
 
 let dropdownShow = ref([
   {
@@ -155,19 +155,18 @@ let cultivationCareer = ref()
 let timer = ref()
 
 async function myRole() {
-  const res = await request.simpleGet(constant.gameUrlPre + '/player/myRole')
-  dropdownShow.value = res
+  dropdownShow.value = await request.simplePost(constant.gameUrlPre + '/player/myRole')
 }
 
 async function addRole() {
-  await request.simpleGet(constant.gameUrlPre + '/player/addRole')
+  await request.simplePost(constant.gameUrlPre + '/player/addRole')
 }
 
 async function findById(id?: number) {
   if (id) {
     player.id = id
   }
-  let res = await request.simpleGet(constant.gameUrlPre + '/player/exhibit', { id: player.id })
+  let res = await request.simplePost(constant.gameUrlPre + '/player/exhibit', player.id)
   player.id = res.id
   player.age = res.age
 
@@ -183,12 +182,12 @@ async function findById(id?: number) {
 }
 
 async function nextMonster() {
-  await request.simpleGet(constant.gameUrlPre + '/player/nextMonster')
+  await request.simplePost(constant.gameUrlPre + '/player/nextMonster')
   await allMonsterFun()
 }
 
 async function attack(monsterId: string) {
-  await request.simpleGet(constant.gameUrlPre + '/player/attack', {
+  await request.simplePost(constant.gameUrlPre + '/player/attack', {
     playerId: player.id,
     monsterId: monsterId
   })
@@ -197,14 +196,14 @@ async function attack(monsterId: string) {
 }
 
 async function allMonsterFun() {
-  let res = await request.simpleGet(constant.gameUrlPre + '/player/allMonster')
-  allMonster.value = res
+  allMonster.value = await request.simplePost(constant.gameUrlPre + '/player/allMonster')
 }
 
 async function cultivationCareerFunCycle() {
-  let res = await request.simpleGet(constant.gameUrlPre + '/cultivationCareer/cultivationCareer', {
-    id: player.id
-  })
+  let res = await request.simplePost(
+    constant.gameUrlPre + '/cultivationCareer/cultivationCareer',
+    player.id
+  )
   cultivationCareer.value = res.list
   await findById()
 }
