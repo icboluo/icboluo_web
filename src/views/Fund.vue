@@ -20,6 +20,15 @@
     <el-button type="primary" plain @click="init"> 搜索</el-button>
 
     <base-table :table-info="tableInfo" @init="init">
+      <template v-slot:cellSlot="id">
+        <div
+          :class="
+            id.filedRow.max == id.fieldVal ? 'color-red' : id.filedRow.min == id.fieldVal ? 'color-blue' : ''
+          "
+        >
+          {{ id.fieldVal }}
+        </div>
+      </template>
       <template v-slot:buttonSlot="id">
         <el-button
           @click="handleClick(id.fieldVal, id.fieldOperation)"
@@ -178,6 +187,20 @@ async function init() {
     ...item,
     avgMap2: item.avgMap[2]
   }))
+  tableInfo.pageInfo.list.forEach((it) => {
+    it.max = Math.max(
+      it.fixedInvestmentIncome,
+      it.lossInvestmentIncome,
+      it.lossRatioIncome,
+      it.bigLossIncome
+    )
+    it.min = Math.min(
+      it.fixedInvestmentIncome,
+      it.lossInvestmentIncome,
+      it.lossRatioIncome,
+      it.bigLossIncome
+    )
+  })
 }
 
 async function handleClick(id: any, operation: string) {

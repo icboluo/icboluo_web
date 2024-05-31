@@ -7,12 +7,22 @@
       :label="item.showName || item.label"
       :key="idx"
     >
+      <template v-slot="cell">
+        <slot
+          name="cellSlot"
+          :fieldVal="cell.row[item.fieldName || item.prop || item.buttonName]"
+          :fieldOperation="item.buttonOperation"
+          :filedRow="cell.row"
+          :idx="idx"
+        ></slot>
+      </template>
       <!--      这里 default和不写是一致的，代表处理的是表体，如果写header代表处理的是表头-->
       <template v-if="item.isButtonSlot" v-slot="cell">
         <slot
           name="buttonSlot"
           :fieldVal="cell.row[item.fieldName || item.prop || item.buttonName]"
           :fieldOperation="item.buttonOperation"
+          :filedRow="cell.row"
           :idx="idx"
         ></slot>
       </template>
@@ -79,8 +89,8 @@ const handleCurrentChange = (curPage: number, pageInfo?: PageInfo) => {
 
 export interface TableInfo {
   header: Header[]
-  pageInfo: PageInfo,
-  body:[]
+  pageInfo: PageInfo
+  body: []
 }
 
 export interface Header extends TableColumnCtx<any> {
@@ -111,5 +121,13 @@ export interface PageInfo extends PaginationProps {
 <style>
 .color1 {
   color: #e10b65;
+}
+
+.color-red {
+  color: #e10b65;
+}
+
+.color-blue {
+  color: #19e10b;
 }
 </style>

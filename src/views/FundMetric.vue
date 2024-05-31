@@ -5,7 +5,7 @@
         <div style="display: flex; align-items: center">
           <el-popover placement="right" :width="400" trigger="click">
             <template #reference>
-              <el-button style="margin-right: 16px">
+              <el-button class="el-button-circle">
                 <el-avatar size="small" :src="circleUrl" style="flex: auto" />
               </el-button>
             </template>
@@ -158,7 +158,6 @@ function calColor(val: number): string {
     return val < 0 ? 'green' : 'red'
   }
 }
-
 </script>
 
 <style scoped>
@@ -240,10 +239,23 @@ function calColor(val: number): string {
   border-right: 1px solid var(--el-border-color);
 }
 
+.el-button-circle {
+  position: relative;
+  top: 40%;
+  right: 20%;
+}
+
 .el-result-class {
   width: 10px;
   height: 10px;
   flex: auto;
   margin: auto;
+}
+
+.el-result__icon svg {
+  width: 20px;
+  height: 20px;
+  top: 40%;
+  right: 20%;
 }
 </style>
