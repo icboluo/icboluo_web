@@ -66,21 +66,17 @@ function register() {
 }
 
 async function login() {
-  let { data } = await axios.get(constant.userUrlPre + '/login', {
-    params: {
-      id: userData.id,
-      pwd: userData.pwd
-    }
+  await request.simplePost(constant.userUrlPre + '/login', {
+    name: userData.id,
+    password: userData.pwd
   })
-  if (data.code === '200' || data.code === '0') {
-    ElMessage({
-      type: 'success',
-      message: 'login successful'
-    })
-    await router.push({
-      path: '/frontPage'
-    })
-  }
+  ElMessage({
+    type: 'success',
+    message: 'login successful'
+  })
+  await router.push({
+    path: '/frontPage'
+  })
 }
 </script>
 

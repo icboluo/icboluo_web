@@ -127,6 +127,29 @@ export async function simplePostPage(
   }
 }
 
+export async function upload(url: string, formData: FormData): Promise<ResImpl> {
+  const axiosResponse = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  return new ResImpl(axiosResponse)
+}
+
+export async function simpleUpload(url: string, formData: FormData): Promise<any> {
+  const res = await upload(url, formData)
+  if (res.isSuccess()) {
+    return res.data
+  } else {
+    ElMessage.error({
+      dangerouslyUseHTMLString: true,
+      message: res.message || 'error'
+    })
+    // 异步抛异常
+    return Promise.reject(new Error('interface.error'))
+  }
+}
+
 export default {
   simplePost,
   simplePostPage
