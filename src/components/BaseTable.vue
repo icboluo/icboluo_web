@@ -115,6 +115,17 @@ export interface PageInfo extends PaginationProps {
   list: []
 }
 
+/*
+ Object.assign(); // 对象合并
+ toRefs() // 将响应式对象转换为普通对象
+ toRef() // 将响应式对象的某个属性转换为普通对象
+ computed() // 计算属性，可以缓存计算结果（类似于备忘录模式）
+ watch() // 监听数据的变化
+ watchEffect() // 监听数据的变化，并执行相应的操作
+ 钩子函数
+ <div ref="a"/>  let a=ref()  a相当于div的容器
+ */
+
 // 勿删，有使用
 </script>
 
