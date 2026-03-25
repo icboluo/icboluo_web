@@ -7,11 +7,9 @@
             所有角色
             <template #dropdown>
               <el-dropdown-menu>
-                <template v-for="item in dropdownShow">
-                  <el-dropdown-item @click="findById(item.id)">
-                    {{ item }}
-                  </el-dropdown-item>
-                </template>
+                <el-dropdown-item v-for="item in dropdownShow" :key="item.id" @click="findById(item.id)">
+                  {{ item }}
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -106,13 +104,14 @@
             </div>
           </el-main>
           <el-aside width="400px">
-            <button @click="reFresh">Cultivation Career</button>
+            <div>修仙生涯</div>
             <div
               v-if="cultivationCareer"
               v-for="(item, idx) in cultivationCareer"
               :key="idx"
               v-bind:style="{ height: '100px' }"
             >
+              <span style="color: #999; font-size: 12px;">{{ formatTime(item.createTime) }}</span><br />
               {{ item.oper }}
             </div>
           </el-aside>
@@ -151,8 +150,8 @@ const experiencePercentage = computed(() => {
   return alUtil.percentage(player.experience, player.curTotalExperience, 0)
 })
 let allMonster = ref([])
-let cultivationCareer = ref()
-let timer = ref()
+let cultivationCareer = ref([])
+let ws: WebSocket | null = null
 
 async function myRole() {
   dropdownShow.value = await request.simplePost(constant.gameUrlPre + '/player/myRole')
@@ -179,6 +178,11 @@ async function findById(id?: number) {
   player.level = res.level
   player.name = res.name
   await allMonsterFun()
+  // 获取生涯日志并建立 WebSocket 连接（仅在未连接时建立）
+  await cultivationCareerFunCycle()
+  if (!ws || ws.readyState === WebSocket.CLOSED) {
+    connectWebSocket()
+  }
 }
 
 async function nextMonster() {
@@ -205,19 +209,76 @@ async function cultivationCareerFunCycle() {
     player.id
   )
   cultivationCareer.value = res.list
-  await findById()
 }
 
-async function reFresh() {
-  await cultivationCareerFunCycle()
-  timer.value = window.setInterval(() => {
-    setTimeout(cultivationCareerFunCycle, 0)
-  }, 9000)
+function formatTime(timeStr: string) {
+  if (!timeStr) return ''
+  const date = new Date(timeStr)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
+
+// 连接 WebSocket 接收实时推送
+function connectWebSocket() {
+  if (!player.id) {
+    console.warn('Player ID not set, skipping WebSocket connection')
+    return
+  }
+
+  // 如果已连接，先关闭
+  if (ws) {
+    ws.close()
+  }
+
+  // 直接连接 game 服务（端口 4399），绕过网关
+  const wsUrl = `ws://localhost:4399/ws/game/${player.id}`
+  ws = new WebSocket(wsUrl)
+  ws.onopen = () => {
+    console.log('WebSocket connected')
+  }
+  ws.onmessage = (event) => {
+    const message = JSON.parse(event.data)
+    if (message.type === 'career_update') {
+      // 将新收到的生涯数据插入到列表最前面
+      cultivationCareer.value.unshift(message.data)
+      // 保持最多显示50条
+      if (cultivationCareer.value.length > 50) {
+        cultivationCareer.value.pop()
+      }
+      // 如果有玩家信息，直接更新（避免调用 findById 重新建立 WebSocket 连接）
+      if (message.player) {
+        const p = message.player
+        player.id = p.id
+        player.age = p.age
+        player.attack = p.attack
+        player.blood = p.blood
+        player.maxBlood = p.maxBlood
+        player.experience = p.experience
+        player.totalExperience = p.totalExperience
+        // curTotalExperience 是前端计算的字段，不覆盖
+        player.level = p.level
+        player.name = p.name
+      }
+    }
+  }
+
+  ws.onclose = () => {
+    // onclose 时不再重连，避免无限循环
+    console.log('WebSocket disconnected')
+  }
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error)
+  }
 }
 
 onUnmounted(() => {
-  clearInterval(timer.value)
+  if (ws) {
+    ws.close()
+  }
 })
+
 </script>
 
 <style scoped></style>

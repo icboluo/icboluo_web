@@ -67,7 +67,7 @@ function register() {
 
 async function login() {
   await request.simplePost(constant.userUrlPre + '/login', {
-    name: userData.id,
+    id: userData.id,
     password: userData.pwd
   })
   ElMessage({

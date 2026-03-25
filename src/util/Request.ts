@@ -72,17 +72,17 @@ class ResImpl<T = any> implements Res<T> {
   }
 }
 
-export async function axiosPost(url: string, param: any) {
-  return await axios.post(url, param)
+export async function axiosPost(url: string, data?: any) {
+  return await axios.post(url, data)
 }
 
-export async function post(url: string, param: any): Promise<Res> {
-  const axiosResponse = await axios.post(url, param)
+export async function post(url: string, data?: any): Promise<Res> {
+  const axiosResponse = await axios.post(url, data)
   return new ResImpl(axiosResponse)
 }
 
-export async function simplePost(url: string, param: any): Promise<any> {
-  const res = await post(url, param)
+export async function simplePost(url: string, data?: any): Promise<any> {
+  const res = await post(url, data)
   if (res.isSuccessOrPopBox()) {
     return res.data
   } else {
