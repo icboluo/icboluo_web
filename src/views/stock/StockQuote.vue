@@ -33,14 +33,14 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="chartVisible" title="走势图" width="80%">
+    <el-dialog v-model="chartVisible" title="走势图" width="80%" @opened="renderChart" @closed="handleChartClosed">
       <div v-if="chart" ref="chartRef" style="width: 100%; height: 480px"></div>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
 import { SessionKey } from '@/util/AlUtil'
@@ -91,44 +91,78 @@ function openChart(row: QuoteVo) {
   }).then((data: StockChartVo) => {
     chart.value = data
     chartVisible.value = true
-    nextTick(renderChart)
   })
 }
+
+let chartInstance: echarts.ECharts | null = null
 
 function renderChart() {
   if (!chartRef.value || !chart.value) {
     return
   }
   const c = chart.value
-  const option = {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['收盘价', '持仓市值'] },
-    xAxis: { type: 'category', data: c.prices.map((p) => p.tradeDay) },
-    yAxis: { type: 'value' },
-    series: [
-      {
-        name: '收盘价',
-        type: 'candlestick',
-        data: c.prices.map((p) => [p.openPrice, p.closePrice, p.lowPrice, p.highPrice])
-      },
-      {
-        name: '持仓市值',
-        type: 'line',
-        data: c.prices.map((p) => p.holdMarketValue)
-      },
-      {
-        name: '买卖点',
-        type: 'scatter',
-        data: c.trades.map((t) => ({
-          value: [t.tradeDay, t.price],
-          symbol: t.tradeType === 'BUY' ? 'triangle' : 'pin',
-          symbolSize: 14,
-          itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }
-        }))
-      }
-    ]
+  // 后端数据仅保证有收盘价，开盘/最高/最低可能为 null，因此用折线展示收盘价走势，
+  // 避免 K 线图因 OHLC 缺失而完全空白。
+  const hasOhlc = c.prices.some(
+    (p) => p.openPrice != null && p.highPrice != null && p.lowPrice != null
+  )
+  const series: echarts.SeriesOption[] = [
+    {
+      name: '收盘价',
+      type: 'line',
+      smooth: true,
+      showSymbol: false,
+      data: c.prices.map((p) => p.closePrice)
+    }
+  ]
+  if (hasOhlc) {
+    series.push({
+      name: 'K线',
+      type: 'candlestick',
+      data: c.prices.map((p) => [p.openPrice, p.closePrice, p.lowPrice, p.highPrice])
+    })
   }
-  echarts.init(chartRef.value).setOption(option)
+  series.push({
+    name: '持仓市值',
+    type: 'line',
+    yAxisIndex: 1,
+    data: c.prices.map((p) => p.holdMarketValue)
+  })
+  if (c.trades.length) {
+    series.push({
+      name: '买卖点',
+      type: 'scatter',
+      data: c.trades.map((t) => ({
+        value: [t.tradeDay, t.price],
+        symbol: t.tradeType === 'BUY' ? 'triangle' : 'pin',
+        symbolSize: 14,
+        itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }
+      }))
+    })
+  }
+  const option: echarts.EChartsOption = {
+    tooltip: { trigger: 'axis' },
+    legend: { data: series.map((s) => (s as { name?: string }).name).filter(Boolean) as string[] },
+    xAxis: { type: 'category', data: c.prices.map((p) => p.tradeDay) },
+    yAxis: [
+      { type: 'value', name: '价格', scale: true },
+      { type: 'value', name: '市值', scale: true }
+    ],
+    series
+  }
+  if (chartInstance) {
+    chartInstance.dispose()
+  }
+  chartInstance = echarts.init(chartRef.value)
+  chartInstance.setOption(option)
+  chartInstance.resize()
+}
+
+function handleChartClosed() {
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
 }
 
 onMounted(loadSeasons)

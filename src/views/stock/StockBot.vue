@@ -12,20 +12,17 @@
     </el-row>
 
     <el-tabs style="margin-top: 16px">
-      <el-tab-pane label="机器人管理">
+      <el-tab-pane label="预置机器人">
         <el-card header="预置机器人" style="margin-top: 16px">
           <el-table :data="presets" style="width: 100%">
             <el-table-column prop="botName" label="名称" width="140" />
             <el-table-column prop="buyStrategyName" label="买入策略" width="160" />
             <el-table-column prop="sellStrategyName" label="卖出策略" width="160" />
-            <el-table-column label="操作" width="120">
-              <template #default="scope">
-                <el-button size="small" @click="usePreset(scope.row)">选用</el-button>
-              </template>
-            </el-table-column>
           </el-table>
         </el-card>
+      </el-tab-pane>
 
+      <el-tab-pane label="组合机器人">
         <el-card header="组合机器人" style="margin-top: 16px">
           <el-table :data="composes" style="width: 100%">
             <el-table-column prop="botName" label="名称" width="140" />
@@ -38,7 +35,9 @@
             </el-table-column>
           </el-table>
         </el-card>
+      </el-tab-pane>
 
+      <el-tab-pane label="新建机器人">
         <el-card header="新建组合机器人" style="margin-top: 16px">
           <el-row :gutter="12" align="middle">
             <el-col :span="5">
@@ -220,14 +219,14 @@ function createCompose() {
   if (!sid || !form.name || !form.buyStrategyId || !form.sellStrategyId) {
     return
   }
-  const param = {
+  const param: Record<string, unknown> = {
     name: form.name,
     buyStrategyId: form.buyStrategyId,
     sellStrategyId: form.sellStrategyId,
     seasonId: sid
   }
-  if (form.buyParams) (param as any).buyParams = form.buyParams
-  if (form.sellParams) (param as any).sellParams = form.sellParams
+  if (form.buyParams) param.buyParams = form.buyParams
+  if (form.sellParams) param.sellParams = form.sellParams
   simplePost(stockUrlPre + 'bot-strategy/compose', param).then(() => loadAll())
 }
 

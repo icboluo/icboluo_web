@@ -5,7 +5,7 @@
         <el-button type="primary" @click="openCreate">创建赛季</el-button>
       </el-col>
       <el-col :span="4">
-        <el-button @click="botMatch">机器人对战</el-button>
+        <el-button @click="openBot">机器人对战</el-button>
       </el-col>
     </el-row>
 
@@ -21,6 +21,21 @@
       <template #footer>
         <el-button @click="createVisible = false">取消</el-button>
         <el-button type="primary" @click="confirmCreate">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="botVisible" title="机器人对战" width="420px">
+      <el-form label-width="90px">
+        <el-form-item label="赛季名称">
+          <el-input v-model="botName" placeholder="请输入赛季名称" />
+        </el-form-item>
+        <el-form-item label="初始资金">
+          <el-input v-model="botFund" placeholder="默认 1000000" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="botVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmBot">开始对战</el-button>
       </template>
     </el-dialog>
 
@@ -40,9 +55,14 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="320">
+      <el-table-column label="操作" width="360">
         <template #default="scope">
-          <el-button size="small" @click="joinSeason(scope.row)">加入</el-button>
+          <el-button
+            size="small"
+            :disabled="scope.row.status !== 'PREPARING'"
+            @click="joinSeason(scope.row)"
+            >加入</el-button
+          >
           <el-button
             size="small"
             type="success"
@@ -64,6 +84,13 @@
             @click="finishSeason(scope.row)"
             >结束</el-button
           >
+          <el-button
+            size="small"
+            type="danger"
+            :disabled="scope.row.status === 'PLAYING'"
+            @click="deleteSeason(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -72,6 +99,7 @@
 
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
+import { ElMessageBox } from 'element-plus'
 import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
 import { SessionKey } from '@/util/AlUtil'
@@ -82,6 +110,9 @@ const loading = ref(false)
 const createName = ref('')
 const createFund = ref('')
 const createVisible = ref(false)
+const botName = ref('')
+const botFund = ref('')
+const botVisible = ref(false)
 
 function init() {
   loading.value = true
@@ -114,11 +145,24 @@ function confirmCreate() {
     .catch((e) => console.error('[StockSeason] create failed', e))
 }
 
-function botMatch() {
-  const name = window.prompt('请输入对战名称', '机器人对战') || '机器人对战'
-  simplePost(stockUrlPre + 'season/bot-match', { name })
+function openBot() {
+  botName.value = ''
+  botFund.value = ''
+  botVisible.value = true
+}
+
+function confirmBot() {
+  if (!botName.value) {
+    return
+  }
+  const param: Record<string, unknown> = { name: botName.value }
+  if (botFund.value) {
+    param.initialFund = Number(botFund.value)
+  }
+  simplePost(stockUrlPre + 'season/bot-match', param)
     .then((data: SeasonVo) => {
       sessionStorage.setItem(SessionKey.stockSeasonId, String(data.id))
+      botVisible.value = false
       init()
     })
     .catch((e) => console.error('[StockSeason] botMatch failed', e))
@@ -148,6 +192,22 @@ function advanceDay(row: SeasonVo) {
 
 function finishSeason(row: SeasonVo) {
   simplePost(stockUrlPre + 'season/finish', { seasonId: row.id }).then(() => init())
+}
+
+function deleteSeason(row: SeasonVo) {
+  ElMessageBox.confirm(`确定删除赛季「${row.name}」吗？该操作将级联删除相关账户、持仓及交易记录，且不可恢复。`, '删除确认', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => simplePost(stockUrlPre + 'season/delete', { seasonId: row.id }))
+    .then(() => init())
+    .catch((e) => {
+      // 用户取消或请求失败都不处理（取消时 e 为 'cancel'，属正常交互）
+      if (e !== 'cancel' && e !== 'close') {
+        console.error('[StockSeason] delete failed', e)
+      }
+    })
 }
 
 onMounted(init)
