@@ -43,7 +43,9 @@ export function percentage(a: number, b: number, def: number) {
 }
 
 export enum SessionKey {
-  fundId = 'fundId'
+  fundId = 'fundId',
+  stockPlayerName = 'stockPlayerName',
+  stockSeasonId = 'stockSeasonId'
 }
 
 export default {

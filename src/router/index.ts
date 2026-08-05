@@ -8,8 +8,15 @@ import Fund from '@/views/Fund.vue'
 import Game from '@/views/Game.vue'
 import TableList from '@/views/TableList.vue'
 import PictureGraph from '@/views/PictureGraph.vue'
-import FundWeight from "@/views/FundMetric.vue";
-import FundMetric from "@/views/FundMetric.vue";
+import FundMetric from '@/views/FundMetric.vue'
+import StockSeason from '@/views/stock/StockSeason.vue'
+import StockQuote from '@/views/stock/StockQuote.vue'
+import StockTrade from '@/views/stock/StockTrade.vue'
+import StockAccount from '@/views/stock/StockAccount.vue'
+import StockRank from '@/views/stock/StockRank.vue'
+import StockProfit from '@/views/stock/StockProfit.vue'
+import StockPlayerDetail from '@/views/stock/StockPlayerDetail.vue'
+import StockBot from '@/views/stock/StockBot.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,7 +76,15 @@ const router = createRouter({
         {
           path: '/game',
           component: Game
-        }
+        },
+        { path: '/stockSeason', name: 'StockSeason', component: StockSeason },
+        { path: '/stockQuote', name: 'StockQuote', component: StockQuote },
+        { path: '/stockTrade', name: 'StockTrade', component: StockTrade },
+        { path: '/stockAccount', name: 'StockAccount', component: StockAccount },
+        { path: '/stockRank', name: 'StockRank', component: StockRank },
+        { path: '/stockProfit', name: 'StockProfit', component: StockProfit },
+        { path: '/stockPlayerDetail', name: 'StockPlayerDetail', component: StockPlayerDetail },
+        { path: '/stockBot', name: 'StockBot', component: StockBot }
       ]
     }
   ]

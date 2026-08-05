@@ -49,13 +49,15 @@ Routing uses `createWebHistory`. The key structural concept is a **layout route*
 
 `FrontPage.vue` is the navigation hub: `el-menu` items carry `index` values equal to route paths, and `@select` calls `router.push(path)`. To add a feature page, register it as a child of `/frontPage` and add a matching `el-menu-item` whose index is the path.
 
+**WARNING:** `router/index.ts` imports 9 view files under `@/views/stock/` (`StockSeason`, `StockQuote`, `StockTrade`, `StockAccount`, `StockRank`, `StockProfit`, `StockPlayerDetail`, `StockBot`). That directory does not exist on disk, so `npm run dev` / `npm run build` will fail until those files are created (or the imports and route entries are removed).
+
 ### Data access layer (`src/util/`)
 This is the most important pattern to understand, because every feature view relies on it:
 
 - **`Request.ts`** wraps axios and defines a `Res`/`ResImpl` envelope around backend responses. Backend payloads are `{ code, message, data }`; `ResImpl` flattens them so callers read `res.data`, `res.code`, `res.message` and use `res.isSuccess()` (true when code is `'0'` or `'200'`) or `isSuccessOrPopBox()` (auto `ElMessage.error` on failure). The main helpers are `post`/`simplePost` (throws on failure), `postPage`/`simplePostPage` (merges `pageNum`/`pageSize` into the param and writes pagination fields back into a `PageInfo`), and `upload`/`simpleUpload` (multipart/form-data).
 - **`AxiosInterceptor.ts`** defines request/response interceptors (sets `Content-Type`, shows `ElMessage` on HTTP 401/403/404/504). **Caveat:** this module is never imported by `main.ts`, and carries a TODO noting it may not load at startup. Treat interceptors as inactive; response handling is done by `Request.ts`. Do not assume global error toasts are wired up.
-- **`Constant.ts`** holds hardcoded backend base URLs: `noteUrlPre` (`:1514`), `fundUrlPre` (`:8888`), `gameUrlPre` (`:4399`), `userUrlPre` (`:7010/user`). All point to `http://127.0.0.1`. Change these when targeting a different environment.
-- **`AlUtil.ts`** provides misc helpers (`toDoubleArray` for chunking lists, `percentage`) and a `SessionKey` enum used to stash values like `fundId` in `sessionStorage`.
+- **`Constant.ts`** holds hardcoded backend base URLs: `noteUrlPre` (`:1514`), `fundUrlPre` (`:8888`), `gameUrlPre` (`:4399`), `userUrlPre` (`:7010/user`), `stockUrlPre` (`:8889`). All point to `http://127.0.0.1`. Change these when targeting a different environment.
+- **`AlUtil.ts`** provides misc helpers (`toDoubleArray` for chunking lists, `percentage`) and a `SessionKey` enum used to stash values in `sessionStorage` (`fundId`, `stockPlayerName`, `stockSeasonId`). The file's trailing comment also sketches the stock data contract types (`SeasonVo`, `QuoteVo`, `AccountVo`, `PositionVo`, `RankVo`, `ProfitPointVo`, `PositionDistributionVo`, `TradeRecordVo`, `StockChartVo`, `PricePoint`, `TradeMarker`) intended for `src/types/stock.ts`.
 
 When adding an API call, import helpers from `@/util/Request` and the right base URL from `@/util/Constant`, and handle the result via `simplePost`/`simplePostPage`.
 
@@ -70,11 +72,17 @@ Each view is a self-contained feature wired to one backend service: `Note.vue` (
 ### Real-time data (`src/composables/useStockWebSocket.ts`)
 A composable that opens `ws://localhost:8889/ws/stock/${seasonId}`, parses JSON messages, filters `pong` heartbeats, and invokes an `onMessage` callback. It runs a 30s ping heartbeat and auto-disconnects on `onUnmounted`. Use this for live stock updates.
 
+### Stock feature (`src/views/stock/`)
+A cluster of stock-trading views served under the `/frontPage` layout route, all backed by `stockUrlPre` (http://127.0.0.1:8889). Registered routes: `/stockSeason`, `/stockQuote`, `/stockTrade`, `/stockAccount`, `/stockRank`, `/stockProfit`, `/stockPlayerDetail`, `/stockBot`. Live data flows through `useStockWebSocket`. Cross-page state (current player/season) is stashed in `sessionStorage` via `AlUtil.SessionKey` (`stockPlayerName`, `stockSeasonId`). **Caveat:** the 9 referenced view files under `src/views/stock/` do not yet exist on disk (see Routing warning above).
+
 ### State (`src/stores/`)
 Pinia is installed but only `counter.ts` (a demo `useCounterStore`) exists. Feature state currently lives in component-local `reactive`/`ref`. Add stores here if shared/global state is needed.
 
 ### Path aliases
-`vite.config.ts` defines `@` -> `src` (and an unused `@&`). `tsconfig.app.json` maps `@/*` -> `src/*`. Import modules with `@/...`.
+`vite.config.ts` defines `@` -> `src` (and a second `@&` alias pointing to the same `src` dir). `tsconfig.app.json` maps `@/*` -> `src/*`. Import modules with `@/...`. Note `server.host` is set to `0.0.0.0`, so the dev server is reachable from the LAN / containers, not just localhost.
 
 ### `src/note/`
 This directory holds static assets and separate sub-projects (img, `myproject-ly-static`, `protal`, `vue-demo2`, `vue`, `html.html`) — NOT part of the Vite SPA bundle. Leave it alone unless intentionally editing static note content.
+
+### Related backend repository
+The backend services this frontend depends on (note, fund, game, user, stock) live in a separate repository at `D:\IdeaProjects\icboluo`. Refer there for API implementations, ports, and data models referenced by `src/util/Constant.ts` (e.g., `:1514`, `:8888`, `:4399`, `:7010`, `:8889`).
