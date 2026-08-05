@@ -326,3 +326,33 @@ export interface TradeMarker {
   quantity: number
   amount: number
 }
+
+// 策略参数元数据
+export interface StrategyParamMeta {
+  name: string // 参数名（唯一标识，如 "buyAmount"）
+  label: string // 参数标签（前端展示名，如 "买入金额"）
+  type: string // 参数类型（integer / decimal / boolean）
+  defaultValue: unknown // 默认值
+  description: string // 参数描述
+}
+
+// 策略详情
+export interface StrategyVo {
+  id: string // 策略标识
+  name: string // 策略名称
+  description: string // 策略描述
+  params: StrategyParamMeta[] // 参数定义列表
+}
+
+// 组合/预设机器人配置
+export interface PresetBotVo {
+  id: number | null // ID（组合机器人有ID，预置机器人无ID）
+  name: string // 机器人名称
+  botName: string // 兼容组合机器人的 botName 字段
+  buyStrategyId: string // 买入策略标识
+  sellStrategyId: string // 卖出策略标识
+  buyStrategyName: string // 买入策略名称
+  sellStrategyName: string // 卖出策略名称
+  buyParams: string // 买入策略参数（JSON 字符串）
+  sellParams: string // 卖出策略参数（JSON 字符串）
+}
