@@ -12,9 +12,6 @@
       <el-col :span="6">
         <el-tag type="info">当前玩家：{{ currentPlayer || '未选择' }}</el-tag>
       </el-col>
-      <el-col :span="4">
-        <el-button type="warning" @click="openDetail">交易详情图</el-button>
-      </el-col>
     </el-row>
 
     <el-row :gutter="12" style="margin-top: 12px" align="middle">
@@ -32,68 +29,87 @@
       </el-col>
     </el-row>
 
-    <BaseTable :table-info="tableInfo" @handler-size-change="init" @handler-cur-change="init">
-      <template #cellSlot="{ filedRow, fieldVal }">
-        <span v-if="fieldVal === 'BUY' || fieldVal === 'SELL'" :style="{ color: filedRow.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }">
-          {{ filedRow.tradeType === 'BUY' ? '买入' : '卖出' }}
-        </span>
-      </template>
-    </BaseTable>
+    <el-table :data="stockList" style="width: 100%; margin-top: 16px" empty-text="该玩家暂无交易股票">
+      <el-table-column prop="stockCode" label="代码" width="110" />
+      <el-table-column prop="stockName" label="名称" width="140" />
+      <el-table-column prop="stockTotalInvest" label="累计投入" width="130" />
+      <el-table-column label="总收益" width="130">
+        <template #default="scope">
+          <span :style="{ color: profitColor(scope.row.stockProfit) }">{{ scope.row.stockProfit }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="收益率(%)" width="120">
+        <template #default="scope">
+          <span :style="{ color: profitColor(scope.row.stockProfitRate) }">{{ scope.row.stockProfitRate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" min-width="180">
+        <template #default="scope">
+          <el-button size="small" type="primary" @click="openChart(scope.row)">走势图</el-button>
+          <el-button size="small" type="warning" @click="openRecords(scope.row)">交易记录</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <el-dialog v-model="detailVisible" title="交易详情图" width="80%" @opened="renderActiveChart" @closed="handleDetailClosed">
-      <el-tabs v-model="activeStockCode" @tab-change="onTabChange">
-        <el-tab-pane v-for="c in detailCharts" :key="c.stockCode" :label="c.stockCode" :name="c.stockCode">
-          <div v-if="c.stockCode === activeStockCode" ref="chartRef" style="width: 100%; height: 460px"></div>
-        </el-tab-pane>
-      </el-tabs>
-      <el-empty v-if="!detailCharts.length" description="暂无交易数据" />
+    <el-dialog v-model="chartVisible" :title="(chartStock?.stockName || '') + ' 走势图'" width="80%" @opened="renderChart" @closed="handleChartClosed">
+      <div v-if="chartStock" ref="chartRef" style="width: 100%; height: 480px"></div>
+    </el-dialog>
+
+    <el-dialog v-model="recordsVisible" :title="(recordStock?.stockName || '') + ' 交易记录'" width="80%">
+      <el-table :data="records" empty-text="暂无交易记录">
+        <el-table-column prop="tradeDay" label="交易日" width="100" />
+        <el-table-column prop="stockCode" label="代码" width="110" />
+        <el-table-column label="类型" width="80">
+          <template #default="scope">
+            <span :style="{ color: scope.row.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }">
+              {{ scope.row.tradeType === 'BUY' ? '买入' : '卖出' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="数量" width="100" />
+        <el-table-column prop="price" label="价格" width="100" />
+        <el-table-column prop="amount" label="金额" width="120" />
+        <el-table-column prop="createTime" label="时间" min-width="180" />
+      </el-table>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref } from 'vue'
-import { simplePost, simplePostPage } from '@/util/Request'
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
 import { SessionKey } from '@/util/AlUtil'
 import * as echarts from 'echarts'
-import BaseTable from '@/components/BaseTable.vue'
 import type { SeasonVo, StockChartVo, TradeRecordVo } from '@/types/stock'
-import type { TableInfo, PageInfo } from '@/components/BaseTable.vue'
+import type { PageInfo } from '@/components/BaseTable.vue'
+
+const route = useRoute()
+// 优先使用排行榜跳转携带的玩家名，并回写 sessionStorage 保证后续一致
+const routePlayer = (route.query.playerName as string) || ''
+if (routePlayer) {
+  sessionStorage.setItem(SessionKey.stockPlayerName, routePlayer)
+}
 
 const seasons = ref<SeasonVo[]>([])
 const seasonId = ref<number>()
-const currentPlayer = sessionStorage.getItem(SessionKey.stockPlayerName) || ''
+const currentPlayer = routePlayer || sessionStorage.getItem(SessionKey.stockPlayerName) || ''
 const tradeForm = reactive({ stockCode: '', quantity: 100 })
 
-const detailVisible = ref(false)
-const detailCharts = ref<StockChartVo[]>([])
-const activeStockCode = ref<string>('')
+// 股票列表：该玩家交易过的股票
+const stockList = ref<StockChartVo[]>([])
+
+// 走势图弹窗
+const chartVisible = ref(false)
+const chartStock = ref<StockChartVo>()
 const chartRef = ref<HTMLElement>()
 let chartInstance: echarts.ECharts | null = null
 
-const pageInfo = reactive<PageInfo>({
-  pageNum: 1,
-  pageSize: 10,
-  total: 0,
-  list: [] as TradeRecordVo[]
-})
-
-const tableInfo = reactive<TableInfo>({
-  header: [
-    { fieldName: 'id', showName: 'ID', width: 80 },
-    { fieldName: 'stockCode', showName: '代码', width: 100 },
-    { fieldName: 'stockName', showName: '名称', width: 120 },
-    { fieldName: 'tradeType', showName: '类型', width: 80 },
-    { fieldName: 'quantity', showName: '数量', width: 100 },
-    { fieldName: 'price', showName: '价格', width: 100 },
-    { fieldName: 'amount', showName: '金额', width: 120 },
-    { fieldName: 'tradeDay', showName: '交易日', width: 100 },
-    { fieldName: 'createTime', showName: '时间', width: 180 }
-  ],
-  pageInfo: pageInfo,
-  body: pageInfo.list as TradeRecordVo[]
-})
+// 交易记录弹窗
+const recordsVisible = ref(false)
+const records = ref<TradeRecordVo[]>([])
+const recordStock = ref<StockChartVo>()
 
 function init() {
   const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
@@ -101,10 +117,10 @@ function init() {
   if (!sid || !playerName) {
     return
   }
-  simplePostPage(stockUrlPre + 'stockTrade/records', pageInfo, { seasonId: sid, playerName }).then(
-    (data: PageInfo) => {
-      pageInfo.list = data.list as TradeRecordVo[]
-      tableInfo.body = pageInfo.list as TradeRecordVo[]
+  // 用 playerCharts 获取该玩家交易过的股票清单（含收益信息）
+  simplePost(stockUrlPre + 'stockQuote/playerCharts', { seasonId: sid, playerName }).then(
+    (data: StockChartVo[]) => {
+      stockList.value = data
     }
   )
 }
@@ -142,29 +158,27 @@ function doTrade(type: 'buy' | 'sell') {
   }).then(() => init())
 }
 
-function openDetail() {
-  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
-  const playerName = sessionStorage.getItem(SessionKey.stockPlayerName)
-  if (!sid || !playerName) {
-    return
+function profitColor(v: string | number | null | undefined): string {
+  if (v == null) {
+    return ''
   }
-  simplePost(stockUrlPre + 'stockQuote/playerCharts', { seasonId: sid, playerName }).then(
-    (data: StockChartVo[]) => {
-      detailCharts.value = data
-      activeStockCode.value = data.length ? data[0].stockCode : ''
-      detailVisible.value = true
-    }
-  )
+  const n = typeof v === 'number' ? v : Number(v)
+  if (Number.isNaN(n)) {
+    return ''
+  }
+  return n > 0 ? '#67c23a' : n < 0 ? '#f56c6c' : ''
 }
 
-function renderActiveChart() {
-  if (!chartRef.value || !activeStockCode.value) {
+function openChart(row: StockChartVo) {
+  chartStock.value = row
+  chartVisible.value = true
+}
+
+function renderChart() {
+  if (!chartRef.value || !chartStock.value) {
     return
   }
-  const c = detailCharts.value.find((x) => x.stockCode === activeStockCode.value)
-  if (!c) {
-    return
-  }
+  const c = chartStock.value
   const series: echarts.SeriesOption[] = [
     {
       name: '收盘价',
@@ -201,17 +215,29 @@ function renderActiveChart() {
   chartInstance.resize()
 }
 
-function onTabChange(code: string | number) {
-  activeStockCode.value = String(code)
-  // tab 切换后对应图表容器需等待 DOM 更新，下一帧再渲染
-  nextTick(renderActiveChart)
-}
-
-function handleDetailClosed() {
+function handleChartClosed() {
   if (chartInstance) {
     chartInstance.dispose()
     chartInstance = null
   }
+}
+
+function openRecords(row: StockChartVo) {
+  recordStock.value = row
+  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+  const playerName = sessionStorage.getItem(SessionKey.stockPlayerName)
+  if (!sid || !playerName) {
+    return
+  }
+  simplePost(stockUrlPre + 'stockTrade/records', {
+    seasonId: sid,
+    playerName,
+    pageNum: 1,
+    pageSize: 1000
+  }).then((data: PageInfo<TradeRecordVo>) => {
+    records.value = data.list.filter((r) => r.stockCode === row.stockCode)
+    recordsVisible.value = true
+  })
 }
 
 onMounted(loadSeasons)

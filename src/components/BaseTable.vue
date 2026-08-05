@@ -51,7 +51,7 @@ import { getCurrentInstance, onMounted } from 'vue'
  */
 defineProps({
   tableInfo: {
-    type: Object as () => TableInfo
+    type: Object as () => TableInfo<any>
   }
 })
 
@@ -87,10 +87,10 @@ const handleCurrentChange = (curPage: number, pageInfo?: PageInfo) => {
   }
 }
 
-export interface TableInfo {
+export interface TableInfo<T = any> {
   header: Header[]
-  pageInfo: PageInfo
-  body: []
+  pageInfo: PageInfo<T>
+  body: T[]
 }
 
 export interface Header extends TableColumnCtx<any> {
@@ -108,11 +108,11 @@ export interface Header extends TableColumnCtx<any> {
   buttonOperation: string
 }
 
-export interface PageInfo extends PaginationProps {
+export interface PageInfo<T = any> extends PaginationProps {
   total: number
   pageSize: number
   pageNum: number
-  list: []
+  list: T[]
 }
 
 /*

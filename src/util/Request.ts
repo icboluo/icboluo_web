@@ -91,11 +91,11 @@ export async function simplePost(url: string, data?: any): Promise<any> {
   }
 }
 
-export async function postPage(
+export async function postPage<T = any>(
   url: string,
-  pageInfo: PageInfo,
+  pageInfo: PageInfo<T>,
   param?: any
-): Promise<Res<PageInfo>> {
+): Promise<Res<PageInfo<T>>> {
   if (!param) {
     param = {}
   }
@@ -113,11 +113,11 @@ export async function postPage(
   return resImpl
 }
 
-export async function simplePostPage(
+export async function simplePostPage<T = any>(
   url: string,
-  pageInfo: PageInfo,
+  pageInfo: PageInfo<T>,
   param?: any
-): Promise<PageInfo> {
+): Promise<PageInfo<T>> {
   const res = await postPage(url, pageInfo, param)
   if (res.isSuccessOrPopBox()) {
     return res.data

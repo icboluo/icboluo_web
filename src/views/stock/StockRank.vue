@@ -13,7 +13,11 @@
 
     <el-table :data="rank" style="width: 100%; margin-top: 16px" v-loading="loading">
       <el-table-column prop="rank" label="排名" width="80" />
-      <el-table-column prop="playerName" label="玩家" width="140" />
+      <el-table-column label="玩家" width="140">
+        <template #default="scope">
+          <el-link type="primary" @click="goTrade(scope.row)">{{ scope.row.playerName }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column prop="totalAsset" label="总资产" width="140" />
       <el-table-column prop="profitRate" label="收益率" width="120">
         <template #default="scope">
@@ -55,6 +59,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
 import { SessionKey } from '@/util/AlUtil'
@@ -69,6 +74,7 @@ const tradeVisible = ref(false)
 const tradeLoading = ref(false)
 const tradeTitle = ref('')
 const tradeRecords = ref<TradeRecordVo[]>([])
+const router = useRouter()
 
 function init() {
   const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
@@ -112,6 +118,10 @@ function viewTrades(row: RankVo) {
       tradeRecords.value = page.list ?? []
     })
     .finally(() => (tradeLoading.value = false))
+}
+
+function goTrade(row: RankVo) {
+  router.push({ path: '/stockTrade', query: { playerName: row.playerName } })
 }
 
 onMounted(loadSeasons)
