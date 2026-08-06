@@ -163,10 +163,6 @@ export interface RankVo {
    * 持仓股票种数
    */
   positionCount: number
-  /**
-   * 持仓股票名称列表
-   */
-  positionStockNames: string[]
 }
 
 /**

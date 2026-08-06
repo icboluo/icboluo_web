@@ -27,9 +27,6 @@
         </template>
       </el-table-column>
       <el-table-column prop="positionCount" label="持仓数" width="100" />
-      <el-table-column prop="positionStockNames" label="持仓股票">
-        <template #default="scope">{{ scope.row.positionStockNames.join('、') }}</template>
-      </el-table-column>
       <el-table-column label="操作" width="120">
         <template #default="scope">
           <el-button size="small" type="primary" @click="viewTrades(scope.row)">查看交易</el-button>
