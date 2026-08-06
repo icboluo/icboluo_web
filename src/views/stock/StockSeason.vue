@@ -39,6 +39,18 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="joinVisible" title="加入赛季" width="420px">
+      <el-form label-width="90px">
+        <el-form-item label="玩家昵称">
+          <el-input v-model="joinPlayerName" placeholder="请输入玩家昵称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="joinVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmJoin">确定加入</el-button>
+      </template>
+    </el-dialog>
+
     <el-table :data="seasons" style="width: 100%; margin-top: 16px" v-loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="名称" />
@@ -113,6 +125,9 @@ const createVisible = ref(false)
 const botName = ref('')
 const botFund = ref('')
 const botVisible = ref(false)
+const joinVisible = ref(false)
+const joinPlayerName = ref('')
+const joinTargetId = ref<number>()
 
 function init() {
   loading.value = true
@@ -169,17 +184,25 @@ function confirmBot() {
 }
 
 function joinSeason(row: SeasonVo) {
-  const playerName = sessionStorage.getItem(SessionKey.stockPlayerName) || ''
-  if (!playerName) {
-    window.prompt && (window as any).prompt('请输入玩家昵称')
+  joinTargetId.value = row.id
+  joinPlayerName.value = sessionStorage.getItem(SessionKey.stockPlayerName) || ''
+  joinVisible.value = true
+}
+
+function confirmJoin() {
+  if (!joinPlayerName.value || joinTargetId.value == null) {
+    return
   }
-  simplePost(stockUrlPre + 'season/join', { seasonId: row.id, playerName }).then((data: SeasonVo) => {
-    sessionStorage.setItem(SessionKey.stockSeasonId, String(data.id))
-    if (playerName) {
+  const playerName = joinPlayerName.value
+  const seasonId = joinTargetId.value
+  simplePost(stockUrlPre + 'season/join', { seasonId, playerName })
+    .then((data: SeasonVo) => {
+      sessionStorage.setItem(SessionKey.stockSeasonId, String(data.id))
       sessionStorage.setItem(SessionKey.stockPlayerName, playerName)
-    }
-    init()
-  })
+      joinVisible.value = false
+      init()
+    })
+    .catch((e) => console.error('[StockSeason] join failed', e))
 }
 
 function startSeason(row: SeasonVo) {

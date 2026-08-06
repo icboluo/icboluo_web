@@ -7,7 +7,16 @@
         </el-select>
       </el-col>
       <el-col :span="6">
-        <el-input v-model="playerName" placeholder="玩家昵称" />
+        <el-select
+          v-model="playerName"
+          filterable
+          allow-create
+          style="width: 100%"
+          placeholder="选择玩家"
+          @change="initAll"
+        >
+          <el-option v-for="p in players" :key="p" :label="p" :value="p" />
+        </el-select>
       </el-col>
       <el-col :span="4">
         <el-button type="primary" @click="initAll">查询</el-button>
@@ -73,10 +82,20 @@ import type {
 const seasons = ref<SeasonVo[]>([])
 const seasonId = ref<number>()
 const playerName = ref('')
+const players = ref<string[]>([])
 const account = ref<AccountVo>()
 const distribution = ref<PositionDistributionVo[]>([])
 const profit = ref<ProfitPointVo[]>([])
 const profitRef = ref<HTMLElement>()
+
+function loadPlayers() {
+  if (!seasonId.value) {
+    return
+  }
+  simplePost(stockUrlPre + 'stockAccount/players', { seasonId: seasonId.value }).then(
+    (data: string[]) => (players.value = data)
+  )
+}
 
 function collectParam() {
   return {
@@ -125,6 +144,7 @@ function loadSeasons() {
       seasonId.value = data[data.length - 1].id
     }
     playerName.value = sessionStorage.getItem(SessionKey.stockPlayerName) || ''
+    loadPlayers()
     initAll()
   })
 }

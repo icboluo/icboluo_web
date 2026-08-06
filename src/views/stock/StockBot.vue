@@ -11,69 +11,73 @@
       </el-col>
     </el-row>
 
+    <el-card header="机器人列表（预置与组合合并展示）" style="margin-top: 16px">
+      <template #header>
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span>机器人列表（预置与组合合并展示）</span>
+          <el-button type="primary" @click="openCreate">新建机器人</el-button>
+        </div>
+      </template>
+      <el-table :data="bots" style="width: 100%">
+        <el-table-column prop="botName" label="名称" width="140" />
+        <el-table-column prop="buyStrategyName" label="买入策略" width="160" />
+        <el-table-column prop="sellStrategyName" label="卖出策略" width="160" />
+        <el-table-column label="类型" width="100">
+          <template #default="scope">
+            <el-tag v-if="scope.row.isPreset" type="info">预置</el-tag>
+            <el-tag v-else type="success">组合</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160">
+          <template #default="scope">
+            <el-button size="small" @click="usePreset(scope.row)">选用</el-button>
+            <el-button
+              size="small"
+              type="danger"
+              :disabled="scope.row.isPreset"
+              @click="deleteCompose(scope.row)"
+            >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="createVisible" title="新建组合机器人" width="640px">
+      <el-form label-width="90px">
+        <el-form-item label="机器人名称">
+          <el-input v-model="form.name" placeholder="机器人名称" />
+        </el-form-item>
+        <el-form-item label="买入策略">
+          <el-select v-model="form.buyStrategyId" placeholder="买入策略" style="width: 100%">
+            <el-option v-for="s in buyStrategies" :key="s.id" :label="s.name" :value="s.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="卖出策略">
+          <el-select v-model="form.sellStrategyId" placeholder="卖出策略" style="width: 100%">
+            <el-option v-for="s in sellStrategies" :key="s.id" :label="s.name" :value="s.id" />
+          </el-select>
+        </el-form-item>
+        <el-alert
+          v-if="buyStrategies.length && form.buyStrategyId"
+          style="margin-bottom: 12px"
+          :title="selectedBuyDesc"
+          type="info"
+          :closable="false"
+        />
+        <el-alert
+          v-if="sellStrategies.length && form.sellStrategyId"
+          :title="selectedSellDesc"
+          type="info"
+          :closable="false"
+        />
+      </el-form>
+      <template #footer>
+        <el-button @click="createVisible = false">取消</el-button>
+        <el-button type="success" @click="createCompose">创建</el-button>
+      </template>
+    </el-dialog>
+
     <el-tabs style="margin-top: 16px">
-      <el-tab-pane label="预置机器人">
-        <el-card header="预置机器人" style="margin-top: 16px">
-          <el-table :data="presets" style="width: 100%">
-            <el-table-column prop="botName" label="名称" width="140" />
-            <el-table-column prop="buyStrategyName" label="买入策略" width="160" />
-            <el-table-column prop="sellStrategyName" label="卖出策略" width="160" />
-          </el-table>
-        </el-card>
-      </el-tab-pane>
-
-      <el-tab-pane label="组合机器人">
-        <el-card header="组合机器人" style="margin-top: 16px">
-          <el-table :data="composes" style="width: 100%">
-            <el-table-column prop="botName" label="名称" width="140" />
-            <el-table-column prop="buyStrategyName" label="买入策略" width="160" />
-            <el-table-column prop="sellStrategyName" label="卖出策略" width="160" />
-            <el-table-column label="操作" width="120">
-              <template #default="scope">
-                <el-button size="small" type="danger" @click="deleteCompose(scope.row)">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </el-tab-pane>
-
-      <el-tab-pane label="新建机器人">
-        <el-card header="新建组合机器人" style="margin-top: 16px">
-          <el-row :gutter="12" align="middle">
-            <el-col :span="5">
-              <el-input v-model="form.name" placeholder="机器人名称" />
-            </el-col>
-            <el-col :span="5">
-              <el-select v-model="form.buyStrategyId" placeholder="买入策略">
-                <el-option v-for="s in buyStrategies" :key="s.id" :label="s.name" :value="s.id" />
-              </el-select>
-            </el-col>
-            <el-col :span="5">
-              <el-select v-model="form.sellStrategyId" placeholder="卖出策略">
-                <el-option v-for="s in sellStrategies" :key="s.id" :label="s.name" :value="s.id" />
-              </el-select>
-            </el-col>
-            <el-col :span="4">
-              <el-button type="success" @click="createCompose">创建</el-button>
-            </el-col>
-          </el-row>
-          <el-alert
-            v-if="buyStrategies.length && form.buyStrategyId"
-            style="margin-top: 12px"
-            :title="selectedBuyDesc"
-            type="info"
-            :closable="false"
-          />
-          <el-alert
-            v-if="sellStrategies.length && form.sellStrategyId"
-            style="margin-top: 12px"
-            :title="selectedSellDesc"
-            type="info"
-            :closable="false"
-          />
-        </el-card>
-      </el-tab-pane>
-
       <el-tab-pane label="策略介绍">
         <el-tabs>
           <el-tab-pane label="买入策略">
@@ -144,8 +148,7 @@ const seasonId = ref<number>()
 
 const buyStrategies = ref<StrategyVo[]>([])
 const sellStrategies = ref<StrategyVo[]>([])
-const presets = ref<PresetBotVo[]>([])
-const composes = ref<PresetBotVo[]>([])
+const bots = ref<PresetBotVo[]>([])
 
 const form = reactive({
   name: '',
@@ -185,11 +188,8 @@ function loadAll() {
     sellStrategies.value = d
     if (d.length) introSellId.value = d[0].id
   })
-  simplePost(stockUrlPre + 'bot-strategy/preset/list').then(
-    (d: PresetBotVo[]) => (presets.value = d)
-  )
-  simplePost(stockUrlPre + 'bot-strategy/compose/list', { seasonId: sid }).then(
-    (d: PresetBotVo[]) => (composes.value = d)
+  simplePost(stockUrlPre + 'bot-strategy/list', { seasonId: sid }).then(
+    (d: PresetBotVo[]) => (bots.value = d)
   )
 }
 
@@ -206,12 +206,24 @@ function loadSeasons() {
   })
 }
 
+const createVisible = ref(false)
+
+function openCreate() {
+  form.name = ''
+  form.buyStrategyId = ''
+  form.sellStrategyId = ''
+  form.buyParams = ''
+  form.sellParams = ''
+  createVisible.value = true
+}
+
 function usePreset(row: PresetBotVo) {
   form.name = row.botName
   form.buyStrategyId = row.buyStrategyId
   form.sellStrategyId = row.sellStrategyId
   form.buyParams = row.buyParams || ''
   form.sellParams = row.sellParams || ''
+  createVisible.value = true
 }
 
 function createCompose() {
@@ -227,7 +239,10 @@ function createCompose() {
   }
   if (form.buyParams) param.buyParams = form.buyParams
   if (form.sellParams) param.sellParams = form.sellParams
-  simplePost(stockUrlPre + 'bot-strategy/compose', param).then(() => loadAll())
+  simplePost(stockUrlPre + 'bot-strategy/compose', param).then(() => {
+    createVisible.value = false
+    loadAll()
+  })
 }
 
 function deleteCompose(row: PresetBotVo) {

@@ -10,7 +10,6 @@ import TableList from '@/views/TableList.vue'
 import PictureGraph from '@/views/PictureGraph.vue'
 import FundMetric from '@/views/FundMetric.vue'
 import StockSeason from '@/views/stock/StockSeason.vue'
-import StockQuote from '@/views/stock/StockQuote.vue'
 import StockTrade from '@/views/stock/StockTrade.vue'
 import StockAccount from '@/views/stock/StockAccount.vue'
 import StockRank from '@/views/stock/StockRank.vue'
@@ -78,7 +77,6 @@ const router = createRouter({
           component: Game
         },
         { path: '/stockSeason', name: 'StockSeason', component: StockSeason },
-        { path: '/stockQuote', name: 'StockQuote', component: StockQuote },
         { path: '/stockTrade', name: 'StockTrade', component: StockTrade },
         { path: '/stockAccount', name: 'StockAccount', component: StockAccount },
         { path: '/stockRank', name: 'StockRank', component: StockRank },

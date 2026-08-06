@@ -118,7 +118,8 @@ function viewTrades(row: RankVo) {
 }
 
 function goTrade(row: RankVo) {
-  router.push({ path: '/stockTrade', query: { playerName: row.playerName } })
+  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+  router.push({ path: '/stockPlayerDetail', query: { playerName: row.playerName, seasonId: sid } })
 }
 
 onMounted(loadSeasons)

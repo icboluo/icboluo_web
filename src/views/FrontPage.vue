@@ -87,19 +87,14 @@
             ><template #title
               ><el-icon><trend-charts /></el-icon> <span>Stock</span></template
             >
-            <el-menu-item-group title="赛季">
-              <el-menu-item index="/stockSeason">赛季大厅</el-menu-item
-              ><el-menu-item index="/stockRank">排行榜</el-menu-item>
-              <el-menu-item index="/stockBot">机器人策略</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="交易">
-              <el-menu-item index="/stockQuote">行情</el-menu-item
-              ><el-menu-item index="/stockTrade">交易</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="分析">
-              <el-menu-item index="/stockAccount">账户</el-menu-item
-              ><el-menu-item index="/stockPlayerDetail">交易详情</el-menu-item>
-            </el-menu-item-group></el-sub-menu
+            <el-menu-item index="/stockSeason">赛季大厅</el-menu-item>
+            <el-menu-item index="/stockTrade">手动交易</el-menu-item>
+            <el-menu-item index="/stockBot">机器人策略</el-menu-item>
+            <el-menu-item index="/stockRank">排行榜</el-menu-item>
+            <el-menu-item index="/stockAccount">账户</el-menu-item>
+            <el-menu-item index="/stockProfit">收益曲线</el-menu-item>
+            <el-menu-item index="/stockPlayerDetail">交易详情</el-menu-item>
+          </el-sub-menu
           >
         </el-menu>
       </el-aside>

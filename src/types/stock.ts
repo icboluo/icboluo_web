@@ -50,25 +50,9 @@ export interface QuoteVo {
    */
   stockName: string
   /**
-   * 开盘价
-   */
-  openPrice: number
-  /**
    * 收盘价
    */
   closePrice: number
-  /**
-   * 最高价
-   */
-  highPrice: number
-  /**
-   * 最低价
-   */
-  lowPrice: number
-  /**
-   * 成交量
-   */
-  volume: number
   /**
    * 日涨跌幅
    */
@@ -283,10 +267,7 @@ export interface PricePoint {
    * 赛季内第几个交易日（从1开始）
    */
   tradeDay: number
-  openPrice: number
   closePrice: number
-  highPrice: number
-  lowPrice: number
   increaseRateDay: number
   /**
    * 当日持仓市值（仅当玩家持有该股票时有值）
@@ -351,4 +332,5 @@ export interface PresetBotVo {
   sellStrategyName: string // 卖出策略名称
   buyParams: string // 买入策略参数（JSON 字符串）
   sellParams: string // 卖出策略参数（JSON 字符串）
+  isPreset: boolean // 是否预置机器人（预置不可删除）
 }
