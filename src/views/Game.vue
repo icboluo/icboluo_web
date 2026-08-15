@@ -232,8 +232,9 @@ function connectWebSocket() {
     ws.close()
   }
 
-  // 直接连接 game 服务（端口 4399），绕过网关
-  const wsUrl = `ws://localhost:4399/ws/game/${player.id}`
+  // 直接连接 game 服务（端口 4399），绕过网关；host 与 gameUrlPre 保持一致以支持其他 IP
+  const gameHost = constant.gameUrlPre.replace(/^https?:\/\//, '').replace(/\/$/, '')
+  const wsUrl = `ws://${gameHost}/ws/game/${player.id}`
   ws = new WebSocket(wsUrl)
   ws.onopen = () => {
     console.log('WebSocket connected')

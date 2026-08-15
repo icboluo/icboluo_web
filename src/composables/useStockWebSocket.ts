@@ -1,4 +1,5 @@
 import { ref, onUnmounted } from 'vue'
+import { stockUrlPre } from '@/util/Constant'
 
 export function useStockWebSocket() {
   const ws = ref<WebSocket | null>(null)
@@ -7,7 +8,9 @@ export function useStockWebSocket() {
 
   function connect(seasonId: number, onMessage: (data: any) => void) {
     if (ws.value) ws.value.close()
-    const wsUrl = `ws://localhost:8889/ws/stock/${seasonId}`
+    // 从 HTTP base URL 提取 host（含端口），避免硬编码 localhost，从而支持其他 IP 访问
+    const host = stockUrlPre.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const wsUrl = `ws://${host}/ws/stock/${seasonId}`
     ws.value = new WebSocket(wsUrl)
     ws.value.onopen = () => {
       connected.value = true

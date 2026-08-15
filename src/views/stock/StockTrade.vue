@@ -6,8 +6,31 @@
           <el-option v-for="s in seasons" :key="s.id" :label="s.name" :value="s.id" />
         </el-select>
       </el-col>
-      <el-col :span="5">
+      <el-col :span="6" v-if="currentSeason">
+        <el-tag type="info">
+          当前交易日：{{ currentSeason.currentTradeDay }} / {{ currentSeason.totalTradeDays }}
+        </el-tag>
+      </el-col>
+      <el-col :span="6" v-if="currentSeason">
+        <el-tag type="warning">
+          已准备：{{ currentSeason.readyCount ?? 0 }} / 总玩家：{{ currentSeason.totalCount ?? 0 }}
+        </el-tag>
+      </el-col>
+      <el-col :span="3" v-if="currentSeason && currentSeason.status === 'PREPARING'">
+        <el-button type="success" @click="prepare">准备</el-button>
+      </el-col>
+      <el-col :span="3">
         <el-button type="primary" @click="onSeasonChange">刷新</el-button>
+      </el-col>
+      <el-col :span="4" v-if="currentSeason && currentSeason.status === 'PLAYING'">
+        <el-button
+          type="success"
+          :loading="roundEnding"
+          :disabled="currentSeason?.status === 'FINISHED'"
+          @click="endRound"
+        >
+          本回合准备好了（结束回合）
+        </el-button>
       </el-col>
       <el-col :span="6">
         <el-tag type="info">当前玩家：{{ currentPlayer || '未选择' }}</el-tag>
@@ -27,24 +50,6 @@
       type="warning"
       :closable="false"
     />
-
-    <!-- 快速买卖区（按代码） -->
-    <el-card style="margin-top: 12px">
-      <el-row :gutter="12" align="middle">
-        <el-col :span="6">
-          <el-input v-model="tradeForm.stockCode" placeholder="股票代码" />
-        </el-col>
-        <el-col :span="6">
-          <el-input v-model.number="tradeForm.quantity" placeholder="数量（100的整数倍）" />
-        </el-col>
-        <el-col :span="3">
-          <el-button type="success" @click="doTrade('buy')">买入</el-button>
-        </el-col>
-        <el-col :span="3">
-          <el-button type="danger" @click="doTrade('sell')">卖出</el-button>
-        </el-col>
-      </el-row>
-    </el-card>
 
     <!-- 全部股票行情 + 持仓标记 + 行内操作 -->
     <el-card style="margin-top: 12px" v-loading="quoteLoading">
@@ -98,6 +103,9 @@
         <el-form-item label="数量">
           <el-input v-model.number="tradeQty" placeholder="100 的整数倍" />
         </el-form-item>
+        <el-form-item v-if="tradeType === 'sell'" label="可卖出">
+          <span :style="{ color: '#f56c6c', fontWeight: 'bold' }">{{ sellableQty }}</span>
+        </el-form-item>
         <el-form-item label="预计金额">
           <span>{{ estimatedAmount }}</span>
         </el-form-item>
@@ -138,14 +146,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
 import { SessionKey } from '@/util/AlUtil'
 import * as echarts from 'echarts'
-import type { QuoteVo, SeasonVo, StockChartVo, TradeRecordVo } from '@/types/stock'
+import type { AccountVo, QuoteVo, SeasonVo, StockChartVo, TradeRecordVo } from '@/types/stock'
 import type { PageInfo } from '@/components/BaseTable.vue'
+import { useStockWebSocket } from '@/composables/useStockWebSocket'
 
 const route = useRoute()
 const routePlayer = (route.query.playerName as string) || ''
@@ -155,12 +164,11 @@ if (routePlayer) {
 
 const seasons = ref<SeasonVo[]>([])
 const seasonId = ref<number>()
+const currentSeason = ref<SeasonVo>()
 const currentPlayer = routePlayer || sessionStorage.getItem(SessionKey.stockPlayerName) || ''
 const hasContext = ref(true)
 const router = useRouter()
 const onlyMine = ref(false)
-
-const tradeForm = reactive({ stockCode: '', quantity: 100 })
 
 // 全部股票行情
 const quotes = ref<QuoteVo[]>([])
@@ -168,6 +176,8 @@ const quoteLoading = ref(false)
 
 // 该玩家交易过的股票（含收益）
 const myStocks = ref<StockChartVo[]>([])
+// 结束本回合（推进交易日）的 loading 状态
+const roundEnding = ref(false)
 const myProfitMap = computed<Record<string, StockChartVo>>(() => {
   const m: Record<string, StockChartVo> = {}
   myStocks.value.forEach((s) => (m[s.stockCode] = s))
@@ -179,6 +189,7 @@ const tradeVisible = ref(false)
 const tradeStock = ref<QuoteVo>()
 const tradeType = ref<'buy' | 'sell'>('buy')
 const tradeQty = ref(100)
+const sellableQty = ref(0)
 const estimatedAmount = computed(() => {
   const price = tradeStock.value?.closePrice
   if (price == null || !tradeQty.value) {
@@ -208,11 +219,6 @@ const visibleStocks = computed(() => {
 
 function goSeason() {
   router.push('/stockSeason')
-}
-
-function onSeasonChange() {
-  init()
-  loadQuotes()
 }
 
 function init() {
@@ -252,11 +258,29 @@ function openTrade(row: QuoteVo, type: 'buy' | 'sell') {
   tradeStock.value = row
   tradeType.value = type
   tradeQty.value = 100
+  sellableQty.value = 0
+  // 卖出时实时查询该股票可卖出（当前持仓）数量
+  if (type === 'sell') {
+    const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+    if (sid && currentPlayer) {
+      simplePost(stockUrlPre + 'stockAccount', { seasonId: sid, playerName: currentPlayer }).then(
+        (acc: AccountVo) => {
+          const pos = (acc.positions || []).find((p) => p.stockCode === row.stockCode)
+          sellableQty.value = pos ? pos.quantity : 0
+        }
+      )
+    }
+  }
   tradeVisible.value = true
 }
 
 function confirmTrade() {
   if (!tradeStock.value || !tradeQty.value) {
+    return
+  }
+  // 卖出时校验不超过可卖出数量
+  if (tradeType.value === 'sell' && tradeQty.value > sellableQty.value) {
+    alert('卖出数量不能超过可卖出数量（' + sellableQty.value + '）')
     return
   }
   const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
@@ -270,23 +294,6 @@ function confirmTrade() {
     quantity: tradeQty.value
   }).then(() => {
     tradeVisible.value = false
-    init()
-    loadQuotes()
-  })
-}
-
-function doTrade(type: 'buy' | 'sell') {
-  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
-  const playerName = sessionStorage.getItem(SessionKey.stockPlayerName)
-  if (!sid || !playerName || !tradeForm.stockCode) {
-    return
-  }
-  simplePost(stockUrlPre + 'stockTrade/' + type, {
-    seasonId: sid,
-    playerName,
-    stockCode: tradeForm.stockCode,
-    quantity: tradeForm.quantity
-  }).then(() => {
     init()
     loadQuotes()
   })
@@ -418,16 +425,86 @@ function loadSeasons() {
   simplePost(stockUrlPre + 'season/list').then((data: SeasonVo[]) => {
     seasons.value = data
     const saved = Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+    let target: SeasonVo | undefined
     if (saved && data.some((s) => s.id === saved)) {
       seasonId.value = saved
+      target = data.find((s) => s.id === saved)
     } else if (data.length) {
       seasonId.value = data[data.length - 1].id
+      target = data[data.length - 1]
     }
+    currentSeason.value = target
     onSeasonChange()
+    connectStockWs()
   })
 }
 
-onMounted(loadSeasons)
+function onSeasonChange() {
+  currentSeason.value = seasons.value.find((s) => s.id === seasonId.value)
+  connectStockWs()
+  init()
+  loadQuotes()
+}
+
+// 玩家操作完本回合后点击：推进到下一个交易日
+function endRound() {
+  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+  if (!sid) {
+    return
+  }
+  if (currentSeason.value?.status === 'FINISHED') {
+    alert('赛季已结束，无法推进交易日')
+    return
+  }
+  roundEnding.value = true
+  simplePost(stockUrlPre + 'season/advance', { seasonId: sid })
+    .then(() => {
+      // 推进后刷新赛季信息、持仓与行情
+      loadSeasons()
+    })
+    .finally(() => (roundEnding.value = false))
+}
+
+function prepare() {
+  const sid = seasonId.value ?? Number(sessionStorage.getItem(SessionKey.stockSeasonId))
+  if (!sid || !currentPlayer) {
+    alert('请先在赛季大厅加入并设置玩家昵称')
+    return
+  }
+  simplePost(stockUrlPre + 'season/prepare', {
+    seasonId: sid,
+    playerName: currentPlayer
+  }).then((data: SeasonVo) => {
+    // 更新当前赛季信息（含人数 / 状态）；若所有人就绪则后端已自动开始并广播
+    const idx = seasons.value.findIndex((s) => s.id === sid)
+    if (idx >= 0) {
+      seasons.value[idx] = data
+    }
+    currentSeason.value = data
+    init()
+    loadQuotes()
+  })
+}
+
+onMounted(() => {
+  loadSeasons()
+})
+
+// 监听赛季进度推送：所有人准备就绪自动开始后，刷新本页数据
+const { connect: connectWs, disconnect: disconnectWs } = useStockWebSocket()
+
+function handleStockMessage(msg: any) {
+  if (msg && msg.type === 'progress') {
+    loadSeasons()
+  }
+}
+
+function connectStockWs() {
+  if (seasonId.value) {
+    disconnectWs()
+    connectWs(seasonId.value, handleStockMessage)
+  }
+}
 </script>
 
 <style scoped></style>

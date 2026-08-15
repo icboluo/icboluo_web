@@ -35,6 +35,14 @@ export interface SeasonVo {
    * 历史行情结束日期，格式 YYYY-MM-DD
    */
   historyEndDate: string
+  /**
+   * 已准备人数
+   */
+  readyCount?: number
+  /**
+   * 总人数（真人玩家账户数）
+   */
+  totalCount?: number
 }
 
 /**
