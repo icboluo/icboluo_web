@@ -383,12 +383,11 @@ function openRecords(row: QuoteVo) {
   simplePost(stockUrlPre + 'stockTrade/records', {
     seasonId: sid,
     playerName,
+    stockCode: row.stockCode,
     pageNum: 1,
     pageSize: 1000
   }).then((data: PageInfo<TradeRecordVo>) => {
-    records.value = data.list
-      .filter((r) => r.stockCode === row.stockCode)
-      .map((r) => ({ ...r, stockName: row.stockName }))
+    records.value = (data.list || []).map((r) => ({ ...r, stockName: row.stockName }))
     recordsVisible.value = true
   })
 }

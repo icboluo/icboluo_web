@@ -57,7 +57,7 @@ const players = ref<string[]>([])
 const account = ref<AccountVo>()
 const charts = ref<StockChartVo[]>([])
 const activeStock = ref('')
-const chartEls = reactive<Record<string, any>>({})
+const chartEls = reactive<Record<string, HTMLElement>>({})
 const route = useRoute()
 
 function collectParam() {
