@@ -246,9 +246,13 @@ export interface StockChartVo {
   stockCode: string
   stockName: string
   /**
-   * 该玩家在该股票上的累计投入（买入总金额 - 卖出回笼金额）
+   * 该玩家在该股票上的累计投入（买入总金额 - 卖出回笼金额，取非负值）
    */
   stockTotalInvest: number
+  /**
+   * 该玩家在该股票上的投资过程中最大净投入金额（持仓占用资金的峰值，取非负值）
+   */
+  stockMaxInvest: number
   /**
    * 该玩家在该股票上的总收益
    */
@@ -257,6 +261,18 @@ export interface StockChartVo {
    * 该玩家在该股票上的收益率（%）
    */
   stockProfitRate: number
+  /**
+   * 该股票对应的原始可操作金额（赛季初始资金按股票个数平均分配得到）
+   */
+  stockInitInvest: number
+  /**
+   * 收益率（按原始可操作金额计算，%）
+   */
+  stockProfitRateByInit: number
+  /**
+   * 收益率（按投资中最大投入金额计算，%）
+   */
+  stockProfitRateByMax: number
   /**
    * 价格走势：每个交易日的OHLCV数据
    */
@@ -277,6 +293,10 @@ export interface PricePoint {
   tradeDay: number
   closePrice: number
   increaseRateDay: number
+  /**
+   * 当日持仓数量
+   */
+  holdQty: number
   /**
    * 当日持仓市值（仅当玩家持有该股票时有值）
    */

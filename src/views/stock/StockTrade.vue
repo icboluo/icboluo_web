@@ -323,6 +323,35 @@ function openChart(row: QuoteVo) {
   })
 }
 
+// 图表 tooltip：展示当日价格/市值，并在有买卖点时展示交易详情
+function tradeTooltip(params: any[]): string {
+  if (!params || !params.length) {
+    return ''
+  }
+  const day = params[0]?.axisValue
+  let html = `<div style="font-weight:600;margin-bottom:4px">第 ${day} 交易日</div>`
+  for (const p of params) {
+    if (p.seriesName === '买卖点') {
+      const t = p.data?.trade
+      if (t) {
+        const isBuy = t.tradeType === 'BUY'
+        const typeText = isBuy ? '买入' : '卖出'
+        const color = isBuy ? '#67c23a' : '#f56c6c'
+        html += `<div style="margin-top:4px;color:${color};font-weight:600">${typeText}</div>`
+        html += `<div>数量：${t.quantity} 股</div>`
+        html += `<div>单价：${t.price}</div>`
+        html += `<div>总金额：${t.amount}</div>`
+      }
+      continue
+    }
+    if (p.value == null || p.value === '' || p.value !== p.value) {
+      continue
+    }
+    html += `<div>${p.marker} ${p.seriesName}：${p.value}</div>`
+  }
+  return html
+}
+
 function renderChart() {
   if (!chartRef.value || !chartStock.value) {
     return
@@ -345,12 +374,13 @@ function renderChart() {
         value: [t.tradeDay, t.price],
         symbol: t.tradeType === 'BUY' ? 'triangle' : 'pin',
         symbolSize: 14,
-        itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }
+        itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' },
+        trade: t
       }))
     })
   }
   const option: echarts.EChartsOption = {
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', formatter: (params: any) => tradeTooltip(params) },
     legend: { data: series.map((s) => (s as { name?: string }).name).filter(Boolean) as string[] },
     xAxis: { type: 'category', data: c.prices.map((p) => p.tradeDay) },
     yAxis: [

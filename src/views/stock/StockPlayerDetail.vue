@@ -32,17 +32,36 @@
     </el-card>
 
     <el-card header="交易过的股票走势" style="margin-top: 16px">
-      <el-tabs v-model="activeStock" type="card">
-        <el-tab-pane v-for="c in charts" :key="c.stockCode" :label="c.stockName" :name="c.stockCode">
-          <div :ref="(el) => (chartEls[c.stockCode] = el)" style="width: 100%; height: 420px"></div>
-        </el-tab-pane>
-      </el-tabs>
+      <el-row :gutter="16">
+        <el-col :span="18">
+          <el-tabs v-model="activeStock" type="card">
+            <el-tab-pane v-for="c in charts" :key="c.stockCode" :label="c.stockName" :name="c.stockCode">
+              <div :ref="(el) => (chartEls[c.stockCode] = el)" style="width: 100%; height: 420px"></div>
+            </el-tab-pane>
+          </el-tabs>
+        </el-col>
+        <el-col :span="6" v-if="activeChart">
+          <el-descriptions title="当前持仓概况" :column="1" border>
+            <el-descriptions-item label="投资中最大投入金额">{{ activeChart.stockMaxInvest }}</el-descriptions-item>
+            <el-descriptions-item label="原始股票可操作金额">{{ activeChart.stockInitInvest }}</el-descriptions-item>
+            <el-descriptions-item label="总收益">
+              <span :style="{ color: profitColor(activeChart.stockProfit) }">{{ activeChart.stockProfit }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="收益率(按原始金额)">
+              <span :style="{ color: profitColor(activeChart.stockProfitRateByInit) }">{{ activeChart.stockProfitRateByInit }}%</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="收益率(按最大投入)">
+              <span :style="{ color: profitColor(activeChart.stockProfitRateByMax) }">{{ activeChart.stockProfitRateByMax }}%</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-col>
+      </el-row>
     </el-card>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { simplePost } from '@/util/Request'
 import { stockUrlPre } from '@/util/Constant'
@@ -59,6 +78,19 @@ const charts = ref<StockChartVo[]>([])
 const activeStock = ref('')
 const chartEls = reactive<Record<string, HTMLElement>>({})
 const route = useRoute()
+
+// 当前选中股票（tab）的走势数据，用于右侧持仓概况展示
+const activeChart = computed<StockChartVo | undefined>(() =>
+  charts.value.find((x) => x.stockCode === activeStock.value)
+)
+
+// 盈亏颜色：赚为红（A股习惯），亏为绿，持平为默认
+function profitColor(value: number | undefined): string {
+  if (value == null || value === 0) {
+    return ''
+  }
+  return value > 0 ? '#f56c6c' : '#67c23a'
+}
 
 function collectParam() {
   return {
@@ -82,6 +114,40 @@ function initAll() {
   })
 }
 
+// 图表 tooltip：展示当日价格/市值、当日持仓数与总金额，并在有买卖点时展示交易详情
+function tradeTooltip(params: any[], priceByDay?: Map<number, any>): string {
+  if (!params || !params.length) {
+    return ''
+  }
+  const day = params[0]?.axisValue
+  const point = priceByDay?.get(Number(day))
+  let html = `<div style="font-weight:600;margin-bottom:4px">第 ${day} 交易日</div>`
+  if (point) {
+    html += `<div>当前持仓数：${point.holdQty} 股</div>`
+    html += `<div>当前总金额：${point.holdMarketValue}</div>`
+  }
+  for (const p of params) {
+    if (p.seriesName === '买卖点') {
+      const t = p.data?.trade
+      if (t) {
+        const isBuy = t.tradeType === 'BUY'
+        const typeText = isBuy ? '买入' : '卖出'
+        const color = isBuy ? '#67c23a' : '#f56c6c'
+        html += `<div style="margin-top:4px;color:${color};font-weight:600">${typeText}</div>`
+        html += `<div>数量：${t.quantity} 股</div>`
+        html += `<div>单价：${t.price}</div>`
+        html += `<div>总金额：${t.amount}</div>`
+      }
+      continue
+    }
+    if (p.value == null || p.value === '' || p.value !== p.value) {
+      continue
+    }
+    html += `<div>${p.marker} ${p.seriesName}：${p.value}</div>`
+  }
+  return html
+}
+
 function renderActiveChart() {
   const code = activeStock.value
   const el = chartEls[code]
@@ -95,8 +161,9 @@ function renderActiveChart() {
     chart = echarts.init(el)
   }
   const xData = c.prices.map((p) => p.tradeDay)
+  const priceByDay = new Map<number, any>(c.prices.map((p) => [p.tradeDay, p]))
   chart.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', formatter: (params: any) => tradeTooltip(params, priceByDay) },
     legend: { data: ['收盘价', '持仓市值', '买卖点'], selected: { '持仓市值': false } },
     xAxis: { type: 'category', data: xData },
     yAxis: [
@@ -130,7 +197,8 @@ function renderActiveChart() {
           return {
             value: [idx < 0 ? t.tradeDay : idx, t.price],
             symbol: t.tradeType === 'BUY' ? 'triangle' : 'pin',
-            itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' }
+            itemStyle: { color: t.tradeType === 'BUY' ? '#67c23a' : '#f56c6c' },
+            trade: t
           }
         })
       }

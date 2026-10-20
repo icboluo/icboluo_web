@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大富翁 · 趣味版</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 20% 10%, #243b55, #141e30);
+    color: #eee; min-height: 100vh; display: flex; justify-content: center;
+    align-items: flex-start; gap: 28px; padding: 28px; flex-wrap: wrap;
+  }
+  h1 { font-size: 22px; letter-spacing: 2px; margin-bottom: 10px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  /* ===== 棋盘 ===== */
+  #board {
+    position: relative; width: 900px; height: 900px; background: #efe6d0;
+    border: 10px solid #20303f; border-radius: 18px; flex: none;
+    box-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 0 40px rgba(0,0,0,.08);
+  }
+  .cell {
+    position: absolute; width: 92px; height: 92px; border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff, #f3f3f3);
+    box-shadow: 0 3px 8px rgba(0,0,0,.18); padding: 5px 6px; overflow: hidden;
+    font-size: 11px; color: #333; transition: box-shadow .2s;
+  }
+  .cell .strip { height: 7px; border-radius: 4px; margin-bottom: 4px; }
+  .cell .cname { font-weight: 800; font-size: 12px; }
+  .cell .cname-ev { color: #555; font-weight: 700; }
+  .cell .pills { display: flex; gap: 4px; margin-top: 4px; }
+  .cell .cprice { background: #fdecea; color: #c0392b; border-radius: 6px;
+    padding: 1px 5px; font-weight: 700; }
+  .cell .crent { background: #eaf3fb; color: #2471a3; border-radius: 6px;
+    padding: 1px 5px; font-weight: 700; }
+  .cell .houses { position: absolute; left: 6px; bottom: 6px; font-size: 13px; line-height: 1; }
+  .cell .owner { position: absolute; bottom: 3px; right: 3px; width: 20px; height: 20px;
+    border-radius: 50%; border: 2px solid #fff; display: none; color: #fff; font-size: 11px;
+    font-weight: 800; align-items: center; justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .cell.buyable { outline: 3px solid #f1c40f; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { outline-color: #e67e22; } }
+  /* ===== 可点击查看详情 ===== */
+  .cell { cursor: pointer; }
+  .cell:not(.buyable):hover { outline: 2px solid #3498db; }
+  #detail .box { padding: 22px 26px; min-width: 280px; max-width: 360px; text-align: left; }
+  #detail h3 { font-size: 19px; margin-bottom: 12px; text-align: center; }
+  #detail .drow { display: flex; gap: 8px; margin: 7px 0; font-size: 13px; align-items: center; }
+  #detail .dlabel { color: #888; min-width: 68px; flex: none; }
+  /* ===== 棋子 ===== */
+  .token { position: absolute; width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid #fff; transition: all .35s ease; z-index: 6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+  /* ===== 中央面板 ===== */
+  #center {
+    position: absolute; left: 104px; top: 104px; width: 692px; height: 692px;
+    background: rgba(20,30,45,.55); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 18px; padding: 16px;
+    color: #fff; display: flex; flex-direction: column;
+    box-shadow: inset 0 0 40px rgba(0,0,0,.35);
+  }
+  #center h2 { text-align: center; font-size: 18px; margin-bottom: 10px; letter-spacing: 3px; }
+  #dice { display: flex; gap: 14px; justify-content: center; margin: 10px 0; }
+  .die { width: 48px; height: 48px; background: linear-gradient(180deg, #fff, #e9e9e9);
+    color: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.35), inset 0 -3px 0 #cfcfcf; }
+  #status { text-align: center; min-height: 22px; font-weight: 800; color: #ffe082; margin: 4px 0; }
+  #logTabs { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+  .ltab { padding: 5px 14px; font-size: 12px; border-radius: 8px;
+    background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; }
+  .ltab.sel { background: #e67e22; }
+  #log { flex: 1; overflow-y: auto; background: rgba(0,0,0,.3); border-radius: 10px;
+    padding: 8px; font-size: 12px; margin-top: 8px; }
+  #log div { margin: 3px 0; padding-bottom: 3px; border-bottom: 1px dashed rgba(255,255,255,.12); }
+  /* ===== 侧边栏 ===== */
+  #side { width: 300px; }
+  .card { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px; padding: 14px; margin-bottom: 14px; backdrop-filter: blur(4px); }
+  .card-title { font-weight: 800; margin-bottom: 8px; font-size: 14px; }
+  .pcard { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 13px; }
+  .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+  .pmoney { font-weight: 800; color: #ffe082; }
+  .prop-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 12px; }
+  .prop-row .pname { flex: 1; }
+  .prop-row .plvl { min-width: 56px; text-align: center; }
+  #propList { max-height: 240px; overflow-y: auto; }
+  .empty { color: #aaa; font-size: 12px; }
+  button { cursor: pointer; border: none; border-radius: 10px; padding: 11px 16px;
+    font-size: 14px; font-weight: 800; margin: 4px 4px 0 0; transition: transform .1s, filter .1s; }
+  button:active { transform: scale(.95); }
+  button:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
+  .b-roll { background: linear-gradient(180deg, #f39c12, #e67e22); color: #fff; }
+  .b-buy { background: linear-gradient(180deg, #2ecc71, #27ae60); color: #fff; }
+  .b-skip { background: #7f8c8d; color: #fff; }
+  .b-up { background: linear-gradient(180deg, #3498db, #2980b9); color: #fff;
+    padding: 6px 10px; font-size: 12px; }
+  /* ===== 遮罩 ===== */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.82);
+    display: flex; align-items: center; justify-content: center; z-index: 99; }
+  .overlay .box { background: rgba(255,255,255,.96); color: #222; padding: 32px 44px;
+    border-radius: 18px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .overlay h2 { font-size: 26px; margin-bottom: 14px; }
+  .rb { background: #34495e; color: #fff; width: 46px; }
+  .rb.sel { background: #e67e22; outline: 3px solid #f1c40f; }
+</style>
+</head>
+<body>
+  <div>
+    <h1>🎲 大富翁 · 趣味版</h1>
+    <div id="board">
+      <div id="center">
+        <h2>游 戏 中 心</h2>
+        <div id="dice"><div class="die" id="d1">-</div><div class="die" id="d2">-</div></div>
+        <div id="status">请先在右侧选择机器人数量并开始</div>
+        <div id="logTabs">
+          <button class="ltab sel" data-t="all">完整日志</button>
+          <button class="ltab" data-t="mine">与我相关</button>
+        </div>
+        <div id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="side">
+    <div class="card" id="players"></div>
+    <div class="card">
+      <div class="card-title">🏠 我的地产（可升级）</div>
+      <div id="propList"></div>
+    </div>
+    <div class="card">
+      <button class="b-roll" id="btnRoll" disabled>🎲 掷骰子</button>
+      <button class="b-buy" id="btnBuy" style="display:none">买下</button>
+      <button class="b-skip" id="btnSkip" style="display:none">不买</button>
+    </div>
+    <div class="card" id="help">
+      <b>玩法</b><br>
+      · 掷骰移动，落到无人地产可<b>买下</b><br>
+      · 地产可<b>升级</b>（Lv.1–5，满级旅馆），租金随等级倍增；<b>需名下有 3 块相邻地产</b>（中间隔机会/税收等非房屋格可跳过，但被他人地产断开）方可升级<br>
+      · 同色两组全归一人，租金再翻倍<br>
+      · 踩别人地产交租，税收/机会卡随机，拘留所下回合暂停<br>
+      · 资金为负破产，最后有钱者获胜
+    </div>
+  </div>
+
+  <!-- 开局设置：选择机器人数量 -->
+  <div class="overlay" id="setup">
+    <div class="box">
+      <h2>开始大富翁</h2>
+      <p style="margin-bottom:12px">选择机器人（电脑）数量：</p>
+      <div id="rbWrap"></div>
+      <p style="margin:14px 0;color:#666;font-size:13px">你将作为 1 名玩家加入，共 <span id="totalN">2</span> 人游戏</p>
+      <button class="b-roll" id="btnStart">开始游戏</button>
+    </div>
+  </div>
+
+  <!-- 地点详情（点击任意格子弹出） -->
+  <div class="overlay" id="detail" style="display:none">
+    <div class="box" id="detailBox"></div>
+  </div>
+
+  <!-- 胜负结算（无重新开始按钮） -->
+  <div class="overlay" id="over" style="display:none">
+    <div class="box"><h2 id="winText"></h2>
+      <p style="color:#666;font-size:13px">刷新页面可再玩一局</p></div>
+  </div>
+
+<script>
+/* ============ 配置 ============ */
+const COLOR = { 红:'#e74c3c', 黄:'#f1c40f', 绿:'#2ecc71', 蓝:'#3498db', 紫:'#9b59b6', 橙:'#d35400', 青:'#16a085', 粉:'#fd79a8', 棕:'#8d6e63', 灰:'#95a5a6', 黑:'#2c3e50', 金:'#c79f00' };
+const PALETTE = ['#e74c3c', '#3498db', '#2ecc71', '#e67e22', '#9b59b6', '#1abc9c'];
+const OFFSETS = [[-10,-10],[10,-10],[-10,10],[10,10],[0,-13],[0,13]];
+const MAX_LEVEL = 5;   // 房屋最高等级（5 = 旅馆）
+
+/* 棋盘 32 格（9x9 顺时针，含 24 块地产，12 种颜色各 2 块；非房屋仅 8 格） */
+const cells = [
+  { type:'go',     name:'起点' },
+  { type:'prop',   name:'中关村',   color:'红', price:120, rent:20 },
+  { type:'chance', name:'机会' },
+  { type:'prop',   name:'国贸',     color:'红', price:140, rent:24 },
+  { type:'prop',   name:'外滩',     color:'黄', price:180, rent:36 },
+  { type:'prop',   name:'陆家嘴',   color:'黄', price:200, rent:40 },
+  { type:'tax',    name:'所得税',   amount:100 },
+  { type:'prop',   name:'科技园',   color:'绿', price:240, rent:48 },
+  { type:'prop',   name:'软件园',   color:'绿', price:260, rent:52 },
+  { type:'prop',   name:'滨海',     color:'蓝', price:300, rent:60 },
+  { type:'prop',   name:'新区',     color:'蓝', price:320, rent:64 },
+  { type:'prop',   name:'古城',     color:'紫', price:360, rent:72 },
+  { type:'free',   name:'免费停车' },
+  { type:'prop',   name:'湖畔',     color:'紫', price:400, rent:80 },
+  { type:'jail',   name:'拘留所' },
+  { type:'prop',   name:'大学城',   color:'橙', price:160, rent:32 },
+  { type:'prop',   name:'高新园',   color:'橙', price:220, rent:44 },
+  { type:'prop',   name:'滨江',     color:'青', price:280, rent:56 },
+  { type:'prop',   name:'江畔',     color:'青', price:340, rent:68 },
+  { type:'tax',    name:'奢侈税',   amount:150 },
+  { type:'prop',   name:'玫瑰园',   color:'粉', price:380, rent:76 },
+  { type:'prop',   name:'花溪',     color:'粉', price:440, rent:88 },
+  { type:'chance', name:'机会' },
+  { type:'prop',   name:'学院路',   color:'棕', price:300, rent:60 },
+  { type:'prop',   name:'科技谷',   color:'棕', price:340, rent:68 },
+  { type:'prop',   name:'工业港',   color:'灰', price:360, rent:72 },
+  { type:'prop',   name:'物流园',   color:'灰', price:400, rent:80 },
+  { type:'prop',   name:'中央广场', color:'黑', price:420, rent:84 },
+  { type:'prop',   name:'金融街',   color:'黑', price:460, rent:92 },
+  { type:'prop',   name:'金台路',   color:'金', price:480, rent:96 },
+  { type:'free',   name:'休息站' },
+  { type:'prop',   name:'金色港湾', color:'金', price:520, rent:104 },
+];
+cells.forEach(c => { if (c.type === 'prop') { c.owner = null; c.level = 0; } });
+const JAIL = cells.findIndex(c => c.type === 'jail');   // 拘留所索引（动态）
+
+/* 32 格在 9x9 网格的顺时针坐标（按 GRID 生成，避免写死） */
+const GRID = 9;
+function buildPerim(n) {
+  const p = [];
+  for (let c = 0; c < n; c++) p.push([0, c]);
+  for (let r = 1; r < n - 1; r++) p.push([r, n - 1]);
+  for (let c = n - 1; c >= 0; c--) p.push([n - 1, c]);
+  for (let r = n - 2; r >= 1; r--) p.push([r, 0]);
+  return p;
+}
+const PERIM = buildPerim(GRID);
+
+/* ============ 状态 ============ */
+let players = [];
+let current = 0, state = 'IDLE';
+const logHistory = [];   // 完整日志
+const logMine = [];      // 与我相关（你）的日志
+let logTab = 'all';      // 当前查看的日志标签：all / mine
+
+/* ============ 渲染棋盘 ============ */
+const board = document.getElementById('board');
+cells.forEach((c, i) => {
+  const [r, col] = PERIM[i];
+  const el = document.createElement('div');
+  el.className = 'cell'; el.id = 'cell' + i;
+  el.style.left = (col * 100 + 4) + 'px';
+  el.style.top  = (r * 100 + 4) + 'px';
+  const strip = (c.type === 'prop') ? '<div class="strip" style="background:' + COLOR[c.color] + '"></div>' : '';
+  let body = (c.type === 'prop')
+    ? '<div class="cname">' + c.name + '</div>' +
+      '<div class="pills"><span class="cprice">$' + c.price + '</span>' +
+      '<span class="crent" id="crent' + i + '">租$' + c.rent + '</span></div>' +
+      '<div class="houses" id="hs' + i + '"></div>'
+    : '<div class="cname cname-ev">' + c.name + '</div>';
+  el.innerHTML = strip + body + '<div class="owner" id="own' + i + '"></div>';
+  el.onclick = () => showDetail(i);          // 点击格子查看详情
+  board.appendChild(el);
+});
+
+function placeToken(p) {
+  const [r, col] = PERIM[p.pos];
+  const off = OFFSETS[p.id % OFFSETS.length];
+  const t = document.getElementById('tok' + p.id);
+  t.style.left = (col * 100 + 50 - 14 + off[0]) + 'px';
+  t.style.top  = (r * 100 + 50 - 14 + off[1]) + 'px';
+}
+
+/* ============ 日志：记录并打印 ============ */
+const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
+function isMine(msg) {
+  const me = (players && players[0]) ? players[0].name : '你';
+  return msg.includes(me);
+}
+function log(msg) {
+  logHistory.unshift(msg);                 // 完整日志（新在最前）
+  if (isMine(msg)) logMine.unshift(msg);   // 与我相关
+  console.log('[大富翁] ' + msg);          // 打印到控制台
+  renderLog();
+}
+function renderLog() {
+  const arr = logTab === 'mine' ? logMine : logHistory;
+  logEl.innerHTML = '';
+  arr.forEach(m => {
+    const d = document.createElement('div');
+    d.textContent = m; logEl.appendChild(d);
+  });
+}
+function setStatus(s) { statusEl.textContent = s; }
+
+/* ============ 玩家面板 ============ */
+function renderPlayers() {
+  const box = document.getElementById('players');
+  box.innerHTML = '';
+  players.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'pcard';
+    div.innerHTML = '<span class="dot" style="background:' + p.color + '"></span>' +
+      '<span>' + p.name + (p.out ? '（出局）' : '') + '</span> · 资金 ' +
+      '<span class="pmoney">' + p.money + '</span>';
+    box.appendChild(div);
+  });
+}
+function updateMoney() { renderPlayers(); }
+
+/* ============ 我的地产（升级） ============ */
+function canUpgradeNow() {
+  return players.length && players[0] && !players[0].out
+    && current === 0 && players[current] && !players[current].ai && state !== 'BUSY';
+}
+function upgradeCost(c) { return Math.round(c.price * 0.5); }
+function rentOf(c) { return c.rent * (c.level + 1); }
+// 名下是否拥有 3 块相连地产：中间遇到非房屋（机会/税收/免费/拘留/起点）跳过继续算，
+// 只有遇到他人/无人地产才断开；环形扫描（2 圈）以覆盖跨边界的连续段。
+function hasConnectedThree(pid) {
+  const n = cells.length;
+  let cnt = 0;
+  for (let i = 0; i < 2 * n; i++) {
+    const c = cells[i % n];
+    if (c.type !== 'prop') continue;          // 非房屋：跳过，不断开
+    if (c.owner === pid) { if (++cnt >= 3) return true; }
+    else cnt = 0;                             // 他人/无人地产：断开重算
+  }
+  return false;
+}
+function updateHousePips(idx) {
+  const c = cells[idx];
+  const el = document.getElementById('hs' + idx);
+  if (el) el.textContent = c.level >= MAX_LEVEL ? '🏨' : ('🏠'.repeat(c.level));
+  const cr = document.getElementById('crent' + idx);
+  if (cr) cr.textContent = '租$' + rentOf(c);
+}
+function renderMyProps() {
+  const box = document.getElementById('propList');
+  if (!box) return;
+  box.innerHTML = '';
+  const mine = cells.filter(c => c.type === 'prop' && c.owner === 0);
+  if (mine.length === 0) { box.innerHTML = '<div class="empty">暂无地产，落到无人地产即可买下</div>'; return; }
+  const allow = canUpgradeNow();
+  const connected = hasConnectedThree(0);
+  cells.forEach((c, i) => {
+    if (!(c.type === 'prop' && c.owner === 0)) return;
+    const cost = upgradeCost(c);
+    const maxed = c.level >= MAX_LEVEL;
+    const lvlText = c.level >= MAX_LEVEL ? '🏨' : ('🏠'.repeat(c.level) || '—');
+    const can = allow && connected && !maxed && players[0].money >= cost;
+    const label = maxed ? '已满级' : (connected ? ('升级 $' + cost) : '需3块相邻');
+    const row = document.createElement('div');
+    row.className = 'prop-row';
+    row.innerHTML =
+      '<span class="dot" style="background:' + COLOR[c.color] + '"></span>' +
+      '<span class="pname">' + c.name + '</span>' +
+      '<span class="plvl">' + lvlText + '</span>' +
+      '<button class="b-up"' + (can ? '' : ' disabled') + '>' + label + '</button>';
+    row.querySelector('.b-up').onclick = () => upgrade(i);
+    box.appendChild(row);
+  });
+}
+function upgrade(idx) {
+  const c = cells[idx];
+  if (c.owner !== 0 || c.level >= MAX_LEVEL) return;
+  if (!hasConnectedThree(0)) { setStatus('需拥有 3 块相邻（棋盘连续）地产才能升级'); return; }
+  const cost = upgradeCost(c);
+  if (players[0].money < cost) { setStatus('资金不足，无法升级 ' + c.name); return; }
+  changeMoney(players[0], -cost);
+  c.level++;
+  updateHousePips(idx);
+  log('🏗️ 你 将 ' + c.name + ' 升级到 Lv.' + c.level + '（租金 $' + rentOf(c) + '）');
+  renderMyProps();
+}
+
+/* ============ 按钮 ============ */
+const btnRoll = document.getElementById('btnRoll');
+const btnBuy = document.getElementById('btnBuy');
+const btnSkip = document.getElementById('btnSkip');
+function refreshButtons() {
+  const p = players[current];
+  const human = p && !p.ai && !p.out;
+  btnRoll.disabled = !(state === 'IDLE' && human);
+  const buying = (state === 'BUY');
+  btnBuy.style.display = buying ? '' : 'none';
+  btnSkip.style.display = buying ? '' : 'none';
+  if (buying) {
+    const c = cells[p.pos];
+    btnBuy.textContent = '买下 $' + c.price;   // 按钮上直接显示金额
+  }
+  renderMyProps();
+}
+
+/* ============ 资金 / 破产 ============ */
+function changeMoney(p, amt) {
+  p.money += amt;
+  if (p.money < 0) bankrupt(p);
+  updateMoney();
+}
+// 出局玩家名下地产全部释放：归属清空 + 房屋等级归零 + 界面视觉复位（可再次被买下）
+function releaseProps(p) {
+  cells.forEach((c, i) => {
+    if (c.type !== 'prop' || c.owner !== p.id) return;
+    c.owner = null;
+    c.level = 0;
+    updateHousePips(i);                                   // 清掉 🏠/🏨，租金显示回到基础值
+    const cellEl = document.getElementById('cell' + i);
+    if (cellEl) cellEl.style.boxShadow = '';             // 清掉归属描边
+    const o = document.getElementById('own' + i);
+    if (o) { o.style.display = 'none'; o.style.background = ''; o.textContent = ''; }  // 清掉归属徽标
+  });
+  renderMyProps();
+}
+function bankrupt(p) {
+  p.out = true;
+  log('💥 ' + p.name + ' 破产出局！');
+  releaseProps(p);
+  const alive = players.filter(x => !x.out);
+  if (alive.length === 1) gameOver(alive[0]);
+}
+
+/* ============ 机会卡 ============ */
+// 好事件为主（6 张），坏事件仅保留 2 张作为资金流出，保证局面仍能推进到胜负
+const chances = [
+  { t:'银行分红', f:p => changeMoney(p, 150) },
+  { t:'中奖彩票', f:p => changeMoney(p, 200) },
+  { t:'报销医疗费', f:p => changeMoney(p, 120) },
+  { t:'前进到起点', f:p => { p.pos = 0; placeToken(p); changeMoney(p, 200); } },
+  { t:'红包', f:p => changeMoney(p, 100) },
+  { t:'退税', f:p => changeMoney(p, 90) },
+  { t:'交税', f:p => changeMoney(p, -100) },
+  { t:'车辆维修', f:p => changeMoney(p, -120) },
+];
+function doChance(p) {
+  const c = chances[Math.floor(Math.random() * chances.length)];
+  log('🎴 ' + p.name + ' 抽到「' + c.t + '」');
+  c.f(p);
+}
+
+/* ============ 移动 / 落地 ============ */
+function movePlayer(p, steps) {
+  const raw = p.pos + steps;
+  if (raw >= cells.length) { changeMoney(p, 200); log('💰 ' + p.name + ' 经过起点，领薪 $200'); }
+  p.pos = raw % cells.length;
+  placeToken(p);
+}
+function goJail(p) {
+  p.pos = JAIL; p.skip = 1; placeToken(p);
+  log('🚔 ' + p.name + ' 被拘留，下回合暂停');
+}
+function payRent(p, c) {
+  const owner = players[c.owner];
+  const group = cells.filter(x => x.color === c.color);
+  const monopoly = group.length > 0 && group.every(x => x.owner === c.owner);
+  let rent = rentOf(c);
+  if (monopoly) rent *= 2;
+  log('🏠 ' + p.name + ' 向 ' + owner.name + ' 交租 $' + rent +
+    (c.level > 0 ? '（Lv.' + c.level + '）' : '') + (monopoly ? '（垄断翻倍）' : ''));
+  changeMoney(p, -rent); changeMoney(owner, rent);
+}
+function resolveCell(p) {
+  const c = cells[p.pos];
+  if (c.type === 'prop') {
+    if (c.owner === null) return 'buy';
+    if (c.owner !== p.id) payRent(p, c);
+  } else if (c.type === 'tax') {
+    log('🧾 ' + p.name + ' 缴纳' + c.name + ' $' + c.amount); changeMoney(p, -c.amount);
+  } else if (c.type === 'chance') {
+    doChance(p);
+  } else if (c.type === 'jail') {
+    goJail(p);
+  }
+  return 'done';
+}
+function buy(p, idx) {
+  const c = cells[idx];
+  changeMoney(p, -c.price);
+  c.owner = p.id;
+  const cellEl = document.getElementById('cell' + idx);
+  const o = document.getElementById('own' + idx);
+  o.style.display = 'flex'; o.style.background = p.color; o.textContent = p.name[0];
+  cellEl.style.boxShadow = 'inset 0 0 0 4px ' + p.color;   // 标记颜色与玩家颜色一致
+  log('🤝 ' + p.name + ' 买下 ' + c.name + '（$' + c.price + '）');
+}
+
+/* ============ 回合流程 ============ */
+function doRoll() {
+  const p = players[current];
+  if (!p.ai && state !== 'IDLE') return;   // 人类需 IDLE 才可掷；电脑在 BUSY（机器人回合）下也允许
+  state = 'BUSY';
+  const d1 = 1 + Math.floor(Math.random() * 6);
+  const d2 = 1 + Math.floor(Math.random() * 6);
+  document.getElementById('d1').textContent = d1;
+  document.getElementById('d2').textContent = d2;
+  setStatus(p.name + ' 掷出 ' + (d1 + d2) + ' 点');
+  refreshButtons();
+  setTimeout(() => {
+    try {
+      movePlayer(p, d1 + d2);
+      postRoll(p, resolveCell(p));
+    } catch (e) {
+      console.error('[大富翁] 回合结算异常', e);
+      log('⚠️ 结算异常，已自动结束本回合');
+      if (state === 'BUSY') state = 'END';   // 防止卡死在 BUSY 导致按钮全部隐藏
+      refreshButtons();
+    }
+  }, 420);
+}
+function postRoll(p, res) {
+  if (res === 'buy' && p.money >= cells[p.pos].price) {
+    if (p.ai) { buy(p, p.pos); afterResolve(p); }
+    else { state = 'BUY'; highlightBuy(p.pos, true); setStatus('落到【' + cells[p.pos].name + '】（$' + cells[p.pos].price + '），是否买下？'); refreshButtons(); }
+  } else {
+    afterResolve(p);
+  }
+}
+function highlightBuy(idx, on) {
+  document.getElementById('cell' + idx).classList.toggle('buyable', on);
+}
+function afterResolve(p) {
+  highlightBuy(p.pos, false);
+  if (p.ai) {
+    setTimeout(endTurn, 650);
+  } else {
+    // 人类：没有可选项时自动结束回合，无需点击“结束回合”
+    state = 'END';
+    setStatus('无可选操作，自动结束回合');
+    refreshButtons();
+    setTimeout(endTurn, 1000);
+  }
+}
+function endTurn() {
+  if (players.filter(x => !x.out).length <= 1) return;
+  let n = current;
+  do { n = (n + 1) % players.length; } while (players[n].out);
+  current = n;
+  const np = players[current];
+  if (np.skip > 0) {
+    np.skip--; log('⏸ ' + np.name + ' 被拘留，跳过本回合');
+    setStatus(np.name + ' 暂停一回合');
+    setTimeout(endTurn, 800); return;
+  }
+  beginTurn(np);
+}
+function beginTurn(p) {
+  setStatus('轮到 ' + p.name);
+  if (p.ai) { state = 'BUSY'; refreshButtons(); setTimeout(doRoll, 750); }
+  else { state = 'IDLE'; refreshButtons(); }
+}
+
+/* ============ 胜负 ============ */
+function gameOver(winner) {
+  log('🏁 游戏结束，' + winner.name + ' 获胜！');
+  document.getElementById('winText').textContent = '🏆 ' + winner.name + ' 获胜！';
+  document.getElementById('over').style.display = 'flex';
+}
+
+/* ============ 开局：选择机器人数量 ============ */
+let selectedRobots = 1;
+function buildRobotsUI() {
+  const wrap = document.getElementById('rbWrap');
+  wrap.innerHTML = '';
+  for (let n = 1; n <= 5; n++) {
+    const b = document.createElement('button');
+    b.className = 'rb' + (n === selectedRobots ? ' sel' : '');
+    b.dataset.n = n; b.textContent = n;
+    b.onclick = () => {
+      selectedRobots = n;
+      document.querySelectorAll('.rb').forEach(x => x.classList.toggle('sel', +x.dataset.n === n));
+      document.getElementById('totalN').textContent = n + 1;
+    };
+    wrap.appendChild(b);
+  }
+}
+function startGame() {
+  // 1 名人类玩家 + selectedRobots 名机器人
+  players = [{ id:0, name:'你', color:PALETTE[0], money:1500, pos:0, skip:0, out:false, ai:false }];
+  for (let i = 1; i <= selectedRobots; i++) {
+    players.push({ id:i, name:'电脑' + i, color:PALETTE[i % PALETTE.length],
+      money:1500, pos:0, skip:0, out:false, ai:true });
+  }
+  // 重置棋盘归属 / 等级 / 视觉
+  cells.forEach((c, i) => { if (c.type === 'prop') { c.owner = null; c.level = 0; updateHousePips(i); } });
+  document.querySelectorAll('.owner').forEach(o => { o.style.display = 'none'; o.textContent = ''; });
+  document.querySelectorAll('.cell').forEach(c => c.style.boxShadow = '');
+  // 生成棋子
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  players.forEach(p => {
+    const t = document.createElement('div');
+    t.className = 'token'; t.id = 'tok' + p.id;
+    t.style.background = p.color; t.textContent = p.name[0];
+    board.appendChild(t); placeToken(p);
+  });
+  renderPlayers(); renderMyProps();
+  document.getElementById('setup').style.display = 'none';
+  logHistory.length = 0; logMine.length = 0; renderLog();   // 新游戏清空日志
+  log('🎮 游戏开始！共 ' + players.length + ' 名玩家');
+  beginTurn(players[0]);
+}
+
+/* ============ 地点详情（点击格子） ============ */
+function typeLabel(t) {
+  return { go:'起点', prop:'地产', tax:'税收', chance:'机会', jail:'拘留所', free:'休息/安全' }[t] || t;
+}
+function showDetail(i) {
+  const c = cells[i];
+  let html;
+  if (c.type === 'prop') {
+    const group = cells.filter(x => x.color === c.color);
+    const monopoly = c.owner !== null && group.every(x => x.owner === c.owner);
+    const ownerTxt = c.owner !== null
+      ? '<span class="dot" style="display:inline-block;background:' + players[c.owner].color + '"></span> ' + players[c.owner].name
+      : '无主';
+    const lvl = c.level >= MAX_LEVEL ? '🏨 满级（旅馆）'
+      : (c.level > 0 ? ('🏠'.repeat(c.level) + ' Lv.' + c.level) : '空地（无房屋）');
+    const groupInfo = group.map(x =>
+      x.name + (x.owner !== null ? '（' + players[x.owner].name + '）' : '（无主）')).join('、');
+    html =
+      '<h3>' + c.name + '</h3>' +
+      '<div class="drow"><span class="dlabel">分组</span><span><span class="dot" style="display:inline-block;background:' + COLOR[c.color] + '"></span> ' + c.color + '组 · 共 ' + group.length + ' 块</span></div>' +
+      '<div class="drow"><span class="dlabel">地价</span><span>$' + c.price + '</span></div>' +
+      '<div class="drow"><span class="dlabel">基础租金</span><span>$' + c.rent + '</span></div>' +
+      '<div class="drow"><span class="dlabel">当前租金</span><span><b>$' + rentOf(c) + '</b>' + (monopoly ? '（垄断，实际收租 $' + (rentOf(c) * 2) + '）' : '') + '</span></div>' +
+      '<div class="drow"><span class="dlabel">归属</span><span>' + ownerTxt + '</span></div>' +
+      '<div class="drow"><span class="dlabel">房屋</span><span>' + lvl + '</span></div>' +
+      '<div class="drow"><span class="dlabel">升级费</span><span>$' + upgradeCost(c) + '（每升 1 级 +$' + c.rent + ' 租金）</span></div>' +
+      '<div class="drow"><span class="dlabel">同组地产</span><span>' + groupInfo + '</span></div>';
+  } else {
+    const desc = c.type === 'go' ? '经过或停留可领薪水 $200'
+      : c.type === 'tax' ? '停留需缴纳 $' + c.amount
+      : c.type === 'chance' ? '随机抽取一张机会卡（共 ' + chances.length + ' 张，好事件居多）'
+      : c.type === 'jail' ? '停留将被拘留，下回合暂停一次'
+      : '安全格，停留无任何事件';
+    html =
+      '<h3>' + c.name + '</h3>' +
+      '<div class="drow"><span class="dlabel">类型</span><span>' + typeLabel(c.type) + '</span></div>' +
+      '<div class="drow"><span class="dlabel">说明</span><span>' + desc + '</span></div>';
+  }
+  html += '<div style="text-align:center;margin-top:16px">' +
+    '<button class="b-skip" onclick="closeDetail()">关闭</button>' +
+    '<div style="color:#999;font-size:11px;margin-top:8px">点击别处或按 Esc 也可关闭</div></div>';
+  document.getElementById('detailBox').innerHTML = html;
+  document.getElementById('detail').style.display = 'flex';
+}
+function closeDetail() { document.getElementById('detail').style.display = 'none'; }
+
+/* ============ 绑定 ============ */
+btnRoll.onclick = doRoll;
+btnBuy.onclick = () => { buy(players[current], players[current].pos); afterResolve(players[current]); };
+btnSkip.onclick = () => afterResolve(players[current]);
+document.querySelectorAll('.ltab').forEach(b => b.onclick = () => {
+  logTab = b.dataset.t;
+  document.querySelectorAll('.ltab').forEach(x => x.classList.toggle('sel', x === b));
+  renderLog();
+});
+document.getElementById('btnStart').onclick = startGame;
+// 点击弹窗以外的任意位置（或按 Esc）关闭详情；弹窗内部点击不关闭
+let detailWasOpen = false;
+document.addEventListener('mousedown', () => {
+  detailWasOpen = document.getElementById('detail').style.display !== 'none';
+});
+document.addEventListener('click', e => {
+  if (!detailWasOpen) return;                                  // 打开弹窗的那一次点击不触发关闭
+  if (e.target.closest && e.target.closest('#detailBox')) return;
+  closeDetail();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+buildRobotsUI();
+refreshButtons();
+</script>
+</body>
+</html>
